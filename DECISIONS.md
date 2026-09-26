@@ -96,6 +96,19 @@ ignored. Simple, deterministic and accurate to within an hour.
 
 The curated YAML is hand-formatted for quick edits on a phone (UPDATING.md); Zod validation guards it.
 
+### D-023 — Playwright pinned to the preinstalled Chromium
+
+`@playwright/test@1.56.1` matches the Chromium build preinstalled in the development container
+(revision 1194), so no browser download is needed locally; CI installs its own. Headless WebGL runs on
+SwiftShader (`--use-angle=swiftshader`).
+
+### D-024 — Loader and fallbacks
+
+The loader is styled inline in `index.html` so it paints before any script. The accessible data table
+is always rendered: it is the whole page when WebGL is missing and a skip-link target otherwise.
+Static HTML text (title, disclaimer) duplicates `src/copy.ts` only as a no-JS/SEO fallback; the script
+overwrites it from `copy.ts` on boot.
+
 ### D-022 — No CO₂ figures
 
 No sourced central value for the carbon intensity of AI data centres was found (only a regional range),

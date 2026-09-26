@@ -5,8 +5,9 @@ Working agreement: `CLAUDE.md`. Decisions log: `DECISIONS.md`. Plan: `PLAN.md`.
 
 Development branch: `claude/pensive-ptolemy-0qc6e6` (pushing to `main` deploys — not done without approval).
 
-Quick orientation: `npm install && npm run check` (type-check, lint, format, tests, data build);
-`npx tsx scripts/report.ts` prints today's estimates per platform.
+Quick orientation: `npm install && npm run check` (type-check, lint, format, tests, data + app build),
+`npm run test:e2e` (Playwright, writes `screenshots/`), `npm run dev` (local site),
+`npx tsx scripts/report.ts` (today's estimates per platform).
 
 ## Milestone 1 — Research & plan ✅
 
@@ -29,20 +30,32 @@ Quick orientation: `npm install && npm run check` (type-check, lint, format, tes
 - [x] `METHODOLOGY.md` first draft; `UPDATING.md` first draft (manual figures).
 - [x] Type-check, lint, format check, tests and data build green; committed and pushed.
 
-No UI exists yet, so the Playwright screenshot check starts in M2.
+## Milestone 2 — Skeleton ✅ (except going live, which needs the owner)
 
-## Next — Milestone 2: Skeleton
+- [x] Vite + Three.js + TypeScript app shell; `index.html` with an inline-styled loader; `src/copy.ts`.
+- [x] `src/data/load.ts`: fetch `public/data/*.json`, validate with the same Zod schemas as the build,
+      cache the last good copy (localStorage, try/catch), fall back to it with a visible notice.
+- [x] Clock + city model (`src/state/`); HUD with live global counters (today UTC, since you arrived,
+      tokens/s, range, "data updated X ago"), tier badge, always-visible disclaimer footer.
+- [x] Placeholder 3D scene (log-scaled tower per platform), render loop pauses when the tab is hidden,
+      resize-aware framing for portrait screens; accessible data table doubles as the no-WebGL dashboard.
+- [x] Fonts self-hosted from the Google Fonts files via `@fontsource` (D-004).
+- [x] GitHub Actions: `ci.yml` (type-check, lint, format, unit tests, build, data-committed check, E2E +
+      screenshots artifact) and `deploy.yml` (Pages on push to `main`). Vite `base` = `/Token-metropolis/`.
+- [x] Playwright (1.56.1, matches the preinstalled Chromium): smoke + zero console errors/warnings,
+      no-WebGL fallback, cached-data fallback; screenshots at 1440×900 and 390×844 in `screenshots/`.
+- [ ] **Live on Pages** — blocked: needs merge to `main` and Pages source set to "GitHub Actions".
 
-- [ ] Vite + Three.js + TypeScript app shell; `index.html`, loading state, `src/copy.ts`.
-- [ ] `src/data/load.ts`: fetch `public/data/*.json`, validate with the same Zod schemas, cache last good
-      data (Cache API/localStorage wrapped in try/catch), offline notice.
-- [ ] Clock/store (`src/state/`), wire `src/model` counters to a minimal DOM readout.
-- [ ] GitHub Actions: `ci.yml` (lint, type-check, test, build on PRs), `deploy.yml` (Pages on `main`),
-      Vite `base` = `/Token-metropolis/`.
-- [ ] Playwright smoke + screenshot harness (1440×900, 390×844) using `/opt/pw-browsers/chromium`.
-- [ ] ESLint/Prettier cover the new app code; zero console errors.
+## Next — Milestone 3: City overview
 
-Then M3–M8 per PLAN.md §8.
+- [ ] Island layout and 15 original campus typologies (PLAN.md §5, `identity` in platforms.yaml).
+- [ ] Load-driven detail: height (log / true-scale toggle), lit windows following each platform's
+      traffic curve, server halls, cooling steam, substations, trucks, incoming light streams.
+- [ ] Day/night per HQ time zone; lighting language (moonlight, warm windows, accent crowns), selective
+      bloom, fog.
+- [ ] Picking + camera director (eased, interruptible flights) + info panel per HQ with tier badges,
+      ranges, formula and sources (bottom sheet on mobile).
+- [ ] Two art-direction passes with desktop + mobile screenshots.
 
 ## Blocked (needs the owner)
 

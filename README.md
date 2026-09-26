@@ -7,8 +7,9 @@ formula and its uncertainty range.
 > **Independent project.** Not affiliated with, endorsed by, or sponsored by any company shown.
 > Figures are estimates unless marked **Reported**.
 
-**Status:** Milestone 1 of 8 (research, data and estimation model) is complete. The 3D site starts in
-Milestone 2. See [PLAN.md](PLAN.md) and [TASKS.md](TASKS.md).
+**Status:** Milestones 1–2 of 8 complete: research, sourced data, estimation model, and the app skeleton
+(data loading, live counters, placeholder 3D scene, CI/deploy workflows). See [PLAN.md](PLAN.md) and
+[TASKS.md](TASKS.md).
 
 ## How the numbers work (short version)
 
@@ -28,8 +29,10 @@ Requires Node 22.12+.
 
 ```bash
 npm install
+npm run dev               # local site at http://localhost:5173/Token-metropolis/
 npm test                  # unit + dataset integration tests
-npm run build             # validate data/manual/*.yaml and write public/data/*.json
+npm run build             # validate data, write public/data/*.json, type-check, Vite production build
+npm run test:e2e          # Playwright smoke tests + screenshots (desktop 1440×900, mobile 390×844)
 npx tsx scripts/report.ts # print today's estimates per platform
 npm run check             # type-check, lint, format check, tests, build
 ```
@@ -40,6 +43,7 @@ npm run check             # type-check, lint, format check, tests, build
 | ---------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | `data/manual/`                                             | Curated, sourced figures: platforms, metrics, models ([UPDATING.md](UPDATING.md)) |
 | `src/model/`                                               | Pure, deterministic estimation model (unit-tested)                                |
+| `src/world/` · `src/ui/` · `src/state/`                    | Three.js scene, DOM interface, clock and city state                               |
 | `src/data/`                                                | Zod schemas and whole-dataset validation                                          |
 | `scripts/`                                                 | Data build (refuses invalid data) and the estimates report                        |
 | `public/data/`                                             | Published JSON consumed by the site                                               |
@@ -47,5 +51,5 @@ npm run check             # type-check, lint, format check, tests, build
 
 ## Built with
 
-TypeScript (strict), Zod, Vitest, ESLint, Prettier. Coming in Milestone 2: Vite, Three.js, Playwright,
-GitHub Actions and GitHub Pages.
+TypeScript (strict), Vite, Three.js, Zod, Vitest, Playwright, ESLint, Prettier; GitHub Actions and
+GitHub Pages.

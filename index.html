@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en" data-state="loading">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Token Metropolis — the AI platforms as a living city</title>
+    <meta
+      name="description"
+      content="A living 3D city of the world’s 15 biggest AI platforms, sized by the tokens they process — every number sourced, with its method and uncertainty range."
+    />
+    <meta name="theme-color" content="#05070d" />
+    <meta name="color-scheme" content="dark" />
+    <meta property="og:title" content="Token Metropolis" />
+    <meta
+      property="og:description"
+      content="The world’s biggest AI platforms as a living city, sized by the tokens they process."
+    />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <style>
+      /* Critical styles: the loader paints before any script or stylesheet arrives. */
+      html,
+      body {
+        margin: 0;
+        background: #05070d;
+        color: #e8ecf5;
+      }
+      .loader {
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: 14px;
+        background: radial-gradient(120% 80% at 50% 110%, #16204a 0%, #05070d 60%);
+        font:
+          500 15px/1.4 'IBM Plex Sans',
+          system-ui,
+          sans-serif;
+        transition:
+          opacity 0.8s ease,
+          visibility 0.8s;
+      }
+      html[data-state='ready'] .loader {
+        opacity: 0;
+        visibility: hidden;
+      }
+      .loader__skyline {
+        display: flex;
+        align-items: flex-end;
+        gap: 5px;
+        height: 64px;
+      }
+      .loader__skyline i {
+        width: 9px;
+        border-radius: 2px 2px 0 0;
+        background: linear-gradient(#ffd9a0, #8a6a3a);
+        animation: rise 1.6s ease-in-out infinite alternate;
+      }
+      .loader__title {
+        margin: 0;
+        font:
+          400 30px/1 'Fraunces Variable',
+          Georgia,
+          serif;
+        letter-spacing: 0.01em;
+      }
+      .loader__status {
+        margin: 0;
+        color: #93a0b8;
+      }
+      @keyframes rise {
+        from {
+          transform: scaleY(0.35);
+          opacity: 0.5;
+        }
+        to {
+          transform: scaleY(1);
+          opacity: 1;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .loader__skyline i {
+          animation: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a class="skip-link" id="skip-link" href="#data-view">Skip to the data table</a>
+
+    <div id="loader" class="loader" role="status" aria-live="polite">
+      <div class="loader__skyline" aria-hidden="true">
+        <i style="height: 30%"></i><i style="height: 55%; animation-delay: 0.1s"></i
+        ><i style="height: 80%; animation-delay: 0.2s"></i
+        ><i style="height: 45%; animation-delay: 0.3s"></i
+        ><i style="height: 100%; animation-delay: 0.4s"></i
+        ><i style="height: 65%; animation-delay: 0.5s"></i
+        ><i style="height: 38%; animation-delay: 0.6s"></i>
+      </div>
+      <p class="loader__title">Token Metropolis</p>
+      <p class="loader__status" id="loader-status">Switching on the city lights…</p>
+    </div>
+
+    <main id="app">
+      <section class="stage" aria-label="The city">
+        <canvas
+          id="scene"
+          role="img"
+          aria-label="3D city: one headquarters per AI platform, sized by tokens processed"
+        ></canvas>
+        <header class="masthead">
+          <h1 id="site-title">Token Metropolis</h1>
+          <p id="site-tagline">
+            The world’s biggest AI platforms as a living city, sized by the tokens they process.
+          </p>
+        </header>
+        <div id="hud" class="hud"></div>
+      </section>
+
+      <section id="data-view" class="data-view" aria-labelledby="data-view-title" tabindex="-1">
+        <h2 id="data-view-title">Data view</h2>
+        <div id="data-table"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p id="disclaimer">
+        Independent project. Not affiliated with, endorsed by, or sponsored by any company shown.
+        Figures are estimates unless marked Reported.
+      </p>
+    </footer>
+
+    <noscript>
+      <p class="noscript">Token Metropolis needs JavaScript to compute its live estimates.</p>
+    </noscript>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

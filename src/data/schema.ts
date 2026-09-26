@@ -248,3 +248,38 @@ export type Model = z.infer<typeof ModelSchema>;
 export const PlatformsFileSchema = z.array(PlatformSchema).length(15);
 export const MetricsFileSchema = z.array(MetricSchema).min(1);
 export const ModelsFileSchema = z.array(ModelSchema).min(1);
+
+// ---------------------------------------------------------------------------
+// Published-only files (written by scripts, read by the client)
+// ---------------------------------------------------------------------------
+
+export const EventSchema = z.object({
+  id: z.string().min(3),
+  date: isoDate,
+  platform: slug,
+  kind: z.enum(['model-launch', 'model-available']),
+  title: z.string().min(3),
+  source: SourceSchema,
+});
+export type TimelineEvent = z.infer<typeof EventSchema>;
+
+export const IncidentSchema = z.object({
+  id: z.string().min(3),
+  platform: slug,
+  /** Status-page impact, normalized. */
+  impact: z.enum(['none', 'minor', 'major', 'critical', 'maintenance']),
+  title: z.string().min(3),
+  started: z.string().min(10),
+  resolved: z.string().min(10).nullable(),
+  url: httpsUrl,
+});
+export type Incident = z.infer<typeof IncidentSchema>;
+
+export const MetaSchema = z.object({
+  schemaVersion: z.literal(1),
+  lastUpdated: z.string().min(10),
+  contentHash: z.string().min(8),
+  counts: z.object({ platforms: z.number(), metrics: z.number(), models: z.number() }),
+  pendingConstants: z.array(z.string()),
+});
+export type Meta = z.infer<typeof MetaSchema>;

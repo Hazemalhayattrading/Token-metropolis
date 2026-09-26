@@ -1,0 +1,417 @@
+/* ==========================================================================
+   Token Metropolis — design tokens and base styles
+   ========================================================================== */
+
+:root {
+  --bg: #05070d;
+  --bg-2: #0b1020;
+  --panel: rgb(12 17 32 / 0.66);
+  --panel-strong: rgb(12 17 32 / 0.88);
+  --line: rgb(255 255 255 / 0.09);
+  --line-strong: rgb(255 255 255 / 0.18);
+  --text: #eef1f8;
+  --muted: #9aa6bd;
+  --faint: #6c7890;
+  --accent: #ffc566;
+
+  /* Tier colours — AA contrast on --bg */
+  --tier-reported: #46d98a;
+  --tier-derived: #ffb627;
+  --tier-modeled: #a7b0c0;
+
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --font-ui: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --radius: 14px;
+  --gap: clamp(12px, 2vw, 20px);
+  --blur: 14px;
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --footer-h: 44px;
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font: 400 15px/1.5 var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  padding-bottom: var(--footer-h);
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -60px;
+  z-index: 100;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--panel-strong);
+  color: var(--text);
+  transition: top 0.2s var(--ease);
+}
+.skip-link:focus {
+  top: 12px;
+}
+
+/* ==========================================================================
+   Stage: full-viewport 3D canvas with overlays
+   ========================================================================== */
+
+.stage {
+  position: relative;
+  height: 100vh;
+  height: 100svh;
+  overflow: hidden;
+}
+
+#scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  touch-action: none;
+}
+
+.masthead {
+  position: absolute;
+  top: calc(var(--gap) + env(safe-area-inset-top));
+  left: var(--gap);
+  max-width: min(520px, 60vw);
+  pointer-events: none;
+}
+.masthead h1 {
+  margin: 0;
+  font: 400 clamp(26px, 3.2vw, 40px) / 1.05 var(--font-display);
+  letter-spacing: 0.005em;
+  font-variation-settings: 'opsz' 96;
+}
+.masthead p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+  max-width: 42ch;
+}
+
+.hud {
+  position: absolute;
+  right: var(--gap);
+  top: calc(var(--gap) + env(safe-area-inset-top));
+  width: min(380px, calc(100vw - 2 * var(--gap)));
+  display: grid;
+  gap: 10px;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  backdrop-filter: blur(var(--blur)) saturate(1.2);
+  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.2);
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.35);
+}
+
+.counter {
+  padding: 16px 18px 14px;
+}
+.counter__label {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.counter__value {
+  display: block;
+  margin: 6px 0 2px;
+  font: 500 clamp(22px, 2.6vw, 30px) / 1.1 var(--font-ui);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+.counter__qualifier,
+.counter__range {
+  margin: 0;
+  color: var(--faint);
+  font-size: 12px;
+}
+.counter__range {
+  margin-top: 2px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.stat__label {
+  margin: 0 0 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.stat__value {
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.stat__unit {
+  display: block;
+  color: var(--faint);
+  font-size: 12px;
+}
+
+.hud__links {
+  display: flex;
+  gap: 16px;
+  padding: 0 4px;
+  font-size: 13px;
+}
+.hud__updated {
+  margin: 0;
+  padding: 0 4px;
+  color: var(--faint);
+  font-size: 12px;
+}
+
+.notice {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid rgb(255 182 39 / 0.35);
+  border-radius: 10px;
+  background: rgb(255 182 39 / 0.08);
+  color: #ffd68a;
+  font-size: 13px;
+}
+
+/* Tier chips — every number carries one */
+.tier {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 1px 8px 1px 7px;
+  border-radius: 999px;
+  border: 1px solid currentcolor;
+  font: 600 11px/18px var(--font-ui);
+  letter-spacing: 0.03em;
+  text-transform: none;
+  white-space: nowrap;
+}
+.tier::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentcolor;
+}
+.tier--reported {
+  color: var(--tier-reported);
+  background: rgb(70 217 138 / 0.1);
+}
+.tier--derived {
+  color: var(--tier-derived);
+  background: rgb(255 182 39 / 0.1);
+}
+.tier--modeled {
+  color: var(--tier-modeled);
+  background: rgb(167 176 192 / 0.1);
+}
+
+.button {
+  appearance: none;
+  border: 1px solid var(--line-strong);
+  background: var(--panel-strong);
+  color: var(--text);
+  font: 500 14px/1 var(--font-ui);
+  padding: 11px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s var(--ease),
+    transform 0.2s var(--ease);
+}
+.button:hover {
+  border-color: var(--accent);
+}
+.button:active {
+  transform: translateY(1px);
+}
+
+/* ==========================================================================
+   Data view (accessible table; the dashboard when WebGL is unavailable)
+   ========================================================================== */
+
+.data-view {
+  padding: clamp(24px, 5vw, 56px) var(--gap) 40px;
+  background: linear-gradient(var(--bg), var(--bg-2));
+}
+.data-view h2 {
+  margin: 0 0 16px;
+  font: 400 clamp(22px, 2.4vw, 30px) / 1.1 var(--font-display);
+}
+.data-view .notice {
+  margin-bottom: 16px;
+}
+#data-table {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+.data-table {
+  width: 100%;
+  min-width: 860px;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.data-table caption {
+  padding: 12px 14px;
+  text-align: left;
+  color: var(--muted);
+  font-size: 13px;
+}
+.data-table th,
+.data-table td {
+  padding: 10px 14px;
+  border-top: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.data-table thead th {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.data-table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.table__parent {
+  display: block;
+  color: var(--faint);
+  font-size: 12px;
+  font-weight: 400;
+}
+.table__scope {
+  color: var(--muted);
+  font-size: 13px;
+  max-width: 38ch;
+}
+
+/* No WebGL: the stage collapses to the masthead and HUD above the table */
+.no-webgl .stage {
+  height: auto;
+  min-height: 0;
+  display: grid;
+  gap: var(--gap);
+  padding: var(--gap);
+}
+.no-webgl #scene {
+  display: none;
+}
+.no-webgl .masthead,
+.no-webgl .hud {
+  position: static;
+  max-width: none;
+  width: auto;
+}
+
+/* ==========================================================================
+   Footer disclaimer — always visible
+   ========================================================================== */
+
+.site-footer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 40;
+  min-height: var(--footer-h);
+  display: flex;
+  align-items: center;
+  padding: 6px var(--gap) calc(6px + env(safe-area-inset-bottom));
+  background: rgb(5 7 13 / 0.82);
+  border-top: 1px solid var(--line);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.site-footer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.noscript {
+  padding: 24px;
+}
+
+/* ==========================================================================
+   Small screens
+   ========================================================================== */
+
+@media (max-width: 720px) {
+  :root {
+    --footer-h: 50px;
+  }
+  .site-footer p {
+    font-size: 11px;
+  }
+  .masthead {
+    max-width: calc(100vw - 2 * var(--gap));
+  }
+  .masthead p {
+    display: none;
+  }
+  .hud {
+    top: auto;
+    bottom: calc(var(--footer-h) + var(--gap));
+    left: var(--gap);
+    right: var(--gap);
+    width: auto;
+  }
+  .counter {
+    padding: 14px 16px 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
