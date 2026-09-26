@@ -274,11 +274,63 @@ export const COPY = {
   },
   // ---- M6: incident mode (src/ui/incidents.ts, src/world/alarm.ts) — owned by that module's builder
   incidents: {
-    // (strings for this module go here)
+    /** Accessible name of the banner. */
+    region: 'Status page notices',
+    /** Impact levels as the status pages publish them (normalized by the data pipeline). */
+    impact: {
+      maintenance: 'Maintenance',
+      minor: 'Minor impact',
+      major: 'Major impact',
+      critical: 'Critical impact',
+    },
+    /** "<HQ>’s official status page reports: “…”" — the HQ name is a button, the rest follows it. */
+    possessive: (name: string) => (/s$/i.test(name) ? '’' : '’s'),
+    reports: ' official status page reports: ',
+    started: (when: string) => `Started ${when}`,
+    /** A UTC instant, written like the time machine's labels. */
+    when: (date: string, hhmm: string) => `${date}, ${hhmm} UTC`,
+    link: 'Status page',
+    /** Visually hidden hint after each "Status page" link. */
+    newTab: 'opens in a new tab',
+    more: (n: number) => `+${n} more`,
+    less: 'Show less',
+    dismiss: (name: string) => `Dismiss the ${name} status notice`,
+    note: 'Copied from the platform’s own status page at our last data update — open it for the current status. Token estimates on this site are not adjusted for incidents.',
+    /** What screen readers hear when a new notice appears. */
+    spoken: (name: string, impact: string, title: string, when: string) =>
+      `${name}${/s$/i.test(name) ? '’' : '’s'} official status page reports ${impact.toLowerCase()}: ${title}. Started ${when}.`,
+    spokenMore: (n: number) => `${n} more status ${n === 1 ? 'notice' : 'notices'} listed.`,
   },
   // ---- M6: cinematic tour (src/state/tour.ts, src/ui/tour.ts) — owned by that module's builder
   tour: {
-    // (strings for this module go here)
+    /** Accessible name of the caption card. */
+    region: 'Cinematic tour',
+    hint: 'Tour · press any key to explore',
+    /** The same hint on touch screens, which have no keys to press. */
+    hintTouch: 'Tour · tap anywhere to explore',
+    stop: 'Stop',
+    stopLabel: 'Stop the tour',
+    method: 'How we estimate',
+    /** Visually hidden hint after the "How we estimate" link. */
+    newTab: 'opens in a new tab',
+    opening:
+      'Token Metropolis — every tower is an AI platform, sized by the tokens it processes each day.',
+    /** Leads for the three largest HQs, largest first. */
+    ranks: ['The largest HQ', 'Number two', 'Number three'],
+    ranked: (lead: string, name: string, perDay: string) =>
+      `${lead}: ${name} — about ${perDay} tokens a day`,
+    smallest: (name: string, perDay: string) =>
+      `The smallest HQ: ${name} — about ${perDay} tokens a day`,
+    /** Growth over the last 90 days, as a percentage (below 2×) or a multiple. */
+    growthPercent: (name: string, pct: string) =>
+      `Growing fastest: ${name} — up about ${pct}% in 90 days`,
+    growthMultiple: (name: string, times: string) =>
+      `Growing fastest: ${name} — about ${times}× its daily volume of 90 days ago`,
+    daytime: (name: string, city: string, time: string) =>
+      `It’s ${time} in ${city}, daytime for ${name}. Every HQ keeps its own local hours.`,
+    closing: (perDay: string) => `The whole city: about ${perDay} tokens a day`,
+    /** What screen readers hear for a caption that states a number (the tier follows it). */
+    spoken: (caption: string, tier: string) => `${caption} (${tier})`,
   },
   // ---- M6: discoveries (src/state/discoveries.ts, src/ui/discoveries.ts) — owned by that module's builder
   discoveries: {
