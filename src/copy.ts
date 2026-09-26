@@ -224,6 +224,34 @@ export const COPY = {
     toastSpoken: (label: string, platform: string, title: string, date: string) =>
       `${label}: ${platform}, ${title} (${date})`,
   },
+  // ---- M6: prompt visualizer (src/ui/prompt.ts) — owned by that module's builder
+  prompt: {
+    // (strings for this module go here)
+  },
+  // ---- M6: uncertainty glass (src/world/uncertainty.ts) — owned by that module's builder
+  glass: {
+    // (strings for this module go here)
+  },
+  // ---- M6: sound (src/audio/sound.ts) — owned by that module's builder
+  sound: {
+    // (strings for this module go here)
+  },
+  // ---- M6: incident mode (src/ui/incidents.ts, src/world/alarm.ts) — owned by that module's builder
+  incidents: {
+    // (strings for this module go here)
+  },
+  // ---- M6: cinematic tour (src/state/tour.ts, src/ui/tour.ts) — owned by that module's builder
+  tour: {
+    // (strings for this module go here)
+  },
+  // ---- M6: discoveries (src/state/discoveries.ts, src/ui/discoveries.ts) — owned by that module's builder
+  discoveries: {
+    // (strings for this module go here)
+  },
+  // ---- M6: share card (src/ui/share.ts) — owned by that module's builder
+  share: {
+    // (strings for this module go here)
+  },
   controls: {
     scale: 'Building height',
     log: 'Log scale',
