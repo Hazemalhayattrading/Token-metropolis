@@ -1,0 +1,209 @@
+# DECISIONS.md
+
+Non-blocking choices made while building, with the reasoning. Newest decisions at the bottom of each
+section. Research for Milestone 1 was done on 2026-09-25.
+
+---
+
+## Product
+
+### D-001 — Name
+
+**Keep "Token Metropolis."** It says what the piece is (tokens, a city), is easy to search and share,
+and the brief already uses it. Alternatives considered: _Inference City_ (too technical),
+_Tokenopolis_ (gimmicky), _Night Shift_ (lovely but vague — used instead as the name of the visual
+concept, see PLAN.md §5).
+
+### D-002 — The extra original feature to build
+
+Of the three ideas in PLAN.md §6, build **Uncertainty glass** (towers show a solid core at the low
+estimate and a glass shell up to the high estimate). It turns the project's core principle — ranges,
+not false precision — into its most memorable visual, and is cheap to build.
+
+### D-003 — Typography (provisional)
+
+Display _Fraunces_, UI _IBM Plex Sans_ (tabular numerals). To be confirmed against screenshots in M3.
+
+---
+
+## Engineering
+
+### D-010 — Branch and deploys
+
+Work happens on `claude/pensive-ptolemy-0qc6e6`. Pushing to `main` deploys to Pages, so nothing is
+pushed to `main` without the owner's approval (CLAUDE.md).
+
+### D-011 — TypeScript 6.0, not 7.0
+
+TypeScript 7 (the native port) is out, but `typescript-eslint` supports only `<6.1`. Pinned
+`typescript@6.0.3` so lint, type-check and editor tooling agree. Revisit when typescript-eslint
+supports 7.
+
+### D-012 — Deterministic math for counters
+
+`Math.exp/log/sin/cos` may differ in the last bit between browser engines. Counters are computed with
+our own implementations built only from IEEE-754 basic arithmetic (`src/model/detmath.ts`), and
+phases are handled in "turns" so range reduction is exact. Result: identical digits on every device.
+
+### D-013 — Exact integration instead of frame accumulation
+
+The live total is the closed-form integral of (piecewise-exponential growth × Fourier traffic shape).
+Counters never drift, survive a hidden tab or a sleeping laptop, and their derivative equals the
+displayed tokens/second exactly. A first version used `G(t) + r(t)·W(t)` as an approximation; replaced
+because the exact form is just as cheap and provably monotonic.
+
+### D-014 — "Tokens today" means since 00:00 UTC
+
+A visitor-local day would make the "same moment, same number" promise depend on the viewer's time
+zone. The UI will label it "today (UTC)".
+
+### D-015 — Uncertainty propagation
+
+Input ranges are read as 90% intervals; products combine in quadrature on a log scale with separate
+low/high sides (log-normal propagation). Sums across platforms add lows and highs (conservative,
+because platforms share assumptions).
+
+### D-016 — Growth extrapolation
+
+Growth after the last figure is fitted from the most recent figure at least 60 days older (so recent
+slow-downs show), clamped to [½×, 10×] per year, and damped with a one-year e-folding time. The band
+widens by a further ×2 each way per year of extrapolation. Initially the fit used the oldest figure in
+the past year; changed after review because it ignored Doubao's visible slow-down in 2026 Q2.
+
+### D-017 — "Reported" expires after 14 days
+
+A value is labeled Reported only within 14 days of a reported figure; interpolated or extrapolated
+values are at best Estimated. Cumulative totals are never Reported, and are Modeled if more than 5% of
+the total comes from modeled segments (e.g. the launch ramp).
+
+### D-018 — One throughput figure for every platform
+
+We cannot know each platform's hardware efficiency, so every HQ uses one H100-equivalent throughput
+(5,000 tokens/s per GPU, range 1,500–15,000, anchored on DeepSeek's production disclosure). All GPU,
+power and water numbers are therefore labeled Modeled.
+
+### D-019 — Regions and time zones
+
+Five regions with fixed representative UTC offsets (−6, −4, +1, +5, +8); daylight saving time is
+ignored. Simple, deterministic and accurate to within an hour.
+
+### D-020 — Published data is committed
+
+`public/data/*.json` is committed so Pages serves it and the daily workflow can diff it.
+`meta.json.lastUpdated` changes only when the content hash changes.
+
+### D-021 — Prettier leaves `data/manual/*.yaml` alone
+
+The curated YAML is hand-formatted for quick edits on a phone (UPDATING.md); Zod validation guards it.
+
+### D-022 — No CO₂ figures
+
+No sourced central value for the carbon intensity of AI data centres was found (only a regional range),
+and the brief does not ask for CO₂. Removed rather than shown with an invented central value.
+
+---
+
+## Data
+
+### D-030 — The 15 platforms (as of 2026-09-25)
+
+"Biggest by usage" has no single metric: consumer apps publish users, coding tools and labs publish
+revenue or tokens. We ranked on the best available usage evidence (reported users, token volumes,
+revenue as a proxy for tokens) and checked it against third-party traffic data.
+
+| #   | Platform                                   | Key evidence                                                                    | Verdict                                                      |
+| --- | ------------------------------------------ | ------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| 1   | ChatGPT                                    | 900M+ weekly users (Feb 2026); OpenAI API >15B tokens/min (Mar 2026)            | Include                                                      |
+| 2   | Gemini                                     | App 1B monthly users (Aug 2026); customer API >16B tokens/min (Apr 2026)        | Include                                                      |
+| 3   | Meta AI                                    | 1B+ monthly users across Meta's apps (May 2025)                                 | Include                                                      |
+| 4   | Doubao                                     | 180T tokens/day (Jun 2026); 382M China MAU                                      | Include                                                      |
+| 5   | Claude                                     | $47B run-rate revenue (May 2026, Anthropic); #3 in web traffic (9.3%, Aug 2026) | Include                                                      |
+| 6   | Microsoft Copilot                          | 150M MAU across the Copilot family (Oct 2025); 30M paid M365 seats (Jul 2026)   | Include                                                      |
+| 7   | Qwen                                       | 167M China MAU (Jun 2026)                                                       | Include                                                      |
+| 8   | DeepSeek                                   | 130M China MAU (Jun 2026); 776B tokens/day disclosed (Feb 2025)                 | Include                                                      |
+| 9   | GitHub Copilot                             | 50M users (Jul 2026)                                                            | Include (separate from Microsoft Copilot; see D-033)         |
+| 10  | Grok                                       | 117M monthly users of Grok features (Mar 2026, SpaceX S-1)                      | Include                                                      |
+| 11  | Cursor                                     | ~$4B annualized revenue (Jun 2026), mostly spent on tokens                      | Include (a top token consumer)                               |
+| 12  | Perplexity                                 | 780M queries/month (May 2025); 100M+ MAU incl. agents (Mar 2026)                | Include                                                      |
+| 13  | Character.AI                               | ~20,000 queries/second (Jun 2024); ~20M MAU                                     | Include (very token-heavy per user)                          |
+| 14  | Tencent Yuanbao                            | 49.8M China MAU (Jun 2026), China's #4 AI-native app                            | **Added**                                                    |
+| 15  | Kimi                                       | 19.4M (Jan 2025) → ~9M China MAU (end 2025)                                     | Include (see below)                                          |
+| —   | Mistral Le Chat                            | Renamed "Vibe" in May 2026; no usage figure found                               | **Dropped**                                                  |
+| —   | Alibaba Quark                              | ~159M MAU claimed (AICPB) for an AI search super-app                            | Not separate: Alibaba, Qwen-powered, AI share of use unknown |
+| —   | OpenAI Codex, Claude Code                  | 5M+ weekly users; $2.5B run-rate                                                | Counted inside OpenAI / Anthropic                            |
+| —   | Manus                                      | ~22M visits/month; acquired by Meta                                             | Counted inside Meta                                          |
+| —   | Replit, Lovable, Genspark, Janitor AI, Poe | $0.2–0.6B revenue or <10M MAU                                                   | Below the cut                                                |
+
+**Slot 15:** Kimi and Mistral are both weak on consumer usage. Kimi wins because it has sourced usage
+figures (so it can be estimated honestly), while no usage number at all could be found for Mistral's
+assistant — it could not even be modeled without inventing an input. Europe therefore has no HQ;
+that is what the data supports today.
+
+### D-031 — What each HQ counts ("scope")
+
+Every platform states its scope in one sentence and the UI shows it. Choices worth noting:
+
+- **ChatGPT** = OpenAI's ChatGPT **plus** the OpenAI API (incl. Codex). The API component starts at
+  ChatGPT's launch (30 Nov 2022), not the API's 2020 launch, so "since launch" means since ChatGPT.
+- **Gemini** = the Gemini app + Google's customer API. Google's all-surface monthly token totals
+  (including Search) could not be verified during research, so they are **not used** — Gemini is
+  therefore a known **underestimate** until those figures are verified (TASKS.md).
+- **Claude, Cursor** are estimated from run-rate revenue ÷ price per token (Anthropic publishes a dense
+  revenue series but no token totals; Cursor's ARR is third-party).
+- **Grok** = consumer Grok only; **Qwen** = the Qwen app only; **Kimi** = the Kimi app only. Their APIs
+  published no usage figures and are excluded (documented in each scope).
+- **Microsoft Copilot** excludes GitHub Copilot via a scope factor derived from Microsoft's own numbers
+  (100M family MAU with 20M GitHub Copilot users; 150M with 26M).
+
+### D-032 — Platform-calibrated conversions
+
+Where tokens and users were published for the same moment, we derive a platform-specific constant
+instead of using generic judgement calls: DeepSeek (776B tokens ÷ 194M China MAU, Feb 2025 →
+4,000 tokens per MAU per day) and Character.AI (20,000 queries/s ÷ ~28M MAU, mid-2024 → 62 requests per
+MAU per day). DeepSeek's current estimate is therefore Estimated rather than Modeled.
+
+### D-033 — Double counting
+
+Coding tools and answer engines call other listed labs' models. Each HQ shows everything its product
+handles, and the global total removes a documented, ranged `routedShare` for Cursor (70%), GitHub
+Copilot (60%), Perplexity (40%) and Microsoft Copilot (10%).
+
+### D-034 — Primary vs third-party
+
+A figure is "primary" when the company (or a primary source) originated it, even if we link to press
+coverage of the statement (e.g. Volcano Engine's token figures reported by Chinese media; Microsoft
+figures from its investor site). Estimates by analytics firms, aggregators or journalists are
+"third-party" and get wider ranges.
+
+### D-035 — Dates with month or quarter precision
+
+Month-only figures are dated the 15th, "end of month" the last day, quarter-only the last day of the
+quarter, "late 2025" mid-November — each noted in `metrics.yaml`. Launch dates carry a `precision`
+field (Cursor: year).
+
+### D-036 — Research limits and verification labels
+
+During research the session's web-search budget (200 searches) ran out and most primary domains were
+blocked by the environment's network policy. We therefore record, for every figure, whether it was
+read on the page (`page`) or only seen in a search-result summary of that page (`snippet`), and mark
+items taken from reference knowledge as `pending`. Constants still pending verification are hidden
+from the UI by code (`isDisplayable`), not by convention. Everything pending is listed in TASKS.md.
+
+### D-037 — Time machine start
+
+The brief asks for a scrubber from Nov 2022 and describes the city growing from one building. The data
+says GitHub Copilot (GA June 2022) and Character.AI (beta Sept 2022) already existed, so the city
+starts with three small buildings, and ChatGPT's growth is the story from there.
+
+### D-038 — Growth where the only figures are relative
+
+Meta AI (only "1B+ MAU", May 2025) and Microsoft Copilot (last absolute figure Oct 2025) have later
+disclosures that are only relative ("60% more daily users", "3× daily users"). These are shown as
+context, not converted into anchors; the curves extrapolate with the documented default/fitted growth
+and widening ranges.
+
+### D-039 — Engagement constants calibrated to ChatGPT
+
+The assistant defaults (45% of weekly users active on a day × 8 messages each = 3.6 messages per weekly
+user per day) match OpenAI's published 18B messages/week from ~700M weekly users (3.7/day). Embedded
+assistants (Meta AI) use 3 requests per active day instead of 8.
