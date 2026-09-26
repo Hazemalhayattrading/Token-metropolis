@@ -7,3 +7,6 @@ test-results/
 .DS_Store
 
 screenshots/
+
+# agent worktrees (temporary, never committed)
+.claude/worktrees/
