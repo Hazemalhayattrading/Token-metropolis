@@ -238,11 +238,39 @@ export const COPY = {
   },
   // ---- M6: uncertainty glass (src/world/uncertainty.ts) — owned by that module's builder
   glass: {
-    // (strings for this module go here)
+    /** Toggle button label (pair it with aria-pressed). */
+    toggle: 'Show uncertainty',
+    /** Tooltip / accessible description of the toggle. */
+    tooltip:
+      'Turn every tower into its plausible range: a solid core up to the low estimate, frosted glass up to the high estimate, and a light ring at the central value.',
+    /** Spoken (aria-live) when the toggle changes. */
+    announceOn: 'Uncertainty shown: each tower is now a solid core, a glass case and a light ring.',
+    announceOff: 'Uncertainty hidden.',
+    legendTitle: 'Reading the glass',
+    legend: {
+      core: 'Solid core: up to the low end of the plausible range.',
+      glass: 'Glass: from the low end up to the high end of the range.',
+      ring: 'Light ring: the central estimate, where the tower itself ends.',
+      frost:
+        'Frost: how firm the evidence is. Clear for Reported, frosted for Estimated, foggy for Modeled.',
+    },
+    rangeNote:
+      'A plausible range is roughly a 90% interval from our model, not a hard limit. The glass uses the same height scale as the towers (log or true).',
   },
   // ---- M6: sound (src/audio/sound.ts) — owned by that module's builder
   sound: {
-    // (strings for this module go here)
+    /** Toggle button label (pair it with aria-pressed). */
+    toggle: 'Sound',
+    /** Visible state next to the icon. */
+    on: 'Sound on',
+    off: 'Sound off',
+    /** Tooltip / accessible description of the toggle. */
+    tooltip:
+      'Ambient city, server hum and launch chimes, synthesized in your browser. Off by default; the volume follows how close you are.',
+    /** Shown if setEnabled(true) leaves sound off (no Web Audio, or the browser refused). */
+    failed: 'Sound could not start in this browser.',
+    /** For an about/help line: the audio is atmosphere, not data. */
+    note: 'The city sounds busier and the servers louder when modeled traffic is high; the sound is atmosphere, not a measurement.',
   },
   // ---- M6: incident mode (src/ui/incidents.ts, src/world/alarm.ts) — owned by that module's builder
   incidents: {
