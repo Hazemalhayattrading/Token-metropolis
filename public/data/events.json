@@ -6,6 +6,7 @@
     "kind": "model-launch",
     "title": "Gemini 3.8 Live released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Gemini 3.8 Live with Live Avatar is now generally available",
       "publisher": "Google Cloud",
@@ -19,6 +20,7 @@
     "kind": "model-launch",
     "title": "Claude Opus 5.5 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Opus 5.5",
       "publisher": "Anthropic",
@@ -32,6 +34,7 @@
     "kind": "model-available",
     "title": "GPT-6 Sol and Luna (OpenAI) available in GitHub Copilot",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -45,6 +48,7 @@
     "kind": "model-launch",
     "title": "GPT-6 (Sol, Luna) first seen",
     "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -58,6 +62,7 @@
     "kind": "model-available",
     "title": "Grok 4.7 (xAI) available in Cursor",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "SpaceXAI releases Grok 4.7",
       "publisher": "MarkTechPost",
@@ -71,6 +76,7 @@
     "kind": "model-launch",
     "title": "Grok 4.7 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "SpaceXAI releases Grok 4.7",
       "publisher": "MarkTechPost",
@@ -84,6 +90,7 @@
     "kind": "model-launch",
     "title": "Gemini 3.8 Flash first seen",
     "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -97,6 +104,7 @@
     "kind": "model-available",
     "title": "Gemini 3.8 Flash (Google) available in GitHub Copilot",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -110,6 +118,7 @@
     "kind": "model-launch",
     "title": "Claude Fable 5.1 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Fable and Mythos 5.1",
       "publisher": "Anthropic",
@@ -123,6 +132,7 @@
     "kind": "model-launch",
     "title": "Hy4 (preview) first seen",
     "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "Tencent-Hunyuan/Hy4-preview",
       "publisher": "Tencent (GitHub)",
@@ -136,6 +146,7 @@
     "kind": "model-launch",
     "title": "DeepSeek-V4-Pro (general availability) released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "DeepSeek ships V4-Pro as its flagship model, leaves preview",
       "publisher": "Unite.AI",
@@ -149,6 +160,7 @@
     "kind": "model-launch",
     "title": "Qwen3.8 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen3.8",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -162,6 +174,7 @@
     "kind": "model-available",
     "title": "MAI-Code-1.1-Flash (Microsoft) available in GitHub Copilot",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -175,6 +188,7 @@
     "kind": "model-available",
     "title": "Kimi K3 (Moonshot AI, hosted by GitHub) available in GitHub Copilot",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -188,6 +202,7 @@
     "kind": "model-launch",
     "title": "Kimi K3 first seen",
     "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "MoonshotAI/Kimi-K3",
       "publisher": "Moonshot AI (GitHub)",
@@ -201,6 +216,7 @@
     "kind": "model-launch",
     "title": "Claude Opus 5 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Opus 5",
       "publisher": "Anthropic",
@@ -214,6 +230,7 @@
     "kind": "model-available",
     "title": "Claude Opus 5 (Anthropic) available in GitHub Copilot",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -227,6 +244,7 @@
     "kind": "model-launch",
     "title": "Muse Spark 1.1 released",
     "datePrecision": "month",
+    "dateKind": "release",
     "source": {
       "title": "Zuckerberg unveils Meta's first paid AI (Q2 2026 earnings)",
       "publisher": "StartupHub.ai",
@@ -240,6 +258,7 @@
     "kind": "model-available",
     "title": "GPT-5.6 Sol, Terra and Luna (OpenAI) available in GitHub Copilot",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -253,6 +272,7 @@
     "kind": "model-launch",
     "title": "GPT-5.6 (Sol, Terra, Luna) released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "GPT-5.6 and the Codex user surge",
       "publisher": "The New Stack",
@@ -266,6 +286,7 @@
     "kind": "model-available",
     "title": "Grok 4.5 (xAI) available in Cursor",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI — Grok 4.5",
       "publisher": "xAI",
@@ -279,6 +300,7 @@
     "kind": "model-launch",
     "title": "Grok 4.5 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI — Grok 4.5",
       "publisher": "xAI",
@@ -292,6 +314,7 @@
     "kind": "model-launch",
     "title": "Hy3 first seen",
     "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "Tencent-Hunyuan/Hy3",
       "publisher": "Tencent (GitHub)",
@@ -305,6 +328,7 @@
     "kind": "model-launch",
     "title": "Claude Sonnet 5 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Sonnet 5",
       "publisher": "Anthropic",
@@ -318,6 +342,7 @@
     "kind": "model-launch",
     "title": "Doubao-Seed-2.1-Pro released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Volcano Engine launches Doubao 2.1 with daily token usage exceeding 180 trillion",
       "publisher": "KuCoin News",
@@ -331,6 +356,7 @@
     "kind": "model-launch",
     "title": "Claude Fable 5 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Fable 5 overview",
       "publisher": "Anthropic",
@@ -344,6 +370,7 @@
     "kind": "model-launch",
     "title": "Claude Opus 4.8 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Opus 4.8 overview",
       "publisher": "Anthropic",
@@ -357,6 +384,7 @@
     "kind": "model-launch",
     "title": "Sonar 2 first seen",
     "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "TestingCatalog on X (Sonar 2 spotted)",
       "publisher": "TestingCatalog (X)",
@@ -370,6 +398,7 @@
     "kind": "model-launch",
     "title": "DeepSeek-V4 (Pro and Flash, preview) released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "DeepSeek-V4 Preview release notes",
       "publisher": "DeepSeek",
@@ -383,6 +412,7 @@
     "kind": "model-launch",
     "title": "Claude Opus 4.7 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Opus 4.7",
       "publisher": "Anthropic",
@@ -396,6 +426,7 @@
     "kind": "model-launch",
     "title": "Gemini 3.1 Pro released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Gemini 3.1 Pro on Gemini CLI, Gemini Enterprise and Vertex AI",
       "publisher": "Google Cloud",
@@ -409,6 +440,7 @@
     "kind": "model-launch",
     "title": "Grok 4.20 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI launches Grok 4.20",
       "publisher": "NextBigFuture",
@@ -422,6 +454,7 @@
     "kind": "model-launch",
     "title": "Qwen3.5 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen3.8",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -435,6 +468,7 @@
     "kind": "model-launch",
     "title": "Claude Opus 4.6 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Opus 4.6",
       "publisher": "Anthropic",
@@ -448,6 +482,7 @@
     "kind": "model-launch",
     "title": "Kimi K2.5 first seen",
     "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "MoonshotAI/Kimi-K2.5",
       "publisher": "Moonshot AI (GitHub)",
@@ -461,6 +496,7 @@
     "kind": "model-launch",
     "title": "Doubao-Seed-1.8 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "豆包大模型日均tokens调用量超过50万亿",
       "publisher": "Economic Observer",
@@ -474,6 +510,7 @@
     "kind": "model-launch",
     "title": "Gemini 3 Flash released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Gemini 3 Flash for enterprises",
       "publisher": "Google Cloud",
@@ -487,6 +524,7 @@
     "kind": "model-launch",
     "title": "Claude Opus 4.5 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Introducing Claude Opus 4.5",
       "publisher": "Anthropic",
@@ -500,6 +538,7 @@
     "kind": "model-launch",
     "title": "Gemini 3 Pro released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Gemini 3 is available for enterprise",
       "publisher": "Google Cloud",
@@ -513,6 +552,7 @@
     "kind": "model-launch",
     "title": "Grok 4.1 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI — Grok 4.1",
       "publisher": "xAI",
@@ -526,6 +566,7 @@
     "kind": "model-launch",
     "title": "Doubao-Seed-1.6-lite and thinking-length upgrade released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "火山引擎发布豆包系列模型升级",
       "publisher": "Tencent News",
@@ -539,6 +580,7 @@
     "kind": "model-launch",
     "title": "Claude Sonnet 4.5 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Introducing Claude Sonnet 4.5",
       "publisher": "Anthropic",
@@ -552,6 +594,7 @@
     "kind": "model-launch",
     "title": "Qwen3-Omni released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen3-Omni README",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -565,6 +608,7 @@
     "kind": "model-launch",
     "title": "Grok Code Fast 1 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI — Grok Code Fast 1",
       "publisher": "xAI",
@@ -578,6 +622,7 @@
     "kind": "model-available",
     "title": "GPT-5 in Microsoft Copilot and Foundry available in Microsoft Copilot",
     "datePrecision": "month",
+    "dateKind": "release",
     "source": {
       "title": "Microsoft FY26 Q1 earnings (GPT-5 available in Foundry this quarter)",
       "publisher": "Microsoft",
@@ -591,6 +636,7 @@
     "kind": "model-launch",
     "title": "GPT-5 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "OpenAI — Introducing GPT-5",
       "publisher": "OpenAI",
@@ -604,6 +650,7 @@
     "kind": "model-launch",
     "title": "Kimi K2 first seen",
     "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "MoonshotAI/Kimi-K2",
       "publisher": "Moonshot AI (GitHub)",
@@ -617,6 +664,7 @@
     "kind": "model-launch",
     "title": "Grok 4 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI — Grok 4",
       "publisher": "xAI",
@@ -630,6 +678,7 @@
     "kind": "model-launch",
     "title": "Hunyuan-A13B released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Tencent-Hunyuan/Hunyuan-A13B",
       "publisher": "Tencent (GitHub)",
@@ -643,6 +692,7 @@
     "kind": "model-launch",
     "title": "Kimi-VL-A3B-Thinking-2506 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "MoonshotAI/Kimi-VL README",
       "publisher": "Moonshot AI (GitHub)",
@@ -656,6 +706,7 @@
     "kind": "model-launch",
     "title": "Doubao-Seed-1.6 released",
     "datePrecision": "month",
+    "dateKind": "release",
     "source": {
       "title": "日均token调用量狂飙137倍！火山引擎展示字节AI实力：新模型豆包1.6支持多模态思考",
       "publisher": "Toutiao",
@@ -669,6 +720,7 @@
     "kind": "model-launch",
     "title": "Claude Opus 4 and Sonnet 4 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Introducing Claude 4",
       "publisher": "Anthropic",
@@ -682,6 +734,7 @@
     "kind": "model-launch",
     "title": "Qwen3 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen3 README",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -695,6 +748,7 @@
     "kind": "model-launch",
     "title": "Gemini 2.5 Pro released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Gemini 2.5 Pro and Flash on Vertex AI",
       "publisher": "Google Cloud",
@@ -708,6 +762,7 @@
     "kind": "model-launch",
     "title": "Llama 4 (Scout, Maverick) released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Meta — The Llama 4 herd",
       "publisher": "Meta",
@@ -721,6 +776,7 @@
     "kind": "model-launch",
     "title": "Claude 3.7 Sonnet and Claude Code (preview) released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude 3.7 Sonnet and Claude Code",
       "publisher": "Anthropic",
@@ -734,6 +790,7 @@
     "kind": "model-launch",
     "title": "R1 1776 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "R1 1776 — model page",
       "publisher": "Artificial Analysis",
@@ -747,6 +804,7 @@
     "kind": "model-launch",
     "title": "Sonar (Llama 3.3 70B-based) released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Perplexity — Meet new Sonar",
       "publisher": "Perplexity",
@@ -760,6 +818,7 @@
     "kind": "model-launch",
     "title": "DeepSeek-R1 released",
     "datePrecision": "month",
+    "dateKind": "release",
     "source": {
       "title": "deepseek-ai/DeepSeek-R1",
       "publisher": "DeepSeek (GitHub)",
@@ -773,6 +832,7 @@
     "kind": "model-launch",
     "title": "DeepSeek-V3 released",
     "datePrecision": "month",
+    "dateKind": "release",
     "source": {
       "title": "deepseek-ai/DeepSeek-V3",
       "publisher": "DeepSeek (GitHub)",
@@ -786,6 +846,7 @@
     "kind": "model-launch",
     "title": "Hunyuan-Large released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Tencent-Hunyuan/Tencent-Hunyuan-Large",
       "publisher": "Tencent (GitHub)",
@@ -799,6 +860,7 @@
     "kind": "model-launch",
     "title": "Qwen2.5 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen3 README",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -812,6 +874,7 @@
     "kind": "model-launch",
     "title": "Grok-2 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI's Grok can now generate images on X",
       "publisher": "TechCrunch",
@@ -825,6 +888,7 @@
     "kind": "model-launch",
     "title": "Llama 3.1 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Meta — Introducing Llama 3.1",
       "publisher": "Meta",
@@ -838,6 +902,7 @@
     "kind": "model-launch",
     "title": "Claude 3.5 Sonnet released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude 3.5 Sonnet",
       "publisher": "Anthropic",
@@ -851,6 +916,7 @@
     "kind": "model-launch",
     "title": "Qwen2 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen3 README",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -864,6 +930,7 @@
     "kind": "model-launch",
     "title": "Doubao model family (first Volcano Engine release) released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "字节跳动最新披露：豆包大模型日均tokens使用量超30万亿",
       "publisher": "Yicai",
@@ -877,6 +944,7 @@
     "kind": "model-launch",
     "title": "GPT-4o released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "OpenAI — Hello GPT-4o",
       "publisher": "OpenAI",
@@ -890,6 +958,7 @@
     "kind": "model-launch",
     "title": "DeepSeek-V2 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "deepseek-ai/DeepSeek-V2",
       "publisher": "DeepSeek (GitHub)",
@@ -903,6 +972,7 @@
     "kind": "model-launch",
     "title": "Llama 3 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Meta — Introducing Meta Llama 3",
       "publisher": "Meta",
@@ -916,6 +986,7 @@
     "kind": "model-launch",
     "title": "Grok-1.5 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI — Announcing Grok-1.5",
       "publisher": "xAI",
@@ -929,6 +1000,7 @@
     "kind": "model-launch",
     "title": "Claude 3 (Haiku, Sonnet, Opus) released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Introducing the next generation of Claude",
       "publisher": "Anthropic",
@@ -942,6 +1014,7 @@
     "kind": "model-launch",
     "title": "Qwen1.5 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen3 README",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -955,6 +1028,7 @@
     "kind": "model-launch",
     "title": "Gemini 1.0 Pro released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Gemini Pro is now available on Vertex AI",
       "publisher": "Google Cloud",
@@ -968,6 +1042,7 @@
     "kind": "model-launch",
     "title": "Qwen-72B released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen README",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -981,6 +1056,7 @@
     "kind": "model-launch",
     "title": "Grok-1 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xai-org/grok-1 README",
       "publisher": "xAI (GitHub)",
@@ -994,6 +1070,7 @@
     "kind": "model-launch",
     "title": "Qwen-7B released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen README",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -1007,6 +1084,7 @@
     "kind": "model-launch",
     "title": "Claude 2 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude 2",
       "publisher": "Anthropic",
@@ -1020,6 +1098,7 @@
     "kind": "model-launch",
     "title": "Bard released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Google — Try Bard and share your feedback",
       "publisher": "Google",
@@ -1033,6 +1112,7 @@
     "kind": "model-launch",
     "title": "Claude (and Claude Instant) released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Introducing Claude",
       "publisher": "Anthropic",
@@ -1046,6 +1126,7 @@
     "kind": "model-launch",
     "title": "GPT-4 released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "OpenAI — GPT-4",
       "publisher": "OpenAI",
@@ -1059,6 +1140,7 @@
     "kind": "model-available",
     "title": "GPT-4 in Bing Chat available in Microsoft Copilot",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Microsoft — Reinventing search with a new AI-powered Bing and Edge",
       "publisher": "Microsoft",
@@ -1072,6 +1154,7 @@
     "kind": "model-launch",
     "title": "GPT-3.5 (ChatGPT research preview) released",
     "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "OpenAI — Introducing ChatGPT",
       "publisher": "OpenAI",

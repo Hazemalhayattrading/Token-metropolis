@@ -103,6 +103,7 @@ export interface FeedItem {
 
 /** A launch is "new" at `t` while its launch day is on: day ≤ t < day + window. */
 export function isNewLaunch(e: TimelineEvent, t: number, windowDays = LAUNCH_WINDOW_DAYS): boolean {
+  if (e.datePrecision === 'month') return false; // no known day, so never "new" by the hour
   const d = eventDay(e);
   return d <= t && t < d + windowDays;
 }

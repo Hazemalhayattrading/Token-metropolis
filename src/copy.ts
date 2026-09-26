@@ -38,6 +38,7 @@ export const COPY = {
   },
   table: {
     caption: 'Estimated tokens per day by platform (central value and plausible range)',
+    asOf: (date: string) => `— today, ${date} (live; the time machine does not change this table)`,
     platform: 'Platform',
     parent: 'Company',
     perDay: 'Tokens per day',
@@ -175,6 +176,14 @@ export const COPY = {
     todayLabelHistory: (date: string) => `Tokens processed on ${date}`,
     todayQualifierHistory: 'all 15 platforms · the whole UTC day · estimate',
     rateLabelHistory: 'At the time shown',
+    todayQualifierSoFar: 'all 15 platforms · 00:00 UTC to now · estimate',
+    panelDay: (date: string) => `Tokens on ${date}`,
+    panelDaySoFar: (date: string) => `Tokens on ${date} so far`,
+    powerHistory: 'Power at the time shown',
+    historyChip: (date: string) => `History · ${date}`,
+    beforeFirstFigure:
+      'This date is before the first published figure below; values here are modeled back from it.',
+    notLaunched: 'Not launched at the date shown.',
     reachedLive: 'Back to the present.',
     /** Time of day next to the date in history mode. */
     utcTime: (hhmm: string) => `${hhmm} UTC`,
@@ -205,9 +214,10 @@ export const COPY = {
     empty: 'No model launches yet at this date.',
     source: 'Source',
     toastLabel: 'Model launch',
+    toastLabels: { launch: 'Model launch', available: 'Now available', 'first-seen': 'First seen' },
     close: 'Close what’s new',
     /** Appended, visually hidden, to the toggle's name while the dot is shown. */
-    toggleHasNew: (hours: number) => `(includes launches from the last ${hours} hours)`,
+    toggleHasNew: (hours: number) => `(includes news from the last ${hours} hours)`,
     /** Visually hidden hint after each "Source" link. */
     newTab: 'opens in a new tab',
     /** What screen readers hear for a launch toast. */

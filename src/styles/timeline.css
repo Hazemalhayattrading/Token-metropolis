@@ -115,11 +115,11 @@
     transform 0.3s var(--ease);
 }
 .tl__icon--pause,
-.tl__play[aria-pressed='true'] .tl__icon--play {
+.tl__play[data-playing='true'] .tl__icon--play {
   opacity: 0;
   transform: scale(0.6);
 }
-.tl__play[aria-pressed='true'] .tl__icon--pause {
+.tl__play[data-playing='true'] .tl__icon--pause {
   opacity: 1;
   transform: none;
 }

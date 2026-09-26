@@ -90,3 +90,30 @@ test("what's new lists sourced launches", async ({ page }) => {
   await expect(toggle).toBeFocused();
   expect(problems).toEqual([]);
 });
+
+test('the HQ panel follows the time machine', async ({ page }) => {
+  const problems = watchConsole(page);
+  await ready(page);
+  const slider = page.getByRole('slider', { name: 'Date shown' });
+  await slider.focus();
+  await page.keyboard.press('Home'); // 2022-11-01: ChatGPT not launched yet (2022-11-30)
+  const label = page.locator('.label[data-id="chatgpt"]');
+  // Labels of unlaunched HQs are hidden; open ChatGPT once it exists (Page Up moves 10% ahead).
+  await slider.focus();
+  await page.keyboard.press('PageUp');
+  await expect(page.locator('#hud')).toContainText('Tokens processed on 2023-');
+  await label.focus();
+  await page.keyboard.press('Enter');
+  const panel = page.locator('#panel');
+  await expect(panel).toBeVisible();
+  await expect(panel.locator('.panel__history')).toContainText('History · 2023-');
+  await expect(panel).toContainText('Tokens on 2023-');
+  await expect(panel).toContainText('At the time shown');
+  // Numbers in the overview still carry tiers.
+  const overview = panel.getByRole('tabpanel', { name: 'Overview' });
+  const n = await overview.locator('.metric').count();
+  await expect(overview.locator('.metric .tier')).toHaveCount(n);
+  await page.keyboard.press('Escape');
+  await expect(panel).toBeHidden();
+  expect(problems).toEqual([]);
+});

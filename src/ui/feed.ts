@@ -14,7 +14,7 @@ import { COPY } from '../copy';
 import type { TimelineEvent } from '../data/schema';
 import { utcDayStart } from '../model/time';
 import type { Clock } from '../state/clock';
-import { eventDateLabel, LAUNCH_WINDOW_DAYS } from '../state/events';
+import { eventDateLabel, eventNews, LAUNCH_WINDOW_DAYS } from '../state/events';
 import { announceDelay, feedItems, feedSignature, stackToasts, type FeedItem } from '../state/race';
 import { h } from './dom';
 
@@ -111,7 +111,11 @@ export function mountFeed(
       h(
         'p',
         { class: 'feed__meta' },
-        h('time', { class: 'feed__date', datetime: e.date }, COPY.time.date(eventDateLabel(e))),
+        h(
+          'time',
+          { class: 'feed__date', datetime: eventDateLabel(e) },
+          COPY.time.date(eventDateLabel(e)),
+        ),
         chip,
       ),
       h(
@@ -328,8 +332,12 @@ export function mountToasts(
       h(
         'p',
         { class: 'toast__head' },
-        h('span', { class: 'toast__label' }, COPY.feed.toastLabel),
-        h('time', { class: 'toast__date', datetime: e.date }, COPY.time.date(eventDateLabel(e))),
+        h('span', { class: 'toast__label' }, COPY.feed.toastLabels[eventNews(e)]),
+        h(
+          'time',
+          { class: 'toast__date', datetime: eventDateLabel(e) },
+          COPY.time.date(eventDateLabel(e)),
+        ),
       ),
       h(
         'p',
@@ -364,7 +372,7 @@ export function mountToasts(
     pending = null;
     lastAnnounce = performance.now();
     status.textContent = COPY.feed.toastSpoken(
-      COPY.feed.toastLabel,
+      COPY.feed.toastLabels[eventNews(e)],
       opts.platformName(e.platform),
       e.title,
       COPY.time.date(eventDateLabel(e)),

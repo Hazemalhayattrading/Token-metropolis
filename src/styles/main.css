@@ -1135,3 +1135,52 @@ a {
 .label--dot .label__value {
   display: none;
 }
+
+/* --- M5 layout fixes -------------------------------------------------------------------- */
+/* No WebGL: the dashboard is a plain flow; the time machine, controls, race and toasts join it. */
+.no-webgl .controls,
+.no-webgl .timeline-root,
+.no-webgl .race-root,
+.no-webgl .toasts-root {
+  position: static;
+  inset: auto;
+  transform: none;
+  width: auto;
+  max-height: none;
+}
+.no-webgl .timeline-root {
+  height: 60px;
+}
+.no-webgl .race-root {
+  height: auto;
+}
+.no-webgl .controls {
+  flex-wrap: wrap;
+}
+/* Toasts never cover an open panel: beside the HQ panel on desktop, hidden under sheets on phones. */
+.panel-open .toasts-root {
+  left: calc(var(--gap) * 2 + min(420px, calc(100vw - 2 * var(--gap))));
+}
+/* Short, wide screens (a phone in landscape): the race starts at the top and the HUD steps aside. */
+@media (min-width: 721px) and (max-height: 620px) {
+  .race-root {
+    top: var(--gap);
+  }
+  .race-open .hud {
+    display: none;
+  }
+}
+@media (max-width: 720px) {
+  .panel-open .toasts-root,
+  .race-open .toasts-root {
+    display: none;
+  }
+  /* The time machine stays usable while the race is open: the sheet sits above it. */
+  .race-open .timeline-root {
+    display: block;
+  }
+  .race-root {
+    bottom: calc(var(--footer-h) + var(--gap) + 64px);
+    max-height: 50svh;
+  }
+}

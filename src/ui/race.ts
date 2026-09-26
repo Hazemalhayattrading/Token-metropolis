@@ -212,6 +212,9 @@ export function mountRace(
 
   /** DOM order = rank order; only rows that are out of place are moved. */
   function placeInOrder(rows: readonly RaceRow[]): void {
+    // Moving a node drops keyboard focus inside it, so remember it and put it back.
+    const active = document.activeElement;
+    const focused = active instanceof HTMLElement && list.contains(active) ? active : null;
     let cursor = list.firstElementChild;
     for (const r of rows) {
       const li = views.get(r.id)?.li;
@@ -219,6 +222,7 @@ export function mountRace(
       if (li === cursor) cursor = cursor.nextElementSibling;
       else list.insertBefore(li, cursor);
     }
+    if (focused && document.activeElement !== focused) focused.focus({ preventScroll: true });
   }
 
   /** Where each row is drawn now, including any move still in flight. */

@@ -52,7 +52,7 @@ export function renderDataTable(container: HTMLElement, city: City, t: number): 
     h(
       'table',
       { class: 'data-table' },
-      h('caption', {}, COPY.table.caption),
+      h('caption', {}, COPY.table.caption, ' ', COPY.table.asOf(daysToIso(t))),
       h(
         'thead',
         {},

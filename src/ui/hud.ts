@@ -41,7 +41,7 @@ export function mountHud(
   const tier = weakest(...city.platforms.map((pm) => instantTier(pm, clock.now())));
 
   const today = h('output', { class: 'counter__value', 'aria-live': 'off' });
-  const todayLabel = h('span', {}, COPY.hud.todayLabel);
+  const todayLabel = h('span', { id: 'hud-today-label' }, COPY.hud.todayLabel);
   const qualifier = h('p', { class: 'counter__qualifier' }, COPY.hud.todayQualifier);
   const rateLabel = h('p', { class: 'stat__label' }, COPY.hud.rateLabel);
   const range = h('p', { class: 'counter__range' });
@@ -52,7 +52,7 @@ export function mountHud(
   root.replaceChildren(
     h(
       'section',
-      { class: 'counter panel', 'aria-label': COPY.hud.todayLabel },
+      { class: 'counter panel', 'aria-labelledby': 'hud-today-label' },
       h('p', { class: 'counter__label' }, todayLabel, ' ', tierBadge(tier)),
       today,
       qualifier,
@@ -104,13 +104,19 @@ export function mountHud(
     const t = clock.now();
     const past = history();
     const dayIso = daysToIso(t);
-    if (past !== wasHistory || (past && dayIso !== lastDay)) {
+    const soFar = utcDayStart(t) + 1 > live.now();
+    const key = `${dayIso}:${soFar}`;
+    if (past !== wasHistory || (past && key !== lastDay)) {
       wasHistory = past;
-      lastDay = dayIso;
+      lastDay = key;
       lastSlow = 0;
       root.classList.toggle('hud--history', past);
       todayLabel.textContent = past ? COPY.time.todayLabelHistory(dayIso) : COPY.hud.todayLabel;
-      qualifier.textContent = past ? COPY.time.todayQualifierHistory : COPY.hud.todayQualifier;
+      qualifier.textContent = past
+        ? soFar
+          ? COPY.time.todayQualifierSoFar
+          : COPY.time.todayQualifierHistory
+        : COPY.hud.todayQualifier;
       rateLabel.textContent = past ? COPY.time.rateLabelHistory : COPY.hud.rateLabel;
     }
     const liveNow = live.now();

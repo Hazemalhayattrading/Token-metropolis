@@ -327,10 +327,12 @@ by day would otherwise read as midnight zeros); "since you arrived" always count
 
 ### D-049 — Launch days, pulses and toasts
 
-A launch day lasts 72 hours from 00:00 UTC on the launch date. Playback that moves forward past a
-launch fires a short real-time pulse at the HQ and a toast; forward jumps longer than 7 days (seeks)
-fire nothing, and moving backwards fires nothing. Month-precision launches (day unknown) get no launch
-day. Beams are fake volumetric shafts (no real lights), and every part of the effect shares one
+A launch day lasts 72 hours from 00:00 UTC on the launch date, and only an HQ's own model launches
+with a known day are celebrated (models offered from another company, first sightings and month-only
+dates are listed and announced, not celebrated). Playback that moves forward past an event fires a
+toast labelled by kind ("Model launch", "Now available", "First seen") and, for celebrated launches, a
+short pulse at the HQ. Seeks, play/pause and returning to live are reported by the time machine and
+never fire; month-only dates never fire (their day is unknown). Beams are fake volumetric shafts (no real lights), and every part of the effect shares one
 bounding sphere so off-screen HQs are culled.
 
 ### D-050 — Race mode uses one linear scale
@@ -338,3 +340,21 @@ bounding sphere so off-screen HQs are culled.
 Bars share a linear scale where the leader fills the width — the honest picture of how concentrated
 tokens are — with thin whiskers for the plausible range and a tier chip on every row. Platform names
 open the HQ panel, where each figure has its formula and source.
+
+### D-051 — Review depth by milestone (owner's request)
+
+Milestone 6 and the final milestone get the full multi-agent review (four dimensions, each finding
+adversarially verified). Other milestones get a lighter review: two reviewers (correctness and data
+honesty), no separate verify phase — findings are triaged while fixing. Tests, E2E and screenshot
+checks always run in full. The M5 review was cut short under this policy after its reviewers had run;
+their confirmed and unverified findings were all addressed.
+
+### D-052 — The whole UI follows the date shown
+
+In history, the HQ panel relabels its figures ("Tokens on <date>", "At the time shown", "Power at the
+time shown"), shows a History chip and the HQ's local time at the date shown, rebuilds its "latest
+published figure" block for that date (before the first figure it shows that figure and says values
+are modeled back from it), lists only models released by then, and shows "not launched yet" with no
+tier before launch (interior tabs disabled). Labels' tier dots and HQ local hours follow the date
+shown. A published figure vouches for the 14 days after it, never for days before it, and the
+pre-launch zero makes no Reported claim. The data table stays live and says so.

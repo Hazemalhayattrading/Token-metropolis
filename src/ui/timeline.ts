@@ -93,7 +93,6 @@ export function mountTimeline(root: HTMLElement, tm: TimeMachine, opts: Timeline
     {
       class: 'tl__play',
       type: 'button',
-      'aria-pressed': 'false',
       'aria-label': COPY.time.play,
     },
     icon('tl__icon tl__icon--play', PLAY_PATH),
@@ -358,7 +357,8 @@ export function mountTimeline(root: HTMLElement, tm: TimeMachine, opts: Timeline
     bar.dataset.mode = s.mode;
     bar.classList.toggle('is-playing', s.playing);
 
-    playBtn.setAttribute('aria-pressed', String(s.playing));
+    // The label (Play / Pause) carries the state; aria-pressed would make "Pause, pressed" ambiguous.
+    playBtn.dataset.playing = String(s.playing);
     playBtn.setAttribute('aria-label', s.playing ? COPY.time.pause : COPY.time.play);
 
     liveBtn.setAttribute('aria-pressed', String(live));

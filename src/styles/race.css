@@ -292,10 +292,10 @@
 
 /* --- phones: a bottom sheet ------------------------------------------------ */
 @media (max-width: 720px) {
+  /* The sheet floats above the time machine bar (see main.css), so it keeps all four corners. */
   .race {
-    max-height: 60svh;
-    border-bottom: 0;
-    border-radius: 18px 18px 0 0;
+    max-height: 50svh;
+    border-radius: 18px;
     transform: translateY(24px);
   }
   .race--open {

@@ -30,6 +30,26 @@ function oldestFirst(a: TimelineEvent, b: TimelineEvent): number {
   return eventDay(a) - eventDay(b) || byId(a, b);
 }
 
+/**
+ * Whether an HQ celebrates this event with a launch day: only its own model launches with a known
+ * day. Models offered from another company, first sightings and month-only dates are listed and
+ * announced, but not celebrated.
+ */
+export function celebrates(e: TimelineEvent): boolean {
+  return e.kind === 'model-launch' && e.datePrecision !== 'month' && e.dateKind !== 'first-seen';
+}
+
+/** Whether the event has a known day (month-only dates are never announced as crossed). */
+export function hasDay(e: TimelineEvent): boolean {
+  return e.datePrecision !== 'month';
+}
+
+/** What kind of news an event is, for toast and feed labels. */
+export function eventNews(e: TimelineEvent): 'launch' | 'available' | 'first-seen' {
+  if (e.kind === 'model-available') return 'available';
+  return e.dateKind === 'first-seen' ? 'first-seen' : 'launch';
+}
+
 /** Platform id → its launches whose launch day is on at `t` (day ≤ t < day + window), newest first. */
 export function activeLaunches(
   events: readonly TimelineEvent[],
@@ -38,8 +58,7 @@ export function activeLaunches(
 ): Map<string, TimelineEvent[]> {
   const out = new Map<string, TimelineEvent[]>();
   for (const e of [...events].sort(newestFirst)) {
-    // Without a known day there is no launch day to celebrate.
-    if (e.datePrecision === 'month') continue;
+    if (!celebrates(e)) continue;
     const d = eventDay(e);
     if (d <= t && t < d + windowDays) {
       const list = out.get(e.platform) ?? [];
@@ -51,8 +70,9 @@ export function activeLaunches(
 }
 
 /**
- * Launches whose date a forward move from `from` to `to` passed (day in (from, to]), oldest first.
- * Moving backwards (scrubbing into the past) fires nothing.
+ * Events with a known day that a forward move from `from` to `to` passed (day in (from, to]),
+ * oldest first. Moving backwards (scrubbing into the past) fires nothing; month-only dates never
+ * fire (their day is unknown).
  */
 export function crossedEvents(
   events: readonly TimelineEvent[],
@@ -63,7 +83,7 @@ export function crossedEvents(
   return events
     .filter((e) => {
       const d = eventDay(e);
-      return d > from && d <= to;
+      return hasDay(e) && d > from && d <= to;
     })
     .sort(oldestFirst);
 }

@@ -394,6 +394,17 @@ export function latestAnchor(
   return best;
 }
 
+/** The platform's earliest published figure (the curve before it is modeled back from it). */
+export function firstAnchor(pm: PlatformModel): (Anchor & { componentId: string }) | undefined {
+  let best: (Anchor & { componentId: string }) | undefined;
+  for (const c of pm.components) {
+    for (const a of c.curve.anchors) {
+      if (!best || a.t < best.t) best = { ...a, componentId: c.component.id };
+    }
+  }
+  return best;
+}
+
 // ---------------------------------------------------------------------------
 // Global totals (de-duplicated)
 // ---------------------------------------------------------------------------

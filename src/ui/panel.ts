@@ -15,6 +15,7 @@ import {
   cumulative,
   cumulativeTier,
   dailyRate,
+  firstAnchor,
   instantTier,
   latestAnchor,
   rateTier,
@@ -22,14 +23,15 @@ import {
   trafficNowRange,
 } from '../model/estimate';
 import { tierOfBasis } from '../model/tier';
-import { daysToIso, utcDayStart } from '../model/time';
+import { daysToIso, daysToMs, utcDayStart } from '../model/time';
 import type { Constant, Estimate, Range, Tier } from '../model/types';
+import type { PlatformModel } from '../model/estimate';
 import type { City } from '../state/city';
 import type { Clock } from '../state/clock';
 import { localTimeLabel } from '../state/localtime';
 import { isLiquidCooled } from '../world/hardware';
 import type { InteriorView } from '../world/interiors';
-import { LAB_MAX, labLineup } from '../world/interiors/lineup';
+import { LAB_MAX, labLineup, releasedBy } from '../world/interiors/lineup';
 import { DESK_BANDS, deskTier, logLoad, tokensAtLoad } from '../world/scale';
 import { tierBadge, uncheckedBadge } from './badge';
 import { byId, h } from './dom';
@@ -59,23 +61,40 @@ const METHODOLOGY_URL =
   'https://github.com/Hazemalhayattrading/Token-metropolis/blob/main/METHODOLOGY.md';
 
 interface Row {
+  label: HTMLElement;
   value: HTMLElement;
   range: HTMLElement;
   badge: HTMLElement;
 }
 
 function row(label: string, unit: string): { el: HTMLElement; row: Row } {
+  const labelEl = h('span', { class: 'metric__label' }, label);
   const value = h('span', { class: 'metric__value' });
   const range = h('span', { class: 'metric__range' });
   const badge = h('span', { class: 'metric__badge' });
   const el = h(
     'div',
     { class: 'metric' },
-    h('div', { class: 'metric__head' }, h('span', { class: 'metric__label' }, label), badge),
+    h('div', { class: 'metric__head' }, labelEl, badge),
     h('div', { class: 'metric__body' }, value, h('span', { class: 'metric__unit' }, unit)),
     range,
   );
-  return { el, row: { value, range, badge } };
+  return { el, row: { label: labelEl, value, range, badge } };
+}
+
+function setLabel(r: Row | undefined, text: string): void {
+  if (r && r.label.textContent !== text) r.label.textContent = text;
+}
+
+/** A platform not launched at the date shown: no number, so no tier (as in the race). */
+function setWaiting(r: Row | undefined): void {
+  if (!r) return;
+  r.value.textContent = COPY.race.notLaunched;
+  r.range.textContent = '';
+  if (r.badge.dataset.tier !== 'none') {
+    r.badge.dataset.tier = 'none';
+    r.badge.replaceChildren();
+  }
 }
 
 function setBadge(el: HTMLElement, tier: Tier): void {
@@ -136,7 +155,21 @@ function constantCard(label: string, c: Constant, fmt: (n: number) => string): H
   );
 }
 
-export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel {
+export interface PanelOptions {
+  /** Whether the time machine shows the past (labels and the header change). */
+  history?: () => boolean;
+  /** Real time, to cap "today" totals in history at the present. */
+  live?: Clock;
+}
+
+export function createPanel(
+  city: City,
+  clock: Clock,
+  cb: PanelCallbacks,
+  popts: PanelOptions = {},
+): Panel {
+  const history = popts.history ?? (() => false);
+  const live = popts.live ?? clock;
   const root = byId('panel');
   let openId: string | null = null;
   let view: InteriorView = 'overview';
@@ -151,6 +184,13 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
   let lastSlow = 0;
   let lastFast = 0;
   let returnFocus: HTMLElement | null = null;
+  let lastT = Number.NaN;
+  let labelKey = '';
+  let sourceKey = '';
+  let sourceBlock: HTMLElement | null = null;
+  let labModels = -1;
+  let labList: HTMLElement | null = null;
+  let historyChip: HTMLElement | null = null;
 
   const close = h(
     'button',
@@ -243,39 +283,26 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
 
   // --- panes ------------------------------------------------------------------
 
-  function overviewPane(id: string): HTMLElement {
-    const pm = city.byId.get(id)!;
-    const t = clock.now();
-    const metricsById = new Map(city.dataset.metrics.map((m) => [m.id, m]));
-    const anchor = latestAnchor(pm, t);
-    const metric = anchor ? metricsById.get(anchor.refs[0] ?? '') : undefined;
-
-    const today = row(COPY.panel.today, COPY.panel.tokens);
-    const now = row(COPY.panel.now, COPY.panel.perSecond);
-    const perDay = row(COPY.panel.perDay, COPY.panel.tokens);
-    const total = row(COPY.panel.sinceLaunch, COPY.panel.tokens);
-    const gpus = row(COPY.panel.gpus, COPY.panel.gpuUnit);
-    const power = row(COPY.panel.power, 'MW');
-    const water = row(COPY.panel.water, COPY.panel.waterUnit);
-    Object.assign(rows, {
-      today: today.row,
-      now: now.row,
-      perDay: perDay.row,
-      total: total.row,
-      gpus: gpus.row,
-      power: power.row,
-      water: water.row,
-    });
-    const extrapolatedDays = anchor ? Math.max(0, t - anchor.t) : 0;
-
-    return pane(
-      'overview',
-      h('p', { class: 'panel__scope' }, pm.platform.scope),
-      h('div', { class: 'panel__grid' }, today.el, now.el, perDay.el, total.el),
-      h('h3', { class: 'panel__section' }, COPY.panel.infrastructure),
-      h('div', { class: 'panel__grid' }, gpus.el, power.el, water.el),
-      h('p', { class: 'panel__note' }, COPY.panel.infraNote),
+  /**
+   * The latest published figure at the date shown, the formula behind today's value and how old
+   * that figure is. Rebuilt whenever the time machine moves to a different latest figure; before a
+   * platform's first figure it shows that first figure and says the values are modeled back from it.
+   */
+  function renderSource(pm: PlatformModel, t: number): void {
+    if (!sourceBlock) return;
+    const latest = latestAnchor(pm, t);
+    const anchor = latest ?? firstAnchor(pm);
+    const key = anchor ? `${anchor.refs[0] ?? ''}@${anchor.t}:${latest ? 'l' : 'f'}` : 'none';
+    const extrapolatedDays = latest ? Math.max(0, t - latest.t) : 0;
+    const fullKey = `${key}:${extrapolatedDays > 14 ? Math.round(extrapolatedDays) : 0}`;
+    if (fullKey === sourceKey) return;
+    sourceKey = fullKey;
+    const metric = anchor
+      ? city.dataset.metrics.find((m) => m.id === (anchor.refs[0] ?? ''))
+      : undefined;
+    const parts: (Node | null)[] = [
       h('h3', { class: 'panel__section' }, COPY.panel.latest),
+      !latest && anchor ? h('p', { class: 'panel__note' }, COPY.time.beforeFirstFigure) : null,
       metric && anchor
         ? h(
             'div',
@@ -302,6 +329,40 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
       extrapolatedDays > 14
         ? h('p', { class: 'panel__note' }, COPY.panel.extrapolated(Math.round(extrapolatedDays)))
         : null,
+    ];
+    sourceBlock.replaceChildren(...parts.filter((x): x is Node => x !== null));
+  }
+
+  function overviewPane(id: string): HTMLElement {
+    const pm = city.byId.get(id)!;
+    const today = row(COPY.panel.today, COPY.panel.tokens);
+    const now = row(COPY.panel.now, COPY.panel.perSecond);
+    const perDay = row(COPY.panel.perDay, COPY.panel.tokens);
+    const total = row(COPY.panel.sinceLaunch, COPY.panel.tokens);
+    const gpus = row(COPY.panel.gpus, COPY.panel.gpuUnit);
+    const power = row(COPY.panel.power, 'MW');
+    const water = row(COPY.panel.water, COPY.panel.waterUnit);
+    Object.assign(rows, {
+      today: today.row,
+      now: now.row,
+      perDay: perDay.row,
+      total: total.row,
+      gpus: gpus.row,
+      power: power.row,
+      water: water.row,
+    });
+    sourceBlock = h('div', { class: 'panel__source-block' });
+    sourceKey = '';
+    renderSource(pm, clock.now());
+
+    return pane(
+      'overview',
+      h('p', { class: 'panel__scope' }, pm.platform.scope),
+      h('div', { class: 'panel__grid' }, today.el, now.el, perDay.el, total.el),
+      h('h3', { class: 'panel__section' }, COPY.panel.infrastructure),
+      h('div', { class: 'panel__grid' }, gpus.el, power.el, water.el),
+      h('p', { class: 'panel__note' }, COPY.panel.infraNote),
+      sourceBlock,
       h(
         'p',
         { class: 'panel__note' },
@@ -490,12 +551,16 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
     ].filter((x): x is HTMLHeadingElement | HTMLDListElement | HTMLParagraphElement => x !== null);
   }
 
-  function labPane(id: string): HTMLElement {
-    const p = city.byId.get(id)!.platform;
-    const models = city.dataset.models.filter((m) => m.platform === id);
-    // The display case holds labLineup(models) (capped at LAB_MAX); the list shows every model.
+  /** The lab lists the models released by the date shown (the display case holds the newest). */
+  function renderLabList(id: string, t: number): void {
+    if (!labList) return;
+    const models = releasedBy(
+      city.dataset.models.filter((m) => m.platform === id),
+      t,
+    );
+    if (models.length === labModels) return;
+    labModels = models.length;
     const all = [...labLineup(models, Infinity)].reverse();
-    modelDetail = h('div', { class: 'lab-detail', 'aria-live': 'polite' });
     modelButtons = all.map((m) => {
       const b = h(
         'button',
@@ -516,21 +581,41 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
       });
       return b;
     });
-    const list = h(
-      'ul',
-      { class: 'lab-list', 'aria-label': COPY.lab.list },
-      ...modelButtons.map((b) => h('li', {}, b)),
-    );
-    return pane(
-      'lab',
-      h('p', { class: 'panel__lead' }, COPY.lab.intro(p.name)),
+    const parts: (Node | null)[] = [
       models.length > LAB_MAX
         ? h('p', { class: 'panel__note' }, COPY.lab.capped(LAB_MAX, models.length))
         : null,
       models.length === 0 ? h('p', { class: 'panel__note' }, COPY.lab.empty) : null,
-      modelDetail,
       h('h3', { class: 'panel__section' }, COPY.lab.list),
-      list,
+      h(
+        'ul',
+        { class: 'lab-list', 'aria-label': COPY.lab.list },
+        ...modelButtons.map((b) => h('li', {}, b)),
+      ),
+    ];
+    labList.replaceChildren(...parts.filter((x): x is Node => x !== null));
+    // A selected model that is not released at this date is deselected.
+    if (selectedModel && !models.some((m) => m.id === selectedModel)) {
+      selectModel(null);
+      cb.onModel(null);
+    } else {
+      for (const b of modelButtons)
+        b.setAttribute('aria-pressed', String(b.dataset.model === selectedModel));
+    }
+  }
+
+  function labPane(id: string): HTMLElement {
+    const p = city.byId.get(id)!.platform;
+    modelDetail = h('div', { class: 'lab-detail', 'aria-live': 'polite' });
+    labList = h('div', { class: 'lab-list-block' });
+    labModels = -1;
+    modelButtons = [];
+    renderLabList(id, clock.now());
+    return pane(
+      'lab',
+      h('p', { class: 'panel__lead' }, COPY.lab.intro(p.name)),
+      modelDetail,
+      labList,
     );
   }
 
@@ -567,6 +652,7 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
             `${p.parent} · ${p.hq.city} · `,
             h('span', { id: 'panel-localtime' }),
           ),
+          (historyChip = h('p', { class: 'panel__history', hidden: true })),
           close,
         ),
         tablist(),
@@ -576,6 +662,43 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
     selectModel(null);
     lastSlow = 0;
     lastFast = 0;
+    labelKey = '';
+  }
+
+  /**
+   * Labels that depend on the date shown: live wording, or the date in history (a whole-day
+   * total, "so far" when that day is today); interior tabs are disabled before launch.
+   */
+  function relabel(t: number, launched: boolean): void {
+    const past = history();
+    const dayIso = daysToIso(t);
+    const soFar = utcDayStart(t) + 1 > live.now();
+    const key = `${past}:${dayIso}:${soFar}:${launched}`;
+    if (key === labelKey) return;
+    labelKey = key;
+    setLabel(
+      rows.today,
+      past
+        ? soFar
+          ? COPY.time.panelDaySoFar(dayIso)
+          : COPY.time.panelDay(dayIso)
+        : COPY.panel.today,
+    );
+    const nowLabel = past ? COPY.time.rateLabelHistory : COPY.panel.now;
+    setLabel(rows.now, nowLabel);
+    setLabel(rows.hallNow, nowLabel);
+    setLabel(rows.power, past ? COPY.time.powerHistory : COPY.panel.power);
+    gauges.power?.setLabel(past ? COPY.time.powerHistory : COPY.power.powerGauge);
+    if (historyChip) {
+      historyChip.hidden = !past;
+      historyChip.textContent = past ? COPY.time.historyChip(dayIso) : '';
+      historyChip.title = COPY.time.historyNote;
+    }
+    tabs.forEach((tab, i) => {
+      if (VIEWS[i] === 'overview') return;
+      tab.disabled = !launched;
+      tab.title = launched ? '' : COPY.time.notLaunched;
+    });
   }
 
   function update(): void {
@@ -585,6 +708,12 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
     lastFast = nowMs;
     const pm = city.byId.get(openId)!;
     const t = clock.now();
+    // A jump of the time shown (seek, playback) refreshes every number at once.
+    if (!(Math.abs(t - lastT) < 0.25)) lastSlow = 0;
+    lastT = t;
+    const day = dailyRate(pm, t);
+    const launched = day.central > 0;
+    relabel(t, launched);
     const tier = rateTier(pm, t);
     // Anything depending on the time-of-day curve is at best Modeled (see instantTier).
     const iTier = instantTier(pm, t);
@@ -594,25 +723,38 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
     const all = lastSlow === 0;
     const on = (v: InteriorView) => all || view === v;
     if (on('overview')) {
-      const today = between(pm, utcDayStart(t), t);
-      setRow(rows.today!, fullNumber(today.central), today, iTier);
-      setRow(rows.now!, humanNumber(tps.central), tps, iTier);
+      // Live: since 00:00 UTC. History: the whole UTC day shown (up to now if it is today).
+      const dayStart = utcDayStart(t);
+      const end = history() ? Math.min(dayStart + 1, live.now()) : t;
+      const today = between(pm, dayStart, end);
+      if (launched) {
+        setRow(rows.today!, fullNumber(today.central), today, iTier);
+        setRow(rows.now!, humanNumber(tps.central), tps, iTier);
+      } else {
+        setWaiting(rows.today);
+        setWaiting(rows.now);
+      }
     }
     if (on('hall')) setRow(rows.hallNow!, humanNumber(tps.central), tps, iTier);
     if (nowMs - lastSlow < 2000) return;
     lastSlow = nowMs;
-    const day = dailyRate(pm, t);
+    if (on('overview')) renderSource(pm, t);
+    if (on('lab')) renderLabList(pm.platform.id, t);
     const g: Estimate = gpuEquivalents(tps, tier);
     const mw = powerMW(g.range, tier);
     const w = waterLitersPerDay(day, tier);
     const waterOk = isDisplayable(w.refs);
     if (on('overview')) {
-      setRow(rows.perDay!, humanNumber(day.central), day, tier);
-      const cum = cumulative(pm, t);
-      setRow(rows.total!, humanNumber(cum.central), cum, cumulativeTier(pm, t));
-      setRow(rows.gpus!, humanNumber(g.range.central), g.range, g.tier);
-      setRow(rows.power!, mwText(mw.range.central), mw.range, mw.tier, mwText);
-      if (waterOk) setRow(rows.water!, humanNumber(w.range.central), w.range, w.tier);
+      if (launched) {
+        setRow(rows.perDay!, humanNumber(day.central), day, tier);
+        const cum = cumulative(pm, t);
+        setRow(rows.total!, humanNumber(cum.central), cum, cumulativeTier(pm, t));
+        setRow(rows.gpus!, humanNumber(g.range.central), g.range, g.tier);
+        setRow(rows.power!, mwText(mw.range.central), mw.range, mw.tier, mwText);
+        if (waterOk) setRow(rows.water!, humanNumber(w.range.central), w.range, w.tier);
+      } else {
+        for (const k of ['perDay', 'total', 'gpus', 'power', 'water']) setWaiting(rows[k]);
+      }
     }
     if (on('offices')) {
       setRow(rows.offPerDay!, humanNumber(day.central), day, tier);
@@ -638,9 +780,10 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
           COPY.panel.range(humanNumber(w.range.low), humanNumber(w.range.high)),
         );
     }
+    // Local time at the HQ for the time shown (live or history).
     const lt = document.getElementById('panel-localtime');
     if (lt)
-      lt.textContent = COPY.panel.localTime(localTimeLabel(pm.platform.hq.timezone, Date.now()));
+      lt.textContent = COPY.panel.localTime(localTimeLabel(pm.platform.hq.timezone, daysToMs(t)));
   }
 
   return {

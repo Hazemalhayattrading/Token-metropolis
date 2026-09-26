@@ -304,9 +304,12 @@ export function segmentAt(c: Curve, t: number): Segment | undefined {
  * of a reported anchor; otherwise it inherits the segment's tier.
  */
 export function rateTierAt(c: Curve, t: number, freshDays: number): Tier {
-  if (t < c.start) return 'reported';
+  // Before launch the rate is zero by construction, not a published figure: no Reported claim
+  // (the UI shows "not launched yet" without a tier).
+  if (t < c.start) return 'modeled';
+  // A published figure vouches for the days after it (up to `freshDays`), never for days before.
   for (const a of c.anchors)
-    if (a.tier === 'reported' && Math.abs(t - a.t) <= freshDays) return 'reported';
+    if (a.tier === 'reported' && t - a.t >= 0 && t - a.t <= freshDays) return 'reported';
   return segmentAt(c, t)?.tier ?? 'modeled';
 }
 

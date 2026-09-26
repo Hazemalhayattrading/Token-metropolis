@@ -129,6 +129,12 @@ integrated and art-directed in the main checkout.
       launch lamps/crowd inside base geometry, reduced-motion growth, frustum culling.
 - [x] E2E `tests/e2e/time.spec.ts` (scrub to 2022, play/pause, live; race 15 rows with tiers; feed
       sources); screenshots `m5-*`; two art passes (race density, HUD daily totals, mobile layering).
+- [x] Integration review (correctness, honesty, accessibility reviewers; cut short per D-051): the
+      panel, labels and model lab now follow the time machine (D-052); launch pulses keyed to real
+      playback; event kinds labelled and celebrated consistently (D-049); tier freshness only after a
+      publication; race keeps keyboard focus while reordering; focus fallbacks when overlays close;
+      no-WebGL layout; toasts never cover panels; race usable on short screens and above the
+      timeline on phones; HUD "so far" wording and accessible name; data table says it is live.
 
 ## Next — Milestone 6
 

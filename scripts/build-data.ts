@@ -46,6 +46,7 @@ function buildEvents(data: Dataset) {
             ? `${m.name} first seen`
             : `${m.name} released`,
       datePrecision: m.datePrecision,
+      dateKind: m.dateKind,
       source: m.source,
     }))
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.id.localeCompare(b.id)));

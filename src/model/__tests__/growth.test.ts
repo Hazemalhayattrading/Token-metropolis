@@ -108,6 +108,9 @@ describe('growth curve', () => {
     expect(segmentAt(curve, DAY0 + 900)?.kind).toBe('extrapolated');
     // reported only close to a reported anchor
     expect(rateTierAt(curve, a1.t + 3, 14)).toBe('reported');
+    // a published figure never vouches for the days before it, nor for the time before launch
+    expect(rateTierAt(curve, a1.t - 3, 14)).not.toBe('reported');
+    expect(rateTierAt(curve, curve.start - 1, 14)).toBe('modeled');
     expect(rateTierAt(curve, a1.t + 40, 14)).toBe('derived');
     // a3 is derived, so a value near it is derived, never reported
     expect(rateTierAt(curve, a3.t, 14)).toBe('derived');

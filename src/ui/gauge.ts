@@ -62,6 +62,7 @@ export interface GaugeOptions {
 
 export interface Gauge {
   readonly el: HTMLElement;
+  setLabel(text: string): void;
   set(range: Range, tier: Tier, value: string, rangeText: string): void;
 }
 
@@ -101,10 +102,11 @@ export function createGauge(o: GaugeOptions): Gauge {
   const value = h('span', { class: 'metric__value' });
   const range = h('span', { class: 'metric__range' });
   const badge = h('span', { class: 'metric__badge' });
+  const labelEl = h('span', { class: 'metric__label' }, o.label);
   const el = h(
     'div',
     { class: 'metric gauge' },
-    h('div', { class: 'metric__head' }, h('span', { class: 'metric__label' }, o.label), badge),
+    h('div', { class: 'metric__head' }, labelEl, badge),
     drawing,
     h(
       'div',
@@ -117,6 +119,9 @@ export function createGauge(o: GaugeOptions): Gauge {
 
   return {
     el,
+    setLabel(text) {
+      if (labelEl.textContent !== text) labelEl.textContent = text;
+    },
     set(r, tier, text, rangeText) {
       const lo = gaugeFraction(r.low, o.min, o.max);
       const hi = gaugeFraction(r.high, o.min, o.max);

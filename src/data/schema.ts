@@ -272,6 +272,8 @@ export const EventSchema = z.object({
   title: z.string().min(3),
   /** Month-precision dates are shown as YYYY-MM and get no launch-day animation. */
   datePrecision: z.enum(['day', 'month']).default('day'),
+  /** first-seen: the day the model was first seen somewhere, not its launch (no celebration). */
+  dateKind: z.enum(['release', 'first-seen']).default('release'),
   source: SourceSchema,
 });
 export type TimelineEvent = z.infer<typeof EventSchema>;

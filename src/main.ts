@@ -122,7 +122,16 @@ async function boot(): Promise<void> {
       raceEl.hidden = !open;
       document.documentElement.classList.toggle('race-open', open);
       controls.raceButton.setAttribute('aria-pressed', String(open));
-      if (!open && raceEl.contains(document.activeElement)) controls.raceButton.focus();
+      if (!open && (raceEl.contains(document.activeElement) || !document.activeElement)) {
+        // The toggle is hidden while an HQ panel is open: go to the panel instead, else the city.
+        const toggleShown =
+          controls.raceButton.checkVisibility?.() ?? controls.raceButton.offsetParent !== null;
+        const target = toggleShown
+          ? controls.raceButton
+          : (document.querySelector<HTMLElement>('#panel:not([hidden]) [aria-selected="true"]') ??
+            byId('scene'));
+        target.focus({ preventScroll: true });
+      }
     };
     // Opening an HQ from the race or the feed moves keyboard focus into its panel.
     let openHq: (id: string) => void = () => byId('data-view').focus();
@@ -149,16 +158,22 @@ async function boot(): Promise<void> {
             : { left: Math.max(0, r.right - stage.left), bottom: 0 },
         );
       };
-      const panel = createPanel(city, tm, {
-        onClose: () => world.select(null),
-        onView: (view) => world.setView(view),
-        onModel: (id) => world.selectModel(id),
-      });
+      const panel = createPanel(
+        city,
+        tm,
+        {
+          onClose: () => world.select(null),
+          onView: (view) => world.setView(view),
+          onModel: (id) => world.selectModel(id),
+        },
+        { history: () => tm.state().mode === 'history', live: liveClock },
+      );
       const world = createWorld(byId<HTMLCanvasElement>('scene'), city, tm, {
         reducedMotion,
         labels: byId('labels'),
         events: data.events,
         onLaunch: (e) => toasts.push(e),
+        isPlaying: () => tm.state().playing,
         onFrame: () => {
           hud.update();
           panel.update();
@@ -167,10 +182,12 @@ async function boot(): Promise<void> {
           feed.update();
         },
         onSelect: (id) => {
+          // Toggle the class first, so controls hidden under the panel are visible again before
+          // the panel hands focus back to them.
+          document.documentElement.classList.toggle('panel-open', id !== null);
           if (id) panel.show(id);
           else panel.hide();
           if (id && mobile.matches && race.open) setRace(false);
-          document.documentElement.classList.toggle('panel-open', id !== null);
           updateInsets();
         },
         onModel: (id) => {
@@ -179,6 +196,13 @@ async function boot(): Promise<void> {
         onViewChange: (view) => panel.showView(view),
       });
       new ResizeObserver(updateInsets).observe(panelEl);
+      // Seeks, play/pause and returning to live are jumps, not playback: no launch pulses for them.
+      tm.subscribe(() => world.resetTimeline());
+      // On phones the race and the HQ panel share the bottom sheet: never both at once.
+      mobile.addEventListener('change', () => {
+        if (mobile.matches && race.open && !panelEl.hidden) setRace(false);
+        updateInsets();
+      });
       openHq = (id) => {
         world.select(id);
         requestAnimationFrame(() =>

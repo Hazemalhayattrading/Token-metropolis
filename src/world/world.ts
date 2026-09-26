@@ -25,7 +25,8 @@ import {
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import type { TimelineEvent } from '../data/schema';
 import { dailyRate, rateTier, trafficNow } from '../model/estimate';
-import { activeLaunches, crossedEvents } from '../state/events';
+import { daysToMs } from '../model/time';
+import { activeLaunches, celebrates, crossedEvents } from '../state/events';
 import type { City } from '../state/city';
 import type { Clock } from '../state/clock';
 import { daylight, localHour, occupancy } from '../state/localtime';
@@ -34,6 +35,7 @@ import { createCampus, type Campus } from './campus/campus';
 import { CameraDirector, type Pose } from './director';
 import { createEnvironment, MOON_DIRECTION } from './environment';
 import type { InteriorView, Interiors } from './interiors';
+import { releasedBy } from './interiors/lineup';
 import { createLaunchFx, type LaunchFx } from './launch';
 import { createLabels, type LabelValue, type Labels } from './labels';
 import { layoutPlots } from './layout';
@@ -52,6 +54,8 @@ export interface World {
   setView(view: InteriorView): void;
   /** Highlight a model in the lab (from the panel list). */
   selectModel(id: string | null): void;
+  /** The time shown jumped (a seek, or back to live): no launch pulses for the gap. */
+  resetTimeline(): void;
   readonly view: InteriorView;
   dispose(): void;
 }
@@ -69,6 +73,8 @@ export interface WorldOptions {
   events?: readonly TimelineEvent[];
   /** The time shown moved forward past a launch (playback, or live). */
   onLaunch?: (e: TimelineEvent) => void;
+  /** Whether the time machine is playing (playback fires every launch it crosses). */
+  isPlaying?: () => boolean;
 }
 
 interface Slot {
@@ -158,6 +164,10 @@ export function createWorld(
   let view: InteriorView = 'overview';
   let interiors: Interiors | null = null;
   let interiorsModule: Promise<typeof import('./interiors')> | null = null;
+  let interiorsLib: typeof import('./interiors') | null = null;
+  /** What the open interiors were built for (rebuilt when the date shown changes them). */
+  let builtFor = { models: -1, height: 0 };
+  let lastRebuild = 0;
   let selectedModel: string | null = null;
 
   const labels: Labels = createLabels(
@@ -285,6 +295,18 @@ export function createWorld(
     };
   }
 
+  /** Build the selected campus's interiors for the date shown (models released by then, log height). */
+  function buildInteriors(lib: typeof import('./interiors'), id: string, t: number): Interiors {
+    const pm = city.byId.get(id)!;
+    const models = releasedBy(
+      city.dataset.models.filter((m) => m.platform === id),
+      t,
+    );
+    const height = towerHeight(dailyRate(pm, t).central, 'log', 0);
+    builtFor = { models: models.length, height };
+    return lib.createInteriors(pm.platform, slots.get(id)!.campus, models, height);
+  }
+
   function closeInteriors(): void {
     interiors?.dispose();
     interiors = null;
@@ -404,11 +426,45 @@ export function createWorld(
 
   const events = opts.events ?? [];
   const BURST_SECONDS = 2.5;
-  // A forward jump longer than this (a seek, not playback) fires no launch pulses.
-  const MAX_PULSE_JUMP_DAYS = 7;
+  // Outside playback (live), only a small forward step (e.g. after the tab slept) fires pulses;
+  // seeks call resetTimeline(), so they never do.
+  const MAX_LIVE_STEP_DAYS = 1;
   let launches = new Map<string, TimelineEvent[]>();
   let launchesAt = Number.NaN;
   let prevT: number | null = null;
+  let tierT = Number.NaN;
+  let hourT = Number.NaN;
+
+  /**
+   * Keep an open interior true to the date shown: before launch there is nothing to show, so go
+   * back to the campus; the lab lists only models released by then; the offices follow the tower.
+   */
+  function syncInteriors(id: string, t: number, rate: number): void {
+    if (rate <= 0) {
+      world.setView('overview');
+      opts.onViewChange?.('overview');
+      return;
+    }
+    if (!interiorsLib || !interiors) return;
+    const now = performance.now();
+    if (now - lastRebuild < 500) return;
+    const models = releasedBy(
+      city.dataset.models.filter((m) => m.platform === id),
+      t,
+    ).length;
+    const height = towerHeight(rate, 'log', 0);
+    const stale =
+      (view === 'lab' && models !== builtFor.models) ||
+      (view === 'offices' && Math.abs(height - builtFor.height) > 0.25 * builtFor.height);
+    if (!stale) return;
+    lastRebuild = now;
+    const shown = view;
+    interiors.dispose();
+    interiors = buildInteriors(interiorsLib, id, t);
+    interiors.show(shown);
+    interiors.selectModel(selectedModel);
+    void director.flyTo(viewPose(id, shown), 0.8);
+  }
 
   const frame = (timestamp: number) => {
     timer.update(timestamp);
@@ -419,22 +475,26 @@ export function createWorld(
       launches = activeLaunches(events, t);
       launchesAt = t;
     }
-    if (prevT !== null && t > prevT && t - prevT < MAX_PULSE_JUMP_DAYS) {
+    const playing = opts.isPlaying?.() ?? false;
+    if (prevT !== null && t > prevT && (playing || t - prevT < MAX_LIVE_STEP_DAYS)) {
       for (const e of crossedEvents(events, prevT, t)) {
         const slot = slots.get(e.platform);
-        if (slot) slot.burst = 1;
+        if (slot && celebrates(e)) slot.burst = 1;
         opts.onLaunch?.(e);
       }
     }
     prevT = t;
     const nowMs = Date.now();
-    if (nowMs - lastTierUpdate > 5_000) {
+    // Tiers and local hours follow the time shown: refreshed when it moves, and every few seconds.
+    if (nowMs - lastTierUpdate > 5_000 || !(Math.abs(t - tierT) < 0.25)) {
       lastTierUpdate = nowMs;
+      tierT = t;
       for (const pm of city.platforms) tiers.set(pm.platform.id, rateTier(pm, t));
     }
-    if (nowMs - lastHourUpdate > 20_000) {
+    if (nowMs - lastHourUpdate > 20_000 || !(Math.abs(t - hourT) < 5 / 1440)) {
       lastHourUpdate = nowMs;
-      for (const s of slots.values()) s.hour = localHour(s.tz, nowMs);
+      hourT = t;
+      for (const s of slots.values()) s.hour = localHour(s.tz, daysToMs(t));
     }
     let maxRate = 0;
     const rates = new Map<string, number>();
@@ -470,6 +530,7 @@ export function createWorld(
       });
       if (inside) {
         interiors?.update({ load, occupancy: occupancy(slot.hour), activity, time: elapsed });
+        syncInteriors(id, t, rate);
       }
       slot.streams.update(elapsed, rate > 0 ? (0.25 + 0.75 * load) * Math.min(1.4, activity) : 0);
       slot.streams.group.visible = rate > 0 && view === 'overview';
@@ -554,14 +615,9 @@ export function createWorld(
       interiorsModule
         .then(async (mod) => {
           if (selected !== id || view !== next) return; // superseded while loading
-          const pm = city.byId.get(id)!;
+          interiorsLib = mod;
           const slot = slots.get(id)!;
-          interiors ??= mod.createInteriors(
-            pm.platform,
-            slot.campus,
-            city.dataset.models.filter((m) => m.platform === id),
-            towerHeight(dailyRate(pm, clock.now()).central, 'log', 0),
-          );
+          interiors ??= buildInteriors(mod, id, clock.now());
           interiors.show(next);
           interiors.selectModel(selectedModel);
           // Compile the interior's shaders before the flight so the first frames don't stall
@@ -585,6 +641,9 @@ export function createWorld(
     selectModel(id) {
       selectedModel = id;
       interiors?.selectModel(id);
+    },
+    resetTimeline() {
+      prevT = null;
     },
     dispose() {
       world.stop();
