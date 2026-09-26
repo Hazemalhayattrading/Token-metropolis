@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lastUpdated": "2026-09-26T15:56:30.235Z",
+  "contentHash": "f91ae6818ef634c6",
+  "counts": {
+    "platforms": 15,
+    "metrics": 98,
+    "models": 83
+  },
+  "pendingConstants": [
+    "EQUIV.locBooks",
+    "EQUIV.enWikipediaWords",
+    "EQUIV.wordsSpokenPerDay",
+    "EQUIV.lifeExpectancyYears",
+    "EQUIV.householdKw"
+  ]
+}

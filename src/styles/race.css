@@ -1,0 +1,350 @@
+/* ==========================================================================
+   Race mode — a bar-chart race of daily tokens (src/ui/race.ts).
+   The panel fills the box its root is given: a right-hand column on desktop
+   (the root needs a definite height, e.g. top + bottom), a bottom sheet on
+   phones (capped at 60svh here). The rows scroll inside when they do not fit.
+   ========================================================================== */
+
+.race {
+  --race-whisker: rgb(238 241 248 / 0.6);
+  --race-track: rgb(255 255 255 / 0.05);
+
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+  min-height: 0;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  backdrop-filter: blur(var(--blur));
+  box-shadow: 0 20px 60px rgb(0 0 0 / 0.45);
+  color: var(--text);
+  opacity: 0;
+  transform: translateX(12px);
+  transition:
+    opacity 0.3s var(--ease),
+    transform 0.4s var(--ease);
+}
+.race[hidden] {
+  display: none;
+}
+.race--open {
+  opacity: 1;
+  transform: none;
+}
+.race:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- header ---------------------------------------------------------------- */
+.race__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 14px 10px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.race__heading {
+  flex: 1;
+  min-width: 0;
+}
+.race__title {
+  margin: 0;
+  font: 400 20px/1.15 var(--font-display);
+  letter-spacing: 0.005em;
+}
+.race__subtitle {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.35;
+}
+.race__date {
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.race__close {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  margin: -4px -4px 0 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  font: 400 22px/1 var(--font-ui);
+  cursor: pointer;
+  transition: border-color 0.2s var(--ease);
+}
+.race__close:hover {
+  border-color: var(--accent);
+}
+.race__close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- rows -------------------------------------------------------------------
+   Two lines per row so every bar gets the same, wide track:
+     #1  ChatGPT                         [Estimated]
+         ███████████████████████   1.2T tokens/day
+         ├──────range──────┤
+   ------------------------------------------------------------------------- */
+.race__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 6px 16px 8px;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+/* more rows below: fade the bottom edge */
+.race__list--more {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+}
+.race__row {
+  position: relative;
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) 104px;
+  grid-template-areas:
+    'rank name  badge'
+    '.    track value';
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 2px;
+  padding: 3px 0;
+}
+.race__rank {
+  grid-area: rank;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 16px;
+  font-variant-numeric: tabular-nums;
+}
+.race__name {
+  grid-area: name;
+  min-width: 0;
+  font: 500 13px/16px var(--font-ui);
+  overflow-wrap: anywhere;
+}
+.race__name--link {
+  appearance: none;
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color 0.2s var(--ease);
+}
+.race__name--link:hover {
+  text-decoration-color: currentcolor;
+}
+.race__name--link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.race__badge {
+  grid-area: badge;
+  justify-self: end;
+  display: flex;
+}
+.race__badge .tier {
+  gap: 4px;
+  padding: 0 6px;
+  font-size: 10px;
+  line-height: 14px;
+}
+.race__value {
+  grid-area: value;
+  justify-self: end;
+  font-size: 12.5px;
+  line-height: 14px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.race__unit {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* the track: faint full length (the leader's value), the bar, the range whisker below */
+.race__track {
+  grid-area: track;
+  position: relative;
+  height: 13px;
+}
+.race__track::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 7px;
+  border-radius: 0 3px 3px 0;
+  background: var(--race-track);
+}
+.race__bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  min-width: 2px;
+  height: 7px;
+  border-radius: 0 3px 3px 0;
+  background: var(--race-accent, var(--accent));
+  opacity: 0.64;
+  transition: width 0.15s linear;
+}
+.race__whisker {
+  position: absolute;
+  top: 9px;
+  height: 4px;
+  border-left: 1px solid var(--race-whisker);
+  border-right: 1px solid var(--race-whisker);
+  transition:
+    left 0.15s linear,
+    width 0.15s linear;
+}
+.race__whisker::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 1.5px;
+  height: 1px;
+  background: var(--race-whisker);
+}
+/* the high end lies beyond the track: no end cap, the line fades out */
+.race__whisker--open {
+  border-right-color: transparent;
+}
+.race__whisker--open::before {
+  background: linear-gradient(to right, var(--race-whisker) 70%, transparent);
+}
+
+/* not launched yet at the date shown: one dimmed line, no bar, no range, no chip */
+.race__row--waiting {
+  grid-template-areas: 'rank name value';
+}
+.race__row--waiting .race__track,
+.race__row--waiting .race__badge {
+  display: none;
+}
+.race__row--waiting .race__name {
+  color: var(--faint);
+  font-weight: 400;
+}
+.race__row--waiting .race__rank,
+.race__row--waiting .race__value {
+  color: var(--faint);
+}
+.race__row--waiting .race__value {
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* --- caption --------------------------------------------------------------- */
+.race__note {
+  margin: 0;
+  padding: 9px 16px 12px;
+  border-top: 1px solid var(--line);
+  color: var(--faint);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.race-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- motion ---------------------------------------------------------------- */
+.race--static,
+.race--static .race__bar,
+.race--static .race__whisker {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .race,
+  .race__bar,
+  .race__whisker {
+    transition: none;
+  }
+}
+
+/* --- phones: a bottom sheet ------------------------------------------------ */
+@media (max-width: 720px) {
+  /* The sheet floats above the time machine bar (see main.css), so it keeps all four corners. */
+  .race {
+    max-height: 50svh;
+    border-radius: 18px;
+    transform: translateY(24px);
+  }
+  .race--open {
+    transform: none;
+  }
+  .race__header {
+    padding: 12px 12px 8px 14px;
+  }
+  .race__title {
+    font-size: 18px;
+  }
+  .race__list {
+    padding-inline: 14px;
+  }
+  .race__note {
+    padding-inline: 14px;
+  }
+}
+
+/* Desktop: one dense line per platform so all fifteen fit without scrolling —
+   rank · name · value · tier on the line, the bar and range whisker beneath. */
+@media (min-width: 721px) {
+  .race__row {
+    grid-template-columns: 22px minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'rank name value badge'
+      '.    track track track';
+    row-gap: 0;
+    padding: 1px 0 2px;
+  }
+  .race__value {
+    padding-right: 2px;
+  }
+  .race__track {
+    height: 7px;
+  }
+  .race__track::before {
+    height: 3px;
+  }
+  .race__bar {
+    height: 3px;
+  }
+  .race__whisker {
+    top: 4px;
+    height: 3px;
+  }
+  .race__list {
+    padding-block: 2px 0;
+  }
+  .race__header {
+    padding-bottom: 6px;
+  }
+}

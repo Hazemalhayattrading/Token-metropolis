@@ -1,0 +1,237 @@
+/* ==========================================================================
+   Cinematic tour captions (src/ui/tour.ts).
+   Styles only what is inside the root the integrator positions (bottom
+   centre, above the time machine). The card centres itself in the root; the
+   root lets clicks through around it.
+   ========================================================================== */
+
+.tour {
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+.tour[hidden] {
+  display: none;
+}
+.tour *,
+.tour *::before,
+.tour *::after {
+  box-sizing: border-box;
+}
+
+.tour__card {
+  position: relative;
+  width: min(620px, 100%);
+  padding: 18px 26px 11px;
+  background: linear-gradient(180deg, rgb(12 17 32 / 0.74), var(--panel-strong) 70%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  backdrop-filter: blur(var(--blur)) saturate(1.2);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 0.5);
+  color: var(--text);
+  text-align: center;
+  pointer-events: auto;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.6s var(--ease),
+    transform 0.8s var(--ease);
+}
+.tour--open .tour__card {
+  opacity: 1;
+  transform: none;
+}
+/* a hairline of light along the top edge, like a title card */
+.tour__card::before {
+  content: '';
+  position: absolute;
+  left: 12%;
+  right: 12%;
+  top: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.75;
+}
+
+.tour :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- captions: two layers that cross-fade; the stage eases its height -------- */
+.tour__stage {
+  position: relative;
+  overflow: hidden;
+  transition: height 0.5s var(--ease);
+}
+.tour__caption {
+  margin: 0;
+  padding: 0 4px 2px;
+  font: 400 clamp(19px, 1.7vw, 25px) / 1.26 var(--font-display);
+  font-variation-settings: 'opsz' 72;
+  letter-spacing: 0.004em;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.7s var(--ease),
+    transform 0.9s var(--ease);
+}
+/* the outgoing caption leaves the flow while it fades, so the height follows the new one */
+.tour__caption:not(.tour__caption--on) {
+  position: absolute;
+  inset: 0 0 auto;
+  transform: translateY(-6px);
+}
+.tour__caption--on {
+  opacity: 1;
+  transform: none;
+}
+.tour__caption .tier {
+  margin-left: 2px;
+  font-size: 12px;
+  line-height: 20px;
+  vertical-align: 0.3em;
+}
+
+/* --- hint, method link and Stop ---------------------------------------------- */
+.tour__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 14px;
+  margin-top: 12px;
+  padding-top: 9px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font: 500 12px/1.3 var(--font-ui);
+  text-align: left;
+}
+.tour__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  letter-spacing: 0.04em;
+}
+.tour__dot {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: tour-pulse 2.4s ease-in-out infinite;
+}
+.tour__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+.tour__method {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  color: var(--muted);
+  text-decoration-color: rgb(255 255 255 / 0.25);
+  transition: color 0.2s var(--ease);
+}
+.tour__method:hover {
+  color: var(--text);
+}
+.tour__stop {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 9px;
+  background: rgb(255 255 255 / 0.04);
+  color: var(--text);
+  font: 500 12.5px/1 var(--font-ui);
+  cursor: pointer;
+  transition:
+    border-color 0.2s var(--ease),
+    background 0.2s var(--ease);
+}
+.tour__stop:hover {
+  border-color: var(--accent);
+  background: rgb(255 255 255 / 0.08);
+}
+.tour__stop:focus-visible {
+  border-radius: 9px;
+}
+.tour__stop-icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: currentcolor;
+}
+
+.tour-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- motion ---------------------------------------------------------------- */
+@keyframes tour-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+/* Reduced motion: nothing moves, and captions switch without fading. */
+.tour--static .tour__card,
+.tour--static .tour__caption,
+.tour--static .tour__stage {
+  transform: none;
+  transition: none;
+}
+.tour--static .tour__dot {
+  animation: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour__card,
+  .tour__caption,
+  .tour__stage {
+    transform: none;
+    transition: none;
+  }
+  .tour__dot {
+    animation: none;
+  }
+}
+
+/* --- phones ---------------------------------------------------------------- */
+@media (max-width: 720px) {
+  .tour__card {
+    padding: 14px 16px 9px;
+    border-radius: 12px;
+  }
+  .tour__caption {
+    font-size: clamp(18px, 5.2vw, 22px);
+    line-height: 1.26;
+  }
+  .tour__bar {
+    margin-top: 10px;
+    padding-top: 8px;
+  }
+  .tour__actions {
+    gap: 10px;
+  }
+}

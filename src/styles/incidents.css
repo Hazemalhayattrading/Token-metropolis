@@ -1,0 +1,331 @@
+/* ==========================================================================
+   Incident banner (src/ui/incidents.ts).
+   Styles only what is inside the root the integrator positions (top centre,
+   below the masthead, on desktop; full width on phones). The card centres
+   itself in the root and draws its own glass.
+   ========================================================================== */
+
+/* Impact colours (light tints: AA contrast on the dark glass). Set on the card
+   for its accent edge, and on each chip and list item for their own level. */
+.incidents--maintenance,
+.incidents__impact--maintenance,
+.incidents__item--maintenance {
+  --inc-color: #a8c4ff;
+  --inc-soft: rgb(143 177 255 / 0.12);
+}
+.incidents--minor,
+.incidents__impact--minor,
+.incidents__item--minor {
+  --inc-color: #ffc261;
+  --inc-soft: rgb(255 171 46 / 0.12);
+}
+.incidents--major,
+.incidents__impact--major,
+.incidents__item--major {
+  --inc-color: #ff9275;
+  --inc-soft: rgb(255 77 51 / 0.14);
+}
+.incidents--critical,
+.incidents__impact--critical,
+.incidents__item--critical {
+  --inc-color: #ff8088;
+  --inc-soft: rgb(255 42 58 / 0.16);
+}
+
+.incidents {
+  position: relative;
+  box-sizing: border-box;
+  width: min(560px, 100%);
+  margin-inline: auto;
+  overflow: hidden;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  backdrop-filter: blur(var(--blur)) saturate(1.2);
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.4);
+  color: var(--text);
+  font: 400 13px/1.45 var(--font-ui);
+  text-align: left;
+  animation: incidents-in 0.45s var(--ease);
+}
+.incidents[hidden] {
+  display: none;
+}
+.incidents *,
+.incidents *::before,
+.incidents *::after {
+  box-sizing: border-box;
+}
+/* the accent edge: the colour of the notice shown */
+.incidents::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--inc-color, var(--accent));
+  box-shadow: 0 0 14px var(--inc-color, var(--accent));
+}
+
+.incidents :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- the most severe notice ------------------------------------------------ */
+.incidents__main,
+.incidents__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+.incidents__main {
+  padding: 11px 10px 9px 16px;
+}
+.incidents__body,
+.incidents__item-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.incidents__msg {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  font-size: 14px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.incidents__impact {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: 2px;
+  padding: 0 8px 0 7px;
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  background: var(--inc-soft);
+  color: var(--inc-color);
+  font: 600 11px/18px var(--font-ui);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  vertical-align: 1px;
+}
+.incidents__dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentcolor;
+  box-shadow: 0 0 6px currentcolor;
+  animation: incidents-pulse 1.8s ease-in-out infinite;
+}
+.incidents__impact--maintenance .incidents__dot {
+  animation: none;
+}
+/* The HQ name reads as part of the sentence, underlined in the impact colour. */
+.incidents__hq {
+  appearance: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 1em;
+  font-weight: 600;
+  line-height: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--inc-color, var(--accent)) 65%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: text-decoration-color 0.2s var(--ease);
+}
+.incidents__hq:hover {
+  text-decoration-color: var(--inc-color, var(--accent));
+}
+/* inline in a sentence: a tight ring that does not cover the next letters */
+.incidents .incidents__hq:focus-visible {
+  outline-offset: 1px;
+  border-radius: 3px;
+}
+.incidents__title {
+  color: var(--text);
+}
+
+.incidents__status {
+  color: var(--tier-reported);
+}
+.incidents__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 12px;
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.incidents__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 24px;
+  color: var(--accent);
+}
+.incidents__ext {
+  font-size: 11px;
+}
+.incidents__more {
+  appearance: none;
+  min-height: 24px;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 0.04);
+  color: var(--text);
+  font: 500 12px/22px var(--font-ui);
+  cursor: pointer;
+  transition:
+    border-color 0.2s var(--ease),
+    background 0.2s var(--ease);
+}
+.incidents__more:hover,
+.incidents__more[aria-expanded='true'] {
+  border-color: rgb(255 255 255 / 0.22);
+  background: rgb(255 255 255 / 0.08);
+}
+.incidents__more:focus-visible {
+  border-radius: 999px;
+}
+
+.incidents__dismiss {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  margin: -3px 0 0;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  font: 400 18px/1 var(--font-ui);
+  cursor: pointer;
+  transition:
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+}
+.incidents__dismiss:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+.incidents__dismiss:focus-visible {
+  border-radius: 9px;
+}
+
+/* --- "+N more" ------------------------------------------------------------- */
+.incidents__list {
+  max-height: min(40vh, 320px);
+  margin: 0;
+  padding: 0 10px 0 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  border-top: 1px solid var(--line);
+  scrollbar-width: thin;
+}
+.incidents__list[hidden] {
+  display: none;
+}
+.incidents__item {
+  padding: 9px 0 8px;
+  border-top: 1px solid var(--line);
+}
+.incidents__item:first-child {
+  border-top: 0;
+}
+.incidents__msg--item {
+  font-size: 13px;
+}
+.incidents__dismiss--item {
+  width: 26px;
+  height: 26px;
+  margin-top: -2px;
+  font-size: 16px;
+}
+
+/* --- where the notice comes from --------------------------------------------- */
+.incidents__note {
+  margin: 0;
+  padding: 7px 14px 9px 16px;
+  border-top: 1px solid var(--line);
+  color: var(--faint);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.incidents-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- motion ---------------------------------------------------------------- */
+@keyframes incidents-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes incidents-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .incidents,
+  .incidents__dot {
+    animation: none;
+  }
+}
+
+/* --- phones: full width ---------------------------------------------------- */
+@media (max-width: 720px) {
+  .incidents {
+    width: 100%;
+    border-radius: 12px;
+  }
+  .incidents__main {
+    padding: 9px 8px 8px 14px;
+  }
+  .incidents__msg {
+    font-size: 13.5px;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+  }
+  .incidents__list {
+    max-height: 32vh;
+    padding-left: 14px;
+  }
+  .incidents__note {
+    padding: 6px 12px 8px 14px;
+    font-size: 11px;
+  }
+}

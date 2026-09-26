@@ -1,0 +1,9 @@
+# Sightings the daily pipeline must not publish (and must not add again).
+#
+# The pipeline adds "first seen on OpenRouter" events to data/auto/sightings.json (do not edit that
+# file by hand). If one is wrong — wrong HQ, not a new model — add its id here, e.g.
+#
+#   - seen-qwen-qwen3-foo
+#
+# and commit. The id is on the event's source link and in data/auto/sightings.json.
+[]

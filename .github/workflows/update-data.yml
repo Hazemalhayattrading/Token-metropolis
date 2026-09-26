@@ -1,0 +1,103 @@
+name: Update data
+
+# The data pipeline (brief §4): status-page notices and new model sightings from public, key-free
+# feeds. Sources that fail keep their previous data; invalid data is never published. It commits
+# to main only when something changed, then deploys the site.
+#
+# Hourly rather than daily: status notices last hours, and the site hides a notice whose page was
+# not read in the last three hours. Runs that find nothing new stop early and commit nothing; while
+# a notice is open somewhere, each run commits (its "as of" time moves) and the site redeploys.
+
+on:
+  schedule:
+    - cron: '17 * * * *' # every hour at :17
+  workflow_dispatch:
+    inputs:
+      deploy:
+        description: Deploy the site even if the data did not change (e.g. after a failed deploy)
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    # Scheduled runs use the default branch; a manual run started from another branch stops here.
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Fetch public feeds (status pages, OpenRouter models)
+        run: npx tsx scripts/update-data.ts
+      - name: Validate and build the published data
+        run: npm run build:data
+      - name: Anything new?
+        id: diff
+        run: |
+          git add -A -- public/data data/auto
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No data change." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Type-check, test and build the site with the new data
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          npm run typecheck
+          npm test
+          npm run build
+      - name: Commit and push
+        id: commit
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -q -m "Update data $(date -u +%Y-%m-%dT%H:%MZ)"
+          # If main moved meanwhile (e.g. a curated edit), start again from it: the generated files
+          # depend on the curated data, so they are regenerated rather than rebased.
+          for attempt in 1 2 3; do
+            if git push -q origin HEAD:main; then
+              echo "changed=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "main moved; regenerating on top of it (attempt $attempt)"
+            git fetch -q origin main
+            git reset -q --hard origin/main
+            npx tsx scripts/update-data.ts
+            npm run build:data
+            git add -A -- public/data data/auto
+            if git diff --cached --quiet; then
+              echo "changed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            npm test
+            git commit -q -m "Update data $(date -u +%Y-%m-%dT%H:%MZ)"
+          done
+          echo "::error::Could not push the data update after three attempts."
+          exit 1
+
+  # Pushes made with the workflow's token do not trigger other workflows, so deploy from here.
+  deploy:
+    needs: update
+    if: needs.update.outputs.changed == 'true' || inputs.deploy
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/deploy.yml

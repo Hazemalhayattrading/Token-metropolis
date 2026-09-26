@@ -1,0 +1,12 @@
+node_modules
+dist/
+coverage/
+playwright-report/
+test-results/
+*.log
+.DS_Store
+
+screenshots/
+
+# agent worktrees (temporary, never committed)
+.claude/worktrees/
