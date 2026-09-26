@@ -20,7 +20,6 @@
   border-radius: 11px;
   background: var(--panel);
   backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
   color: var(--muted);
   font: 500 13px/1 var(--font-ui);
   white-space: nowrap;
@@ -49,19 +48,13 @@
   flex: none;
   opacity: 0.85;
 }
-/* Both labels share one cell, so the button keeps its width while busy. */
-.share__labels {
-  display: inline-grid;
-}
-.share__label {
-  grid-area: 1 / 1;
-}
+/* The label swaps while busy (the button is last in the row, so its width may change). */
 .share__label--busy,
 .share__button--busy .share__label {
-  visibility: hidden;
+  display: none;
 }
 .share__button--busy .share__label--busy {
-  visibility: visible;
+  display: inline;
 }
 
 /* Narrow screens: icon only (the accessible name stays "Share an image of this view"). */
@@ -98,7 +91,6 @@
   border-radius: 10px;
   background: var(--panel-strong);
   backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
   box-shadow: 0 12px 40px rgb(0 0 0 / 0.4);
   color: #ffd68a;
   font: 400 13px/1.4 var(--font-ui);
@@ -157,7 +149,6 @@
   border-radius: var(--radius);
   background: var(--panel-strong);
   backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
   box-shadow: 0 30px 90px rgb(0 0 0 / 0.55);
   color: var(--text);
   font: 400 14px/1.45 var(--font-ui);
@@ -170,7 +161,6 @@
 .share-dialog::backdrop {
   background: rgb(5 7 13 / 0.6);
   backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
 }
 .share-dialog--open {
   opacity: 1;

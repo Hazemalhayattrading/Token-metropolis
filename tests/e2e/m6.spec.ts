@@ -137,3 +137,75 @@ test('your prompt: an exact token count, modeled energy and water, and a token s
   await expect(toggle).toHaveAttribute('aria-pressed', 'false');
   expect(problems).toEqual([]);
 });
+
+test('hidden details: progress is kept in this browser, listed with hints, and can be reset', async ({
+  page,
+}) => {
+  const problems = watchConsole(page);
+  await page.addInitScript(() => {
+    if (!sessionStorage.getItem('seeded')) {
+      sessionStorage.setItem('seeded', '1');
+      localStorage.setItem(
+        'token-metropolis:discoveries:v1',
+        JSON.stringify({ v: 1, found: ['lighthouse', 'fox', 'not-a-real-detail'] }),
+      );
+    }
+  });
+  await ready(page);
+  // Unknown ids in storage are ignored: two of the 40 are found.
+  const chip = page.getByRole('button', { name: /Hidden details: 2 of 40 found/ });
+  await chip.scrollIntoViewIfNeeded();
+  await chip.click();
+  await expect(chip).toHaveAttribute('aria-expanded', 'true');
+  const list = page.locator('.disc__panel');
+  await expect(list).toBeVisible();
+  await expect(list).toContainText('Decorative easter eggs — they are not data.');
+  // The list stays inside the screen (phones: a sheet under the control strip).
+  const box = (await list.boundingBox())!;
+  const vw = page.viewportSize()!.width;
+  expect(box.x).toBeGreaterThanOrEqual(0);
+  expect(box.x + box.width).toBeLessThanOrEqual(vw);
+
+  await list.getByRole('button', { name: 'Reset progress' }).click();
+  await list.getByRole('button', { name: 'Yes, reset' }).click();
+  await expect(page.getByRole('button', { name: /Hidden details: 0 of 40 found/ })).toBeVisible();
+  expect(await page.evaluate(() => localStorage.getItem('token-metropolis:discoveries:v1'))).toBe(
+    null,
+  );
+  expect(problems).toEqual([]);
+});
+
+test('share: an image of the view with its numbers, from the city and from an HQ', async ({
+  page,
+}, info) => {
+  const problems = watchConsole(page);
+  await ready(page);
+  const button = page.locator('.share-slot .share__button');
+  await button.scrollIntoViewIfNeeded();
+  await button.click();
+  const dialog = page.locator('dialog.share-dialog[open]');
+  await expect(dialog.locator('img')).toHaveAttribute('alt', /All 15 platforms, 20\d\d-\d\d-\d\d/, {
+    timeout: 30_000,
+  });
+  await expect(dialog.getByRole('link', { name: 'Download PNG' })).toHaveAttribute(
+    'download',
+    /\.png$/,
+  );
+  await page.waitForTimeout(500);
+  await page.screenshot({ path: `screenshots/m6-${info.project.name}-share.png` });
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(button).toBeFocused();
+
+  // From an HQ panel: the card is about that HQ.
+  await page.locator('.label[data-id="claude"]').focus();
+  await page.keyboard.press('Enter');
+  const panelShare = page.locator('#panel .panel__actions .share__button');
+  await expect(panelShare).toBeVisible();
+  await panelShare.click();
+  await expect(dialog.locator('img')).toHaveAttribute('alt', /Claude, 20\d\d-/, {
+    timeout: 30_000,
+  });
+  await page.keyboard.press('Escape');
+  expect(problems).toEqual([]);
+});

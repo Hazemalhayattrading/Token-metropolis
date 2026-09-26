@@ -551,7 +551,26 @@ a {
 }
 .panel__header {
   position: relative;
-  padding-right: 40px;
+  padding-right: 84px;
+}
+/* view actions (share) beside the close button; the share button is icon-only here */
+.panel__actions {
+  position: absolute;
+  right: 40px;
+  top: -4px;
+  display: flex;
+  gap: 6px;
+}
+.panel__actions .share__button {
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 10px;
+  background: transparent;
+}
+.panel__actions .share__labels {
+  display: none;
 }
 .panel__title {
   margin: 0;
@@ -974,9 +993,16 @@ a {
 .timeline-root:empty {
   display: none;
 }
-/* the control row sits above the timeline */
+/* the control row sits above the timeline; on narrower desktops it wraps upwards */
 .controls {
   bottom: calc(var(--footer-h) + var(--gap) + 72px);
+  right: var(--gap);
+  flex-wrap: wrap;
+  align-items: flex-end;
+  pointer-events: none;
+}
+.controls > * {
+  pointer-events: auto;
 }
 .panel-open .timeline-root {
   left: calc(var(--gap) + min(420px, calc(100vw - 2 * var(--gap))) + var(--gap));
@@ -1308,7 +1334,8 @@ a {
 .glass-legend {
   position: absolute;
   right: var(--gap);
-  bottom: calc(var(--footer-h) + var(--gap) + 72px);
+  /* above the control row, which can reach this far right */
+  bottom: calc(var(--footer-h) + var(--gap) + 124px);
   width: min(300px, calc(100vw - 2 * var(--gap)));
   z-index: 4;
 }
@@ -1381,6 +1408,7 @@ a {
     left: 0;
     padding: 0 var(--gap);
     flex-wrap: nowrap;
+    pointer-events: auto;
     overflow-x: auto;
     scrollbar-width: none;
     scroll-padding-inline: var(--gap);
@@ -1390,6 +1418,20 @@ a {
   }
   .controls > * {
     flex: none;
+  }
+  /* The strip scrolls sideways, which would clip its popovers: they open as sheets under it. */
+  .controls .feed__panel,
+  .controls .feed__panel[data-placement='bottom'],
+  .controls .disc__panel,
+  .controls .disc__panel[data-placement='bottom'] {
+    position: fixed;
+    top: calc(var(--gap) + 98px + env(safe-area-inset-top));
+    bottom: auto;
+    /* beats the inline offset the popover scripts set for their desktop placement */
+    left: var(--gap) !important;
+    right: var(--gap);
+    width: auto;
+    max-height: 60svh;
   }
   .glass-legend {
     top: calc(var(--gap) + 100px + env(safe-area-inset-top));

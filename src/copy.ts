@@ -626,6 +626,13 @@ export const COPY = {
     disclaimerShort:
       'Independent project, not affiliated with any company shown. Estimates unless marked Reported.',
     disclaimerShortest: 'Independent project · estimates unless marked Reported',
+    /** Card title for the whole city (an HQ's card is titled with its name). */
+    cityTitle: (n: number) => `All ${n} platforms`,
+    /** Card subtitle: the date and time shown, and whether it is live. */
+    subtitle: (date: string, hhmm: string, history: boolean) =>
+      `${date} · ${hhmm} UTC · ${history ? 'time machine' : 'live'}`,
+    perSecond: 'tokens / s',
+    perDay: 'tokens / day',
   },
   compare: {
     open: 'Compare',

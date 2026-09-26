@@ -358,3 +358,96 @@ are modeled back from it), lists only models released by then, and shows "not la
 tier before launch (interior tabs disabled). Labels' tier dots and HQ local hours follow the date
 shown. A published figure vouches for the 14 days after it, never for days before it, and the
 pre-launch zero makes no Reported claim. The data table stays live and says so.
+
+### D-053 — Uncertainty glass: every tower shows its error bars (original idea)
+
+"Show uncertainty" turns each tower into its plausible range: a solid core up to the low estimate, a
+frosted glass case up to the high estimate and a thin light ring at the central value, where the
+tower itself ends. The frost follows the tier (clear for Reported, frosted for Estimated, fogged for
+Modeled). The three heights come straight from the model's range on the towers' own scale (log or
+true); the mottling is cosmetic. The facade dims while the glass is shown, and a legend explains the
+four parts and that the range is roughly a 90% model interval, not a hard limit.
+
+### D-054 — Sound: procedural, off by default, conservative
+
+All sound is synthesized with Web Audio (no files, no network): a distant city bed, a server hum that
+comes forward as the camera flies into an HQ, a launch chime and a soft incident tone. It starts only
+from a click (browsers require a gesture), peaks around −10 dBFS behind a soft safety clipper, ramps
+every change, and suspends while off or while the tab is hidden. Where Web Audio is missing the toggle
+simply stays off and says so.
+
+### D-055 — Incidents: official status pages, live only
+
+Incident mode shows only notices from each platform's official status page, linked, with the
+reported impact. `incidents.json` is a snapshot of current status, so notices follow the live clock
+and never the time machine; a notice older than three days is treated as stale, and an unreadable
+timestamp claims nothing. Alarm beacons pulse and the HQ's windows flicker at no more than three
+flashes a second (photosensitivity guidance), and not at all with reduced motion.
+
+### D-056 — Cinematic tour stops and captions
+
+After 30 s without input (and with no panel, race, compare, prompt or share dialog open, and no
+playback) the camera flies a loop: the city, the three largest HQs, the smallest, the fastest-growing
+over 90 days, an HQ in daytime, and the city total. Every caption that states an estimate carries its
+tier: a growth ratio of two estimates is at best Estimated; the city total is a sum, so at best
+Estimated and Modeled when routing shares de-duplicate it; a clock time carries none. Captions hold
+6–10 s depending on their length. Any key, pointer, wheel or touch stops the tour.
+
+### D-057 — Your prompt, visualized
+
+Tokens are counted with o200k_base (GPT-4o-class models), using gpt-tokenizer, which is fetched as
+its own chunk (~1 MB gzipped) the first time the panel opens. The UI says that Claude, Gemini and
+others split text differently. The count carries an "Exact" chip, not a tier: it is a computation on
+the visitor's own text, not an estimate of a platform. Energy and on-site water are Modeled, with
+ranges, the formula, the energy per token and the sourced inputs. The figures are the same for every
+HQ (one H100-class efficiency figure, as elsewhere), and the panel says so. The text never leaves the
+browser. Opening the panel returns to live. The flight frames the hall where the token lands, then
+lights a rack. On wide screens the panel sits beside the HQ panel (picking an HQ in the city aims it
+there); otherwise they share one slot.
+
+### D-058 — Compare mode
+
+Two or three HQs side by side, each column with its own camera and bloom pipeline, framed the same
+way. Columns are used even on phones, because towers are vertical. Phones give the campuses the top
+half and the metrics cards the bottom half. Each card shows the key figures with ranges and tiers and
+the latest published figure with its source.
+
+### D-059 — "Since you arrived", in other words
+
+Under the arrival counter a line rotates through words, electricity and cooling water for the tokens
+processed since the visitor arrived. Each shows a central value, a range and a tier, and any
+equivalence whose constant is still pending verification is hidden by code rather than shown
+unverified.
+
+### D-060 — Hidden details
+
+There are 40 decorative details: 16 around the island, 5 that appear in every HQ's interior of that
+kind, and 19 that belong to one HQ each (every HQ has at least one). None is a logo or a mascot-like
+pairing with a company, and the list says they are not data. Progress stays in this browser
+(localStorage). Unknown ids and corrupt data are dropped, and finds made in another tab are merged. A
+detail whose HQ leaves the dataset moves to another HQ. The night-shift nap appears only at the HQ's
+local night (an unknown hour counts as night). Props are batched to keep draw calls low. When a
+campus's invisible pick box is nearer than a detail, the campus wins: a detail hidden behind an HQ is
+found from another angle, never through a building.
+
+### D-061 — Share card
+
+The card is a 1200×630 PNG drawn in the browser: the current render under a glass band with the site
+name, a title, the date and time (live or time machine), up to four figures each with its value,
+range and tier chip in the site's words and colours, the disclaimer (shortened only when it cannot
+fit) and the URL. From the control row it describes the city (the HUD's figures); from the HQ
+panel's header it describes that HQ (the panel's figures, and the interior's name when one is open),
+with the image cropped to the area beside or above the panel. Without WebGL the card uses a night
+backdrop. "Share…" appears only where the system share sheet accepts files; otherwise the card is
+downloaded.
+
+### D-062 — Builds keep the standard backdrop-filter
+
+The CSS minifier kept only the `-webkit-backdrop-filter` of each pair, so no glass panel was blurred
+in Chrome in production (dev builds were fine). The sources now declare only the standard property,
+and the build adds the prefix for Safari.
+
+### D-063 — Popovers on phones open as sheets under the control strip
+
+On phones the control row is a sideways-scrolling strip, which clipped the "What's new" and hidden
+details popovers. On phones they open as fixed sheets just under the strip, full width.

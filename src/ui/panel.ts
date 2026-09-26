@@ -54,6 +54,8 @@ export interface Panel {
   showView(view: InteriorView): void;
   readonly openId: string | null;
   readonly view: InteriorView;
+  /** A slot in the header, beside the close button, for view actions (the share button). */
+  readonly actions: HTMLElement;
 }
 
 const VIEWS: readonly InteriorView[] = ['overview', 'offices', 'hall', 'power', 'lab'];
@@ -198,6 +200,7 @@ export function createPanel(
     '×',
   );
   close.addEventListener('click', cb.onClose);
+  const actions = h('div', { class: 'panel__actions' });
   root.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') cb.onClose();
   });
@@ -653,6 +656,7 @@ export function createPanel(
             h('span', { id: 'panel-localtime' }),
           ),
           (historyChip = h('p', { class: 'panel__history', hidden: true })),
+          actions,
           close,
         ),
         tablist(),
@@ -790,6 +794,7 @@ export function createPanel(
     get openId() {
       return openId;
     },
+    actions,
     get view() {
       return view;
     },

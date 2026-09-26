@@ -33,6 +33,7 @@ import type { Clock } from '../state/clock';
 import { daylight, localHour, occupancy } from '../state/localtime';
 import { humanNumber } from '../ui/format';
 import { createCampus, type Campus } from './campus/campus';
+import { createDiscoveryProps, type DiscoveryProps } from './discoveries';
 import { CameraDirector, type Pose } from './director';
 import { createEnvironment, MOON_DIRECTION } from './environment';
 import type { InteriorView, Interiors } from './interiors';
@@ -43,7 +44,7 @@ import { createLaunchFx, type LaunchFx } from './launch';
 import { createTokenFlight, screenToWorld } from './tokenflight';
 import { createUncertaintyGlass, type UncertaintyGlass } from './uncertainty';
 import { createLabels, type LabelValue, type Labels } from './labels';
-import { layoutPlots } from './layout';
+import { ISLAND_RADIUS, layoutPlots } from './layout';
 import { createPost, type Post } from './post';
 import { facilityCounts, logLoad, towerHeight, type ScaleMode } from './scale';
 import { createStreams, type Streams } from './streams';
@@ -90,6 +91,8 @@ export interface WorldOptions {
   onSelect?: (id: string | null) => void;
   /** A model crystal was clicked in the lab. */
   onModel?: (id: string) => void;
+  /** A hidden detail was clicked (src/state/discoveries.ts). */
+  onDiscovery?: (id: string) => void;
   /** The world changed view on its own (e.g. the interiors failed to load and it fell back). */
   onViewChange?: (view: InteriorView) => void;
   /** Model launches (public/data/events.json), newest first. */
@@ -199,6 +202,26 @@ export function createWorld(
   let scaleMode: ScaleMode = 'log';
   let view: InteriorView = 'overview';
   let interiors: Interiors | null = null;
+  /**
+   * The 40 hidden details (src/state/discoveries.ts): island props, plus props added to each
+   * interior as it is built. Created shortly after the first frames (~50 ms of work), so they
+   * never delay the first picture of the city.
+   */
+  let discoveries: DiscoveryProps | null = null;
+  const propHours = new Map<string, number>();
+  const propLoads = new Map<string, number>();
+  const createProps = () => {
+    discoveries = createDiscoveryProps({
+      campuses: [...slots.values()].map(({ campus: c }) => ({
+        id: c.id,
+        group: c.group,
+        footprint: c.footprint,
+      })),
+      islandRadius: ISLAND_RADIUS,
+      reducedMotion: opts.reducedMotion,
+    });
+    scene.add(discoveries.group);
+  };
   let interiorsModule: Promise<typeof import('./interiors')> | null = null;
   let interiorsLib: typeof import('./interiors') | null = null;
   /** What the open interiors were built for (rebuilt when the date shown changes them). */
@@ -444,7 +467,12 @@ export function createWorld(
     );
     const height = towerHeight(dailyRate(pm, t).central, 'log', 0);
     builtFor = { models: models.length, height };
-    return lib.createInteriors(pm.platform, slots.get(id)!.campus, models, height);
+    const c = slots.get(id)!.campus;
+    return lib.createInteriors(pm.platform, c, models, height, (v, g) =>
+      discoveries
+        ? discoveries.decorateInterior(v, g, { id, footprint: c.footprint, bodyHalf: c.bodyHalf })
+        : [],
+    );
   }
 
   function closeInteriors(): void {
@@ -492,7 +520,9 @@ export function createWorld(
   interface Picked {
     platform: string | null;
     model: string | null;
+    discovery: string | null;
   }
+  const none: Picked = { platform: null, model: null, discovery: null };
 
   function pick(ev: PointerEvent): Picked {
     const r = canvas.getBoundingClientRect();
@@ -504,32 +534,36 @@ export function createWorld(
     const crystals = interiors?.pickables() ?? [];
     if (crystals.length > 0) {
       const m = raycaster.intersectObjects(crystals as Object3D[], false)[0];
-      if (m) return { platform: null, model: m.object.userData.modelId as string };
+      if (m) return { ...none, model: m.object.userData.modelId as string };
     }
+    // Hidden details: the island's in the city view, only the open view's inside an interior
+    // (hidden groups would still be hit).
+    const props =
+      view === 'overview'
+        ? (discoveries?.pickables ?? [])
+        : (interiors?.discoveryPickables() ?? []);
+    const d = props.length > 0 ? raycaster.intersectObjects(props as Object3D[], false)[0] : null;
+    const discovery = (d?.object.userData.discoveryId as string | undefined) ?? null;
     // Inside an interior, taps never jump to a neighbouring HQ; the panel's tabs lead out.
-    if (view !== 'overview') return { platform: null, model: null };
+    if (view !== 'overview') return { ...none, discovery };
     const hit = raycaster.intersectObjects(hitMeshes, false)[0];
-    return {
-      platform: (hit?.object.userData.platformId as string | undefined) ?? null,
-      model: null,
-    };
+    if (d && discovery && (!hit || d.distance <= hit.distance)) return { ...none, discovery };
+    return { ...none, platform: (hit?.object.userData.platformId as string | undefined) ?? null };
   }
 
   const onMove = (ev: PointerEvent) => {
     if (ev.pointerType !== 'mouse' || compare) return;
     const picked = pick(ev);
     const id = picked.platform;
-    if (picked.model) {
-      canvas.style.cursor = 'pointer';
-      return;
-    }
+    // Over a model crystal or a hidden detail no HQ is hovered (its highlight must not linger).
     if (id !== hovered) {
       if (hovered) slots.get(hovered)?.campus.setHighlight(hovered === selected);
       hovered = id;
       if (id) slots.get(id)?.campus.setHighlight(true);
       labels.setHovered(id);
     }
-    canvas.style.cursor = id && id !== selected ? 'pointer' : '';
+    const clickable = picked.model || picked.discovery || (id && id !== selected);
+    canvas.style.cursor = clickable ? 'pointer' : '';
   };
   const onDown = (ev: PointerEvent) => (down = { x: ev.clientX, y: ev.clientY });
   const onUp = (ev: PointerEvent) => {
@@ -541,7 +575,8 @@ export function createWorld(
     if (picked.model) {
       world.selectModel(picked.model);
       opts.onModel?.(picked.model);
-    } else if (picked.platform) world.select(picked.platform);
+    } else if (picked.discovery) opts.onDiscovery?.(picked.discovery);
+    else if (picked.platform) world.select(picked.platform);
   };
   canvas.addEventListener('pointermove', onMove);
   canvas.addEventListener('pointerdown', onDown);
@@ -643,6 +678,7 @@ export function createWorld(
       rates.set(pm.platform.id, range.central);
       maxRate = Math.max(maxRate, range.central);
     }
+    if (!discoveries && elapsed > 0.5) createProps();
     let activitySum = 0;
     let rateSum = 0;
     for (const pm of city.platforms) {
@@ -683,6 +719,8 @@ export function createWorld(
         interiors?.update({ load, occupancy: occupancy(slot.hour), activity, time: elapsed });
         syncInteriors(id, t, rate);
       }
+      propHours.set(id, slot.hour);
+      propLoads.set(id, load);
       slot.streams.update(elapsed, rate > 0 ? (0.25 + 0.75 * load) * Math.min(1.4, activity) : 0);
       slot.streams.group.visible = rate > 0 && view === 'overview';
       slot.burst = Math.max(0, slot.burst - dt / BURST_SECONDS);
@@ -732,6 +770,16 @@ export function createWorld(
       opts.sound.setZoom(zoom);
       const sel = selected ? city.byId.get(selected) : undefined;
       opts.sound.setActivity(sel ? trafficNow(sel, t) : rateSum > 0 ? activitySum / rateSum : 1);
+    }
+    if (discoveries) {
+      // Inside an interior only that interior's details show; the island's step away.
+      discoveries.group.visible = view === 'overview';
+      discoveries.update({
+        time: elapsed,
+        hours: propHours,
+        loads: propLoads,
+        reducedMotion: opts.reducedMotion,
+      });
     }
     tokenFlight.update(dt, elapsed);
     director.update(dt);
@@ -906,6 +954,7 @@ export function createWorld(
       labels.dispose();
       disposeCompare();
       closeInteriors();
+      discoveries?.dispose();
       tokenFlight.dispose();
       slots.forEach((s) => {
         s.alarm.dispose();

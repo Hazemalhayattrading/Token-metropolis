@@ -14,6 +14,8 @@ import './styles/compare.css';
 import './styles/incidents.css';
 import './styles/tour.css';
 import './styles/prompt.css';
+import './styles/discoveries.css';
+import './styles/share.css';
 import { createSound } from './audio/sound';
 import { COPY } from './copy';
 import { DataUnavailableError, loadData } from './data/load';
@@ -32,6 +34,10 @@ import { mountIncidentBanner } from './ui/incidents';
 import { mountTourCaptions } from './ui/tour';
 import { createPanel } from './ui/panel';
 import { mountPrompt } from './ui/prompt';
+import { createTracker } from './state/discoveries';
+import { shareCardText, type CardView } from './state/sharecard';
+import { mountDiscoveries } from './ui/discoveries';
+import { mountShareButton, type ShareInput } from './ui/share';
 import { mountRace } from './ui/race';
 import { mountTimeline } from './ui/timeline';
 import type { ScaleMode } from './world/scale';
@@ -194,6 +200,18 @@ async function boot(): Promise<void> {
       onSelect: (id) => openHq(id),
     });
 
+    // Share card: an image of the view with its key numbers, ranges and tier chips.
+    const shareSlot = h('div', { class: 'share-slot' });
+    const shareText = (platformId: string | null, view: CardView['view'] = 'overview') =>
+      shareCardText(city, {
+        t: tm.now(),
+        liveNow: liveClock.now(),
+        history: tm.state().mode === 'history',
+        platformId,
+        view,
+      });
+    const siteUrl = () => location.origin + location.pathname;
+
     if (hasWebGL()) {
       const { createWorld } = await import('./world/world');
       const panelEl = byId('panel');
@@ -268,6 +286,10 @@ async function boot(): Promise<void> {
         promptShown(true);
       });
       const sound = createSound();
+      // Hidden details: a per-visitor tracker (this browser only) and the "12/40 found" chip.
+      const tracker = createTracker();
+      const discSlot = h('div', { class: 'disc-slot' });
+      const discoveries = mountDiscoveries(discSlot, tracker, { platformName, reducedMotion });
       const world = createWorld(byId<HTMLCanvasElement>('scene'), city, tm, {
         reducedMotion,
         sound,
@@ -298,6 +320,9 @@ async function boot(): Promise<void> {
         },
         onModel: (id) => {
           if (panel.view === 'lab') panel.selectModel(id);
+        },
+        onDiscovery: (id) => {
+          if (tracker.mark(id)) discoveries.celebrate(id);
         },
         onViewChange: (view) => panel.showView(view),
       });
@@ -394,6 +419,35 @@ async function boot(): Promise<void> {
         return sound.enabled;
       });
       controls.feedSlot.before(promptButton, glassButton, soundButton);
+      controls.feedSlot.after(discSlot, shareSlot);
+
+      // The share card frames what the visitor sees: with the HQ panel open, the part of the
+      // frame beside (desktop) or above (phones) the panel, where the view is centred.
+      const freeArea = (frame: HTMLCanvasElement): HTMLCanvasElement => {
+        if (panelEl.hidden) return frame;
+        const stage = byId('scene').getBoundingClientRect();
+        const r = panelEl.getBoundingClientRect();
+        const k = frame.width / Math.max(1, stage.width);
+        const x = mobile.matches ? 0 : Math.round((r.right - stage.left) * k);
+        const w = frame.width - x;
+        const hgt = mobile.matches ? Math.round((r.top - stage.top) * k) : frame.height;
+        if (w < 64 || hgt < 64) return frame;
+        const out = document.createElement('canvas');
+        out.width = w;
+        out.height = hgt;
+        out.getContext('2d')?.drawImage(frame, x, 0, w, hgt, 0, 0, w, hgt);
+        return out;
+      };
+      const captureView = async (): Promise<ShareInput> => {
+        const id = panelEl.hidden ? null : panel.openId;
+        return {
+          frame: freeArea(world.captureFrame()),
+          ...shareText(id, id ? world.view : 'overview'),
+          url: siteUrl(),
+        };
+      };
+      mountShareButton(shareSlot, { capture: captureView });
+      mountShareButton(panel.actions, { capture: captureView });
 
       // Incident mode: official status-page notices. incidents.json is a snapshot of *current*
       // status, so notices follow the live clock only (not the time machine).
@@ -427,7 +481,12 @@ async function boot(): Promise<void> {
         new Promise<boolean>((resolve) => setTimeout(() => resolve(run === tourRun), ms));
       const startTour = async () => {
         const busy =
-          !panelEl.hidden || compare.open || race.open || prompt.isOpen || tm.state().playing;
+          !panelEl.hidden ||
+          compare.open ||
+          race.open ||
+          prompt.isOpen ||
+          document.documentElement.classList.contains('share-open') ||
+          tm.state().playing;
         if (busy || document.hidden) return;
         const run = ++tourRun;
         tm.goLive();
@@ -452,6 +511,15 @@ async function boot(): Promise<void> {
       document.documentElement.classList.add('no-webgl');
       byId('data-view').prepend(h('p', { class: 'notice', role: 'status' }, COPY.noWebgl));
       controls = mountControls(null, () => setRace(!race.open));
+      // Without WebGL there is no rendered view: the card draws its night backdrop instead.
+      controls.feedSlot.after(shareSlot);
+      mountShareButton(shareSlot, {
+        capture: async () => ({
+          frame: document.createElement('canvas'),
+          ...shareText(null),
+          url: siteUrl(),
+        }),
+      });
       const feed = mountFeed(controls.feedSlot, {
         events: data.events,
         clock: tm,

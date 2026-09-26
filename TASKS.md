@@ -148,7 +148,22 @@ discoveries + tracker + share card). Integration hooks already on the branch: `c
 - [x] Compare mode (built directly): split-screen viewports with one camera + bloom pipeline each,
       metrics card per column with ranges, tiers and the latest source; phones use half-height columns.
 - [x] "Since you arrived" equivalences: words, electricity, cooling water (range + tier each).
-- [ ] Merge + integrate wave 1; screenshots and two art passes; full review; docs.
+- [x] Uncertainty glass + sound merged and wired (control-row toggles, legend, status line) — D-053/54.
+- [x] Incident banner + alarm beacons/flicker (live clock only, 3-day staleness) — D-055.
+- [x] Cinematic tour after 30 s idle (captions with tiers; any input stops it) — D-056.
+- [x] Prompt visualizer: lazy o200k tokenizer, "Exact" count chip, Modeled energy/water, token
+      flight framed on the hall; beside the HQ panel on wide screens, shared slot otherwise — D-057.
+- [x] Hidden details: island props (deferred ~0.5 s after start), interior props via the interiors'
+      `decorate` hook, picking (campus box wins when nearer), tracker + chip, "Found" toast — D-060.
+- [x] Share card from the control row (city) and the HQ panel header (that HQ, cropped to the free
+      area); `state/sharecard.ts` builds title/subtitle/figures with tiers and ranges — D-061.
+- [x] Fixed on the way: builds dropped the standard `backdrop-filter` (no blur in Chrome) — D-062;
+      phone popovers were clipped by the scrolling control strip — D-063; hovering a hidden detail
+      left the last HQ highlighted.
+- [x] E2E: glass, incidents, sound, tour, prompt (count, tiers, send + landing), hidden details
+      (stored progress, list, reset), share (city + HQ).
+- [ ] Final M6 screenshots (desktop + mobile) and second art pass over every M6 feature.
+- [ ] Full multi-agent review (4 dimensions + adversarial verify, D-051); fix findings; push.
 
 ## Blocked (needs the owner)
 
