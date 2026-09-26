@@ -234,7 +234,76 @@ export const COPY = {
   },
   // ---- M6: prompt visualizer (src/ui/prompt.ts) — owned by that module's builder
   prompt: {
-    // (strings for this module go here)
+    /** Label for the control that opens the panel (the integrator's toggle). */
+    open: 'Your prompt',
+    title: 'Your prompt, visualized',
+    intro:
+      'Type or paste any text. We count its tokens and send one glowing token into the HQ you choose.',
+    close: 'Close your prompt',
+    label: 'Your text',
+    placeholder: 'Paste an email, a poem, a page of code…',
+    chars: (n: string, max: string) => `${n} / ${max} characters`,
+    privacy: 'Your text stays in this browser: it is counted here and never sent anywhere.',
+    countLabel: 'Tokens',
+    tokens: (n: number) => (n === 1 ? 'token' : 'tokens'),
+    empty: 'Type or paste some text to count its tokens.',
+    loading: 'Counting… (loading the tokenizer)',
+    counting: 'Counting…',
+    failed:
+      'The tokenizer could not be loaded, so this text cannot be counted. Check your connection and try again.',
+    failedAgain:
+      'The tokenizer is still unavailable. If you are online, reloading the page should fix it.',
+    countFailed: 'This text could not be counted.',
+    retry: 'Try again',
+    /** Tooltip of the count's tier chip: the count is exact for the tokenizer named. */
+    countHelp: (tokenizer: string) =>
+      `Exact count for the ${tokenizer} tokenizer, computed from your text in this browser.`,
+    tokenizerNote: (tokenizer: string) =>
+      `Counted with ${tokenizer}, the tokenizer of GPT-4o-class models; Claude, Gemini and others split text differently, so their counts differ.`,
+    tokenizerSources: 'Tokenizer:',
+    tokenizerSpec: 'OpenAI tiktoken',
+    tokenizerLibrary: 'gpt-tokenizer, the JavaScript port used here',
+    hqLabel: 'Send it to',
+    sameForEveryHq:
+      'The figures are the same for every HQ: we use one hardware-efficiency figure for all of them, because none publishes its own.',
+    results: 'What this prompt takes',
+    energy: 'Energy',
+    water: 'On-site cooling water',
+    energyUnit: 'Wh',
+    waterUnit: 'mL',
+    noValue: '—',
+    resultsEmpty: 'Energy and water appear here once your text is counted.',
+    scope:
+      'Only the tokens you typed. A real request also carries instructions and chat history, and the reply adds its own tokens: a typical chat request is 2,000–3,000 tokens in all. Water is on-site cooling only, not the water used to make the electricity.',
+    formula: 'How it is calculated',
+    energyFormula: (formula: string) => `Energy (Wh) = ${formula}`,
+    waterFormula: (formula: string) => `Water (mL) = ${formula}`,
+    perToken: 'Energy per token',
+    perTokenUnit: 'J',
+    perTokenFormula: (kw: string, pue: string, tokensPerSec: string) =>
+      `J/token = ${kw} kW per GPU × 1,000 × PUE ${pue} ÷ ${tokensPerSec} tokens/s per GPU`,
+    inputs: 'Inputs and sources',
+    inputUnits: { throughput: 'tokens/s', kw: 'kW', pue: '', wue: 'L/kWh' },
+    sources: 'Sources',
+    method: 'How we estimate',
+    /** Visually hidden hint after links that open a new tab. */
+    newTab: 'opens in a new tab',
+    send: (hq: string) => `Send to ${hq}`,
+    sendHint: 'Type or paste some text first.',
+    sendHintCount: 'Sending needs the token count first.',
+    sent: (hq: string) => `Sent. Watch your token fly into ${hq}.`,
+    arrived: (hq: string) => `Your token landed in ${hq}’s server hall.`,
+    /** What screen readers hear once typing settles (never on every keystroke). */
+    spokenCount: (
+      count: string,
+      unit: string,
+      wh: string,
+      whRange: string,
+      ml: string,
+      mlRange: string,
+    ) =>
+      `${count} ${unit}. Energy about ${wh} watt-hours (${whRange}); on-site water about ${ml} millilitres (${mlRange}). Both modeled.`,
+    spokenSent: (count: string, unit: string, hq: string) => `Sent ${count} ${unit} to ${hq}.`,
   },
   // ---- M6: uncertainty glass (src/world/uncertainty.ts) — owned by that module's builder
   glass: {
