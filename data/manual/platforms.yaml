@@ -1,0 +1,808 @@
+# Token Metropolis — the 15 platforms (HQs).
+# Human-curated. Validated by scripts/build-data.ts against src/data/schema.ts.
+# Selection rationale: DECISIONS.md (D-010). Research accessed 2026-09-25.
+#
+# verified: page (read on the source page) · snippet (search-result summary only) · pending (not yet checked)
+# regionalMix basis: published (built from published country shares) · assumption (our allocation)
+# identity: original palettes and architectural typologies — no logos, wordmarks, mascots or brand colours.
+
+- id: chatgpt
+  name: ChatGPT
+  parent: OpenAI
+  scope: "OpenAI: ChatGPT (consumer and business) plus the OpenAI API, including Codex."
+  profile: assistant
+  hq:
+    city: San Francisco
+    country: United States
+    lat: 37.7688
+    lon: -122.3893
+    timezone: America/Los_Angeles
+    verified: pending
+    note: "City widely reported; street address and coordinates not verified during research."
+  launch:
+    date: "2022-11-30"
+    what: "ChatGPT public research preview"
+    source:
+      title: "Sam Altman on X: ChatGPT crossed 1 million users (5 Dec 2022)"
+      publisher: "Sam Altman (X)"
+      url: "https://x.com/sama/status/1599668808285028353"
+      published: "2022-12-05"
+    verified: snippet
+    note: "“ChatGPT launched on wednesday. today it crossed 1 million users!” — the Wednesday before 5 Dec 2022 is 30 Nov."
+  regionalMix:
+    shares: { northAmerica: 0.15, latinAmerica: 0.12, europeAfrica: 0.28, southAsiaMiddleEast: 0.22, eastAsiaPacific: 0.23 }
+    asOf: "2025-07"
+    basis: assumption
+    note: "OpenAI said ~330M of 2.5B daily prompts came from the US (13%, July 2025); the rest is our allocation. Not available in mainland China."
+    source:
+      title: "TechCrunch — ChatGPT users send 2.5 billion prompts a day"
+      publisher: "TechCrunch"
+      url: "https://techcrunch.com/2025/07/21/chatgpt-users-send-2-5-billion-prompts-a-day/"
+      published: "2025-07-21"
+  components:
+    - id: chatgpt
+      label: "ChatGPT apps"
+      profile: assistant
+      routedShare: { value: 0, low: 0, high: 0, note: "Served on OpenAI's own models." }
+    - id: api
+      label: "OpenAI API (incl. Codex)"
+      profile: api
+      routedShare: { value: 0, low: 0, high: 0, note: "Served on OpenAI's own models." }
+  hardware:
+    accelerator: nvidia-blackwell
+    note: "Served largely on Microsoft Azure (NVIDIA GPUs, incl. GB300 clusters); Microsoft says its Maia 200 accelerator now also serves OpenAI models."
+    sources:
+      - title: "Microsoft FY26 Q4 earnings"
+        publisher: "Microsoft"
+        url: "https://www.microsoft.com/en-us/investor/events/fy-2026/earnings-fy-2026-q4"
+  statusPage:
+    url: "https://status.openai.com"
+    json: "https://status.openai.com/api/v2/summary.json"
+    provider: incident.io
+    verified: page
+    note: "Endpoint confirmed in a third-party status monitor's configuration (github.com/bentleypark/aiwatch)."
+  feeds: []
+  identity:
+    palette: { primary: "#d8d0c0", secondary: "#5f584d", accent: "#ffb444", glow: "#ffd9a0" }
+    architecture: "Ring-plaza monolith: a tall, calm pale-stone slab rising from a wide circular plaza ringed by low pavilions."
+    motif: ring
+
+- id: gemini
+  name: Gemini
+  parent: Google
+  scope: "Google's Gemini models: the Gemini app and Google's customer API (Gemini API / Vertex AI). Excludes Search AI features, whose volume could not be verified."
+  profile: assistant
+  hq:
+    city: Mountain View
+    country: United States
+    lat: 37.422
+    lon: -122.0841
+    timezone: America/Los_Angeles
+    verified: pending
+  launch:
+    date: "2023-03-21"
+    what: "Bard (the predecessor of the Gemini app) opened to the public; renamed Gemini in 2024."
+    source:
+      title: "Google — Try Bard and share your feedback"
+      publisher: "Google"
+      url: "https://blog.google/technology/ai/try-bard/"
+    verified: pending
+    note: "Date from reference knowledge; blog.google was unreachable during research. Verified related milestone: Gemini Pro became publicly available on Vertex AI on 13 Dec 2023."
+  regionalMix:
+    shares: { northAmerica: 0.18, latinAmerica: 0.13, europeAfrica: 0.27, southAsiaMiddleEast: 0.22, eastAsiaPacific: 0.2 }
+    asOf: "2026"
+    basis: assumption
+    note: "No country breakdown was found; allocation mirrors other global assistants. Not available in mainland China."
+  components:
+    - id: app
+      label: "Gemini app"
+      profile: assistant
+      routedShare: { value: 0, low: 0, high: 0, note: "Served on Google's own models." }
+    - id: api
+      label: "Gemini API and Vertex AI (customers)"
+      profile: api
+      start: "2023-12-13"
+      routedShare: { value: 0, low: 0, high: 0, note: "Served on Google's own models." }
+  hardware:
+    accelerator: google-tpu
+    note: "Gemini trains and serves on Google TPUs (Ironwood; TPU 8i announced for inference in April 2026)."
+    sources:
+      - title: "Google Cloud — Ironwood TPUs and new Axion-based VMs"
+        publisher: "Google Cloud"
+        url: "https://cloud.google.com/blog/products/compute/ironwood-tpus-and-new-axion-based-vms-for-your-ai-workloads"
+      - title: "Google Cloud — Welcome to Google Cloud Next '26"
+        publisher: "Google Cloud"
+        url: "https://cloud.google.com/blog/topics/google-cloud-next/welcome-to-google-cloud-next26"
+  feeds:
+    - { url: "https://cloud.google.com/blog/products/ai-machine-learning", type: html }
+  identity:
+    palette: { primary: "#9fb4c8", secondary: "#34485c", accent: "#5cf2a6", glow: "#a8ffd2" }
+    architecture: "Twin helix spires: two slender glass towers spiralling around each other, stitched together by glowing sky-bridges."
+    motif: helix
+
+- id: claude
+  name: Claude
+  parent: Anthropic
+  scope: "Anthropic: the Claude apps, Claude Code and the Claude API, including via cloud partners."
+  profile: api
+  hq:
+    address: "548 Market St, PMB 90375, San Francisco, CA 94104 (postal address)"
+    city: San Francisco
+    country: United States
+    lat: 37.7902
+    lon: -122.4003
+    timezone: America/Los_Angeles
+    source:
+      title: "Anthropic — Privacy policy"
+      publisher: "Anthropic"
+      url: "https://www.anthropic.com/legal/privacy"
+    verified: page
+    note: "The privacy policy lists a postal (PMB) address; coordinates approximate."
+  launch:
+    date: "2023-03-14"
+    what: "Claude and Claude Instant launched via a chat interface and API"
+    source:
+      title: "Anthropic — Introducing Claude"
+      publisher: "Anthropic"
+      url: "https://www.anthropic.com/news/introducing-claude"
+      published: "2023-03-14"
+    verified: page
+  regionalMix:
+    shares: { northAmerica: 0.25, latinAmerica: 0.08, europeAfrica: 0.3, southAsiaMiddleEast: 0.15, eastAsiaPacific: 0.22 }
+    asOf: "2025-08"
+    basis: published
+    note: "Anthropic Economic Index: Claude.ai conversation share US 21.6%, India 7.2%, Brazil 3.7% (Aug 2025); US, India, Japan, UK and South Korea lead (Nov 2025). Region totals are our allocation. Covers Claude.ai, not the API."
+    source:
+      title: "Anthropic Economic Index — September 2025 report"
+      publisher: "Anthropic"
+      url: "https://www.anthropic.com/research/anthropic-economic-index-september-2025-report"
+      published: "2025-09-15"
+  components:
+    - id: all
+      label: "Claude apps, Claude Code and API"
+      profile: api
+      routedShare: { value: 0, low: 0, high: 0, note: "Served on Anthropic's own models." }
+      overrides:
+        pricePerMillionTokens: pricePerMillionTokens_anthropic
+        tokenRevenueShare: tokenRevenueShare_anthropic
+  hardware:
+    accelerator: mixed
+    note: "Claude runs on AWS Trainium (over one million Trainium2 chips), Google TPUs and NVIDIA GPUs (Azure; SpaceX Colossus capacity)."
+    sources:
+      - title: "Anthropic and Amazon expand compute collaboration"
+        publisher: "Anthropic"
+        url: "https://www.anthropic.com/news/anthropic-amazon-compute"
+      - title: "Anthropic raises Series H"
+        publisher: "Anthropic"
+        url: "https://www.anthropic.com/news/series-h"
+  statusPage:
+    url: "https://status.claude.com"
+    json: "https://status.claude.com/api/v2/summary.json"
+    provider: statuspage.io
+    verified: pending
+    note: "Could not be reached during research; the pipeline treats it as optional."
+  feeds:
+    - { url: "https://www.anthropic.com/news", type: html }
+  identity:
+    palette: { primary: "#3a4a42", secondary: "#1f2a25", accent: "#a98bff", glow: "#d9c9ff" }
+    architecture: "Terraced garden library: a stepped ziggurat of warm-lit reading terraces with hanging gardens and a lantern crown."
+    motif: terraces
+
+- id: meta-ai
+  name: Meta AI
+  parent: Meta
+  scope: "The Meta AI assistant across WhatsApp, Instagram, Facebook, Messenger and the Meta AI app."
+  profile: assistant
+  hq:
+    city: Menlo Park
+    country: United States
+    lat: 37.4848
+    lon: -122.1484
+    timezone: America/Los_Angeles
+    source:
+      title: "Meta on GitHub (organisation profile: Menlo Park, California)"
+      publisher: "GitHub"
+      url: "https://github.com/facebook"
+    verified: page
+    note: "City verified; coordinates approximate."
+  launch:
+    date: "2023-09-27"
+    what: "Meta AI assistant announced at Meta Connect 2023 (US beta)"
+    source:
+      title: "Meta Newsroom"
+      publisher: "Meta"
+      url: "https://about.fb.com/news/"
+    verified: pending
+    note: "Date from reference knowledge; Meta's sites were unreachable during research."
+  regionalMix:
+    shares: { northAmerica: 0.12, latinAmerica: 0.2, europeAfrica: 0.25, southAsiaMiddleEast: 0.28, eastAsiaPacific: 0.15 }
+    asOf: "2026"
+    basis: assumption
+    note: "No data found; allocation follows WhatsApp's weight in India, Brazil and Indonesia."
+  components:
+    - id: assistant
+      label: "Meta AI in Meta's apps"
+      profile: assistant
+      routedShare: { value: 0, low: 0, high: 0, note: "Served on Meta's own models." }
+      overrides:
+        requestsPerDau: requestsPerDau_embedded
+  hardware:
+    accelerator: mixed
+    note: "Not verified during research (NVIDIA GPUs and Meta's MTIA chips are both reported)."
+    sources: []
+  feeds: []
+  identity:
+    palette: { primary: "#4a5560", secondary: "#262d33", accent: "#c8f25a", glow: "#e6ffa6" }
+    architecture: "Lattice canopy campus: a vast low campus beneath an undulating mesh canopy roof planted with trees."
+    motif: canopy
+
+- id: copilot
+  name: Microsoft Copilot
+  parent: Microsoft
+  scope: "Microsoft's first-party Copilots — consumer Copilot, Microsoft 365 Copilot and other Copilot apps — excluding GitHub Copilot, which has its own HQ."
+  profile: assistant
+  hq:
+    address: "One Microsoft Way, Redmond, Washington 98052"
+    city: Redmond
+    country: United States
+    lat: 47.6397
+    lon: -122.1286
+    timezone: America/Los_Angeles
+    source:
+      title: "Microsoft Privacy Statement"
+      publisher: "Microsoft"
+      url: "https://www.microsoft.com/en-us/privacy/privacystatement"
+    verified: page
+  launch:
+    date: "2023-02-07"
+    what: "The new Bing with Bing Chat (later renamed Microsoft Copilot)"
+    source:
+      title: "Microsoft FY23 Q3 earnings (“two months since the launch of new Bing and Edge”)"
+      publisher: "Microsoft"
+      url: "https://www.microsoft.com/en-us/investor/events/fy-2023/earnings-fy-2023-q3"
+      published: "2023-04-25"
+    verified: page
+    note: "The source confirms a February 2023 launch; the day is the widely reported announcement date."
+  regionalMix:
+    shares: { northAmerica: 0.35, latinAmerica: 0.08, europeAfrica: 0.3, southAsiaMiddleEast: 0.12, eastAsiaPacific: 0.15 }
+    asOf: "2026"
+    basis: assumption
+    note: "No country breakdown found; weighted to markets where Microsoft 365 and Bing are strongest."
+  components:
+    - id: copilots
+      label: "Consumer and Microsoft 365 Copilots"
+      profile: assistant
+      routedShare: { value: 0.1, low: 0, high: 0.25, note: "Mostly OpenAI models served by Microsoft on Azure (not in OpenAI's own figures); some Microsoft 365 features use Anthropic's Claude, which Anthropic's revenue counts." }
+      overrides:
+        scope: scope_copilotExGithub
+  hardware:
+    accelerator: nvidia-blackwell
+    note: "Azure datacenters: large NVIDIA GB300 clusters and Microsoft's Maia 200 accelerators."
+    sources:
+      - title: "Microsoft FY26 Q1 earnings"
+        publisher: "Microsoft"
+        url: "https://www.microsoft.com/en-us/investor/events/fy-2026/earnings-fy-2026-q1"
+  feeds:
+    - { url: "https://www.microsoft.com/en-us/microsoft-copilot/blog/", type: html }
+  identity:
+    palette: { primary: "#b9c2cc", secondary: "#3d4652", accent: "#ff6f8e", glow: "#ffb3c2" }
+    architecture: "Cantilever stack: offset glass slabs stacked like half-open drawers, each overhanging the one below."
+    motif: slabs
+
+- id: doubao
+  name: Doubao
+  parent: ByteDance
+  scope: "ByteDance's Doubao model family: the Doubao app, ByteDance products and Volcano Engine API customers."
+  profile: assistant
+  hq:
+    city: Beijing
+    country: China
+    lat: 39.98
+    lon: 116.31
+    timezone: Asia/Shanghai
+    verified: pending
+    note: "District-level approximation (Haidian); not verified during research."
+  launch:
+    date: "2024-05-15"
+    what: "Doubao model family opened to enterprises on Volcano Engine (the consumer Doubao app launched earlier, in 2023)."
+    source:
+      title: "Yicai — ByteDance: Doubao models exceed 30 trillion tokens a day"
+      publisher: "Yicai"
+      url: "https://www.yicai.com/news/102866248.html"
+    verified: snippet
+    note: "Source gives May 2024; the day is the Volcano Engine FORCE conference date (reference knowledge)."
+  regionalMix:
+    shares: { northAmerica: 0.01, latinAmerica: 0.005, europeAfrica: 0.01, southAsiaMiddleEast: 0.005, eastAsiaPacific: 0.97 }
+    asOf: "2026-04"
+    basis: published
+    note: "Similarweb: doubao.com traffic is ~100% from China (snippet). ByteDance's international assistant is a separate product."
+    source:
+      title: "Similarweb — doubao.com"
+      publisher: "Similarweb"
+      url: "https://www.similarweb.com/website/doubao.com/"
+  components:
+    - id: all
+      label: "Doubao models (app, ByteDance products, Volcano Engine API)"
+      profile: assistant
+      routedShare: { value: 0, low: 0, high: 0, note: "Served on ByteDance's own models." }
+  hardware:
+    accelerator: mixed
+    note: "Not disclosed in sources found."
+    sources: []
+  feeds: []
+  identity:
+    palette: { primary: "#44304a", secondary: "#22172a", accent: "#f25cff", glow: "#fbb0ff" }
+    architecture: "Honeycomb megastructure: a colossal block of stacked hexagonal cells, lighting up cell by cell."
+    motif: hexagons
+
+- id: qwen
+  name: Qwen
+  parent: Alibaba
+  scope: "Alibaba's Qwen app (Qianwen). Alibaba Cloud API volume and Qwen use inside other Alibaba apps are not included: no figures were found."
+  profile: assistant
+  hq:
+    city: Hangzhou
+    country: China
+    lat: 30.28
+    lon: 120.03
+    timezone: Asia/Shanghai
+    verified: pending
+    note: "Approximate location of Alibaba's Xixi campus; not verified during research."
+  launch:
+    date: "2023-08-03"
+    what: "First open Qwen models (Qwen-7B, Qwen-7B-Chat) released"
+    source:
+      title: "QwenLM/Qwen README"
+      publisher: "Alibaba Qwen team (GitHub)"
+      url: "https://raw.githubusercontent.com/QwenLM/Qwen/main/README.md"
+    verified: page
+    note: "The consumer app (earlier Tongyi) was relaunched as Qwen in late 2025."
+  regionalMix:
+    shares: { northAmerica: 0.01, latinAmerica: 0.005, europeAfrica: 0.01, southAsiaMiddleEast: 0.025, eastAsiaPacific: 0.95 }
+    asOf: "2026"
+    basis: assumption
+    note: "User figures are for China (QuestMobile); a small international share is assumed."
+  components:
+    - id: app
+      label: "Qwen app"
+      profile: assistant
+      routedShare: { value: 0, low: 0, high: 0, note: "Served on Alibaba's own models." }
+  hardware:
+    accelerator: mixed
+    note: "Not disclosed in sources found."
+    sources: []
+  feeds:
+    - { url: "https://github.com/QwenLM/Qwen3.8/commits/main.atom", type: atom }
+  identity:
+    palette: { primary: "#d7cbb5", secondary: "#3e3a33", accent: "#7fe36a", glow: "#c3ffb2" }
+    architecture: "Tiered eave tower: a modern pagoda of stacked tiers with upturned, glowing eaves above a still pool."
+    motif: eaves
+
+- id: deepseek
+  name: DeepSeek
+  parent: DeepSeek
+  scope: "DeepSeek's chat (web and app) and API."
+  profile: assistant
+  hq:
+    address: "Huijin International Building, 169 Huancheng North Road, Gongshu District, Hangzhou (registered address)"
+    city: Hangzhou
+    country: China
+    lat: 30.279
+    lon: 120.166
+    timezone: Asia/Shanghai
+    source:
+      title: "Company registry record (Qichamao)"
+      publisher: "Qichamao"
+      url: "https://www.qichamao.com/orgcompany/searchitemdtl/a72b715426d66e6ccb5aa551d5297650.html"
+    verified: snippet
+    note: "Coordinates approximate."
+  launch:
+    date: "2024-05-06"
+    what: "DeepSeek-V2 released, with chat and API platform live (the earliest date verified in research; the mobile app followed in January 2025)."
+    source:
+      title: "deepseek-ai/DeepSeek-V2"
+      publisher: "DeepSeek (GitHub)"
+      url: "https://github.com/deepseek-ai/DeepSeek-V2"
+    verified: page
+    note: "DeepSeek's chat service predates V2 (late 2023, not verified during research)."
+  regionalMix:
+    shares: { northAmerica: 0.08, latinAmerica: 0.08, europeAfrica: 0.12, southAsiaMiddleEast: 0.12, eastAsiaPacific: 0.6 }
+    asOf: "2026"
+    basis: assumption
+    note: "China-heavy with substantial international use; no country split was found."
+  components:
+    - id: all
+      label: "DeepSeek chat and API"
+      profile: assistant
+      routedShare: { value: 0, low: 0, high: 0, note: "Served on DeepSeek's own models." }
+      overrides:
+        userWindow: monthly
+        tokensPerUserDay: tokensPerMauDay_deepseek
+  hardware:
+    accelerator: nvidia-hopper
+    note: "“All DeepSeek-V3/R1 inference services are served on H800 GPUs” (Feb 2025); DeepSeek plans to serve V4 on Huawei Ascend 950 supernodes."
+    sources:
+      - title: "DeepSeek-V3/R1 Inference System Overview"
+        publisher: "DeepSeek (GitHub)"
+        url: "https://github.com/deepseek-ai/open-infra-index/blob/main/202502OpenSourceWeek/day_6_one_more_thing_deepseekV3R1_inference_system_overview.md"
+  statusPage:
+    url: "https://status.deepseek.com"
+    json: "https://status.deepseek.com/api/v2/summary.json"
+    provider: statuspage.io
+    verified: pending
+    note: "Could not be reached during research; the pipeline treats it as optional."
+  feeds:
+    - { url: "https://api-docs.deepseek.com/updates/", type: html }
+  identity:
+    palette: { primary: "#2e4a57", secondary: "#172730", accent: "#2fe6c8", glow: "#a6fff0" }
+    architecture: "Sunken well tower: a cylindrical tower rising out of a deep circular atrium around a mirror pool."
+    motif: well
+
+- id: grok
+  name: Grok
+  parent: "xAI (SpaceX)"
+  scope: "Grok in X and the Grok apps. The xAI API is not included: no usage figure was found."
+  profile: assistant
+  hq:
+    address: "1450 Page Mill Road, Palo Alto, CA"
+    city: Palo Alto
+    country: United States
+    lat: 37.414
+    lon: -122.147
+    timezone: America/Los_Angeles
+    source:
+      title: "The Real Deal — xAI expands in Palo Alto with big office lease"
+      publisher: "The Real Deal"
+      url: "https://therealdeal.com/san-francisco/2025/10/30/elon-musks-xai-expands-in-palo-alto-with-big-office-lease/"
+      published: "2025-10-30"
+    verified: snippet
+    note: "xAI became a SpaceX subsidiary in 2026 (renamed SpaceXAI), per reporting seen during research."
+  launch:
+    date: "2023-11-04"
+    what: "Grok early beta for selected testers, then X Premium+ subscribers"
+    source:
+      title: "TechCrunch — Musk says X subscribers will get early access to xAI's chatbot Grok"
+      publisher: "TechCrunch"
+      url: "https://techcrunch.com/2023/11/03/musk-says-twitter-subscribers-will-get-early-access-to-xais-chatbot-grok/"
+      published: "2023-11-03"
+    verified: snippet
+  regionalMix:
+    shares: { northAmerica: 0.27, latinAmerica: 0.12, europeAfrica: 0.28, southAsiaMiddleEast: 0.15, eastAsiaPacific: 0.18 }
+    asOf: "2026-02"
+    basis: published
+    note: "Similarweb (grok.com desktop): US 23.7%, India 8%, Brazil 5.2%, South Korea 3.6%, Hong Kong 3.1% (snippet). Region totals are our allocation; X-embedded use is not measured."
+    source:
+      title: "Similarweb — grok.com"
+      publisher: "Similarweb"
+      url: "https://www.similarweb.com/website/grok.com/"
+  components:
+    - id: consumer
+      label: "Grok in X and the Grok apps"
+      profile: assistant
+      routedShare: { value: 0, low: 0, high: 0, note: "Served on xAI's own models." }
+  hardware:
+    accelerator: nvidia-blackwell
+    note: "Colossus 2 in Memphis (gigawatt-scale NVIDIA GB200/GB300 cluster); Colossus 1 (H100/H200/GB200) is leased to Anthropic."
+    sources:
+      - title: "xAI — Colossus"
+        publisher: "xAI"
+        url: "https://x.ai/colossus"
+  statusPage:
+    url: "https://status.x.ai"
+    json: null
+    rss: "https://status.x.ai/feed.xml"
+    provider: other
+    verified: page
+    note: "RSS only; confirmed in a third-party status monitor's configuration (github.com/bentleypark/aiwatch)."
+  feeds:
+    - { url: "https://status.x.ai/feed.xml", type: rss }
+    - { url: "https://x.ai/news", type: html }
+  identity:
+    palette: { primary: "#2b2b2e", secondary: "#141416", accent: "#ff5a36", glow: "#ffa184" }
+    architecture: "Brutalist forge: a black-concrete tower wrapped in an industrial exoskeleton beside a humming power plant."
+    motif: forge
+
+- id: github-copilot
+  name: GitHub Copilot
+  parent: "GitHub (Microsoft)"
+  scope: "GitHub Copilot in IDEs, the CLI and on github.com, across all the models it offers."
+  profile: coding
+  hq:
+    city: San Francisco
+    country: United States
+    lat: 37.7823
+    lon: -122.3913
+    timezone: America/Los_Angeles
+    verified: pending
+    note: "City widely reported; not verified during research."
+  launch:
+    date: "2022-06-21"
+    what: "GitHub Copilot generally available"
+    source:
+      title: "Microsoft FY22 Q4 earnings (“generally available one month ago”)"
+      publisher: "Microsoft"
+      url: "https://www.microsoft.com/en-us/investor/events/fy-2022/earnings-fy-2022-q4"
+      published: "2022-07-26"
+    verified: page
+    note: "The source confirms general availability in June 2022; the day is the widely reported GA date."
+  regionalMix:
+    shares: { northAmerica: 0.25, latinAmerica: 0.08, europeAfrica: 0.3, southAsiaMiddleEast: 0.2, eastAsiaPacific: 0.17 }
+    asOf: "2026"
+    basis: assumption
+    note: "No Copilot-specific split found; allocation follows the global developer population."
+  components:
+    - id: copilot
+      label: "GitHub Copilot"
+      profile: coding
+      routedShare: { value: 0.6, low: 0.35, high: 0.8, note: "Most requests go to OpenAI, Anthropic and Google models, whose providers count them (OpenAI API, Anthropic revenue, Google's customer API). Azure-hosted models and Microsoft's own MAI-Code stay here." }
+  hardware:
+    accelerator: mixed
+    note: "Runs on each model provider's cloud: Azure for OpenAI and Microsoft models, AWS/Google Cloud/Anthropic for Claude, Google Cloud for Gemini, xAI for Grok."
+    sources:
+      - title: "GitHub Docs — Copilot model hosting"
+        publisher: "GitHub"
+        url: "https://raw.githubusercontent.com/github/docs/main/content/copilot/reference/ai-models/model-hosting.md"
+  statusPage:
+    url: "https://www.githubstatus.com"
+    json: "https://www.githubstatus.com/api/v2/summary.json"
+    provider: statuspage.io
+    verified: page
+    note: "Copilot is a component of GitHub's status page; confirmed in a third-party status monitor's configuration."
+  feeds:
+    - { url: "https://github.com/github/docs/commits/main/data/tables/copilot/model-release-status.yml.atom", type: atom }
+  identity:
+    palette: { primary: "#5b6470", secondary: "#2a3038", accent: "#45a6ff", glow: "#a9d4ff" }
+    architecture: "Sawtooth workshop halls: long industrial halls with sawtooth roofs, skylights and a clock tower."
+    motif: sawtooth
+
+- id: perplexity
+  name: Perplexity
+  parent: Perplexity AI
+  scope: "Perplexity's answer engine and agents (web, apps, Comet, Computer)."
+  profile: search
+  hq:
+    address: "115 Sansome St, Suite 900, San Francisco, CA"
+    city: San Francisco
+    country: United States
+    lat: 37.791
+    lon: -122.401
+    timezone: America/Los_Angeles
+    source:
+      title: "Craft — Perplexity AI locations"
+      publisher: "Craft"
+      url: "https://craft.co/perplexity-ai/locations"
+    verified: snippet
+  launch:
+    date: "2022-12-07"
+    what: "Public launch of the Perplexity answer engine"
+    source:
+      title: "Contrary Research — Perplexity business breakdown"
+      publisher: "Contrary Research"
+      url: "https://research.contrary.com/company/perplexity"
+    verified: snippet
+  regionalMix:
+    shares: { northAmerica: 0.23, latinAmerica: 0.1, europeAfrica: 0.27, southAsiaMiddleEast: 0.2, eastAsiaPacific: 0.2 }
+    asOf: "2026-08"
+    basis: published
+    note: "Similarweb (perplexity.ai web): US ~20%, India ~11% (snippet, low confidence). Region totals are our allocation."
+    source:
+      title: "Similarweb — perplexity.ai"
+      publisher: "Similarweb"
+      url: "https://www.similarweb.com/website/perplexity.ai/"
+  components:
+    - id: search
+      label: "Answer engine and agents"
+      profile: search
+      routedShare: { value: 0.4, low: 0.2, high: 0.6, note: "Its own Sonar models serve much traffic; Pro and agent modes also call OpenAI, Anthropic, Google and xAI models. The split is not disclosed." }
+  hardware:
+    accelerator: nvidia-hopper
+    note: "NVIDIA H100 GPUs with TensorRT-LLM; Sonar served on Cerebras."
+    sources:
+      - title: "NVIDIA — Spotlight: Perplexity AI serves 400 million search queries a month"
+        publisher: "NVIDIA"
+        url: "https://developer.nvidia.com/blog/spotlight-perplexity-ai-serves-400-million-search-queries-a-month-using-nvidia-inference-stack/"
+  statusPage:
+    url: "https://status.perplexity.com"
+    json: "https://status.perplexity.com/api/v2/summary.json"
+    provider: incident.io
+    verified: page
+    note: "Moved to incident.io in September 2026; confirmed in a third-party status monitor's configuration."
+  feeds:
+    - { url: "https://www.perplexity.ai/changelog", type: html }
+  identity:
+    palette: { primary: "#c9ccd6", secondary: "#3a3d4d", accent: "#6f86ff", glow: "#bcc8ff" }
+    architecture: "Domed observatory: a hilltop observatory with a slotted, rotating dome and a sweeping telescope beam."
+    motif: dome
+
+- id: yuanbao
+  name: Tencent Yuanbao
+  parent: Tencent
+  scope: "Tencent's Yuanbao assistant app (Hunyuan and DeepSeek models, served by Tencent)."
+  profile: assistant
+  hq:
+    city: Shenzhen
+    country: China
+    lat: 22.52
+    lon: 113.93
+    timezone: Asia/Shanghai
+    verified: pending
+    note: "Approximate location of Tencent's Nanshan headquarters; not verified during research."
+  launch:
+    date: "2024-05-30"
+    what: "Tencent Yuanbao app launched"
+    source:
+      title: "Tencent Yuanbao"
+      publisher: "Tencent"
+      url: "https://yuanbao.tencent.com/"
+    verified: pending
+    note: "Date from reference knowledge; not verified during research."
+  regionalMix:
+    shares: { northAmerica: 0.005, latinAmerica: 0.005, europeAfrica: 0.005, southAsiaMiddleEast: 0.005, eastAsiaPacific: 0.98 }
+    asOf: "2026"
+    basis: assumption
+    note: "A domestic Chinese product."
+  components:
+    - id: app
+      label: "Yuanbao app"
+      profile: assistant
+      routedShare: { value: 0, low: 0, high: 0, note: "Tencent serves both its own Hunyuan models and open DeepSeek models itself, so DeepSeek's figures do not include them." }
+  hardware:
+    accelerator: mixed
+    note: "Not disclosed in sources found."
+    sources: []
+  feeds: []
+  identity:
+    palette: { primary: "#4b4336", secondary: "#26211a", accent: "#ffe15a", glow: "#fff0a8" }
+    architecture: "Ingot pavilion: a broad, stepped tower that swells at the waist, crowned by a glowing lantern roof."
+    motif: ingot
+
+- id: cursor
+  name: Cursor
+  parent: "Anysphere (SpaceX)"
+  scope: "The Cursor AI code editor and agents, across all the models it offers."
+  profile: coding
+  hq:
+    city: San Francisco
+    country: United States
+    lat: 37.7749
+    lon: -122.4194
+    timezone: America/Los_Angeles
+    verified: pending
+    note: "City widely reported; not verified during research. SpaceX's acquisition of Anysphere was reported as closed in August 2026."
+  launch:
+    date: "2023-01-01"
+    precision: year
+    what: "Cursor publicly launched in 2023"
+    source:
+      title: "Cursor"
+      publisher: "Anysphere"
+      url: "https://cursor.com/"
+    verified: pending
+    note: "Launch year from reference knowledge; the curve starts at the beginning of 2023."
+  regionalMix:
+    shares: { northAmerica: 0.3, latinAmerica: 0.07, europeAfrica: 0.3, southAsiaMiddleEast: 0.15, eastAsiaPacific: 0.18 }
+    asOf: "2026"
+    basis: assumption
+    note: "No data found; allocation follows the professional developer population."
+  components:
+    - id: editor
+      label: "Cursor editor and agents"
+      profile: coding
+      routedShare: { value: 0.7, low: 0.5, high: 0.85, note: "Most tokens go to Anthropic, OpenAI and Google models, whose providers count them; Cursor's own models and (since the SpaceX deal) Grok stay here." }
+      overrides:
+        tokenRevenueShare: tokenRevenueShare_cursor
+  hardware:
+    accelerator: mixed
+    note: "Mostly runs on the model providers' infrastructure; not disclosed."
+    sources: []
+  statusPage:
+    url: "https://status.cursor.com"
+    json: "https://status.cursor.com/api/v2/summary.json"
+    provider: statuspage.io
+    verified: page
+    note: "Confirmed in a third-party status monitor's configuration."
+  feeds: []
+  identity:
+    palette: { primary: "#1c1f26", secondary: "#0d0f14", accent: "#e9eef7", glow: "#ffffff" }
+    architecture: "Blade wedge: a razor-thin angular tower of dark glass with a single brilliant lit edge."
+    motif: blade
+
+- id: characterai
+  name: Character.AI
+  parent: Character Technologies
+  scope: "Character.AI's companion chat (web and apps)."
+  profile: companion
+  hq:
+    city: Menlo Park
+    country: United States
+    lat: 37.4529
+    lon: -122.1817
+    timezone: America/Los_Angeles
+    verified: pending
+    note: "City widely reported; not verified during research."
+  launch:
+    date: "2022-09-16"
+    what: "Character.AI public beta"
+    source:
+      title: "Character.AI — Optimizing AI inference at Character.AI (“since Character.AI launched in 2022”)"
+      publisher: "Character.AI"
+      url: "https://blog.character.ai/optimizing-ai-inference-at-character-ai/"
+    verified: pending
+    note: "The source confirms a 2022 launch; the day is the widely reported beta date, not verified."
+  regionalMix:
+    shares: { northAmerica: 0.3, latinAmerica: 0.15, europeAfrica: 0.25, southAsiaMiddleEast: 0.12, eastAsiaPacific: 0.18 }
+    asOf: "2026"
+    basis: assumption
+    note: "No data found."
+  components:
+    - id: chat
+      label: "Companion chat"
+      profile: companion
+      routedShare: { value: 0, low: 0, high: 0.1, note: "Served on Character.AI's own models (2024); the current model mix was not found." }
+      overrides:
+        userWindow: monthly
+        requestsPerUserDay: requestsPerMauDay_characterai
+  hardware:
+    accelerator: mixed
+    note: "Not established; one 2026 report suggests AMD GPUs via DigitalOcean (low confidence)."
+    sources:
+      - title: "Introl — DigitalOcean and AMD prove non-NVIDIA inference works at scale"
+        publisher: "Introl"
+        url: "https://introl.com/blog/digitalocean-characterai-amd-inference-breakthrough-2026"
+  statusPage:
+    url: "https://status.character.ai"
+    json: "https://status.character.ai/api/v2/summary.json"
+    provider: statuspage.io
+    verified: page
+    note: "Reported inactive since about June 2026 by a third-party monitor."
+  feeds:
+    - { url: "https://blog.character.ai/", type: html }
+  identity:
+    palette: { primary: "#4a3440", secondary: "#251a20", accent: "#ff8fd0", glow: "#ffc9e6" }
+    architecture: "Marquee amphitheatre: a round theatre ringed with marquee bulbs, stage spotlights sweeping the sky."
+    motif: marquee
+
+- id: kimi
+  name: Kimi
+  parent: Moonshot AI
+  scope: "Moonshot AI's Kimi assistant app. Moonshot's API and third-party hosting of its open models are not included."
+  profile: assistant
+  hq:
+    city: Beijing
+    country: China
+    lat: 39.99
+    lon: 116.33
+    timezone: Asia/Shanghai
+    verified: pending
+    note: "District-level approximation (Haidian); not verified during research."
+  launch:
+    date: "2023-10-09"
+    what: "Kimi chatbot launched"
+    source:
+      title: "Moonshot AI"
+      publisher: "Moonshot AI"
+      url: "https://www.moonshot.cn/"
+    verified: pending
+    note: "Date from reference knowledge; not verified during research."
+  regionalMix:
+    shares: { northAmerica: 0.02, latinAmerica: 0.01, europeAfrica: 0.02, southAsiaMiddleEast: 0.02, eastAsiaPacific: 0.93 }
+    asOf: "2026"
+    basis: assumption
+    note: "User figures are for China; a small international share is assumed."
+  components:
+    - id: app
+      label: "Kimi app"
+      profile: assistant
+      routedShare: { value: 0, low: 0, high: 0, note: "Served on Moonshot's own models." }
+  hardware:
+    accelerator: nvidia-hopper
+    note: "The Kimi K3 technical report mentions NVIDIA Hopper and H20 work; the serving fleet is not disclosed."
+    sources:
+      - title: "Kimi K3 technical report"
+        publisher: "Moonshot AI (GitHub)"
+        url: "https://raw.githubusercontent.com/MoonshotAI/Kimi-K3/main/k3_tech_report.pdf"
+  feeds: []
+  identity:
+    palette: { primary: "#2f3350", secondary: "#171a2b", accent: "#3fd7ff", glow: "#aeeeff" }
+    architecture: "Crescent tower: a tall crescent-shaped tower cradling a luminous orb in its curve."
+    motif: crescent
