@@ -1,1 +1,302 @@
-[]
+[
+  {
+    "id": "seen-qwen-qwen3-8-max-prime",
+    "date": "2026-09-23",
+    "platform": "qwen",
+    "kind": "model-launch",
+    "title": "Qwen3.8 Max Prime first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Qwen3.8 Max Prime — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/qwen/qwen3.8-max-prime"
+    },
+    "model": "Qwen3.8 Max Prime"
+  },
+  {
+    "id": "seen-openai-gpt-6-luna-pro",
+    "date": "2026-09-22",
+    "platform": "chatgpt",
+    "kind": "model-launch",
+    "title": "GPT-6 Luna Pro first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "GPT-6 Luna Pro — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/openai/gpt-6-luna-pro"
+    },
+    "model": "GPT-6 Luna Pro"
+  },
+  {
+    "id": "seen-openai-gpt-6-sol-pro",
+    "date": "2026-09-22",
+    "platform": "chatgpt",
+    "kind": "model-launch",
+    "title": "GPT-6 Sol Pro first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "GPT-6 Sol Pro — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/openai/gpt-6-sol-pro"
+    },
+    "model": "GPT-6 Sol Pro"
+  },
+  {
+    "id": "seen-qwen-qwen3-8-omni-flash",
+    "date": "2026-09-21",
+    "platform": "qwen",
+    "kind": "model-launch",
+    "title": "Qwen3.8 Omni Flash first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Qwen3.8 Omni Flash — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/qwen/qwen3.8-omni-flash"
+    },
+    "model": "Qwen3.8 Omni Flash"
+  },
+  {
+    "id": "seen-deepseek-deepseek-v4-1-flash",
+    "date": "2026-09-10",
+    "platform": "deepseek",
+    "kind": "model-launch",
+    "title": "DeepSeek V4.1 Flash first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "DeepSeek V4.1 Flash — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/deepseek/deepseek-v4.1-flash"
+    },
+    "model": "DeepSeek V4.1 Flash"
+  },
+  {
+    "id": "seen-openai-gpt-6-astra",
+    "date": "2026-09-04",
+    "platform": "chatgpt",
+    "kind": "model-launch",
+    "title": "GPT-6 Astra first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "GPT-6 Astra — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/openai/gpt-6-astra"
+    },
+    "model": "GPT-6 Astra"
+  },
+  {
+    "id": "seen-openai-gpt-6-astra-pro",
+    "date": "2026-09-04",
+    "platform": "chatgpt",
+    "kind": "model-launch",
+    "title": "GPT-6 Astra Pro first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "GPT-6 Astra Pro — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/openai/gpt-6-astra-pro"
+    },
+    "model": "GPT-6 Astra Pro"
+  },
+  {
+    "id": "seen-qwen-qwen3-8-max-0902",
+    "date": "2026-09-03",
+    "platform": "qwen",
+    "kind": "model-launch",
+    "title": "Qwen3.8 Max first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Qwen3.8 Max — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/qwen/qwen3.8-max-0902"
+    },
+    "model": "Qwen3.8 Max"
+  },
+  {
+    "id": "seen-qwen-qwen3-8-flash",
+    "date": "2026-08-26",
+    "platform": "qwen",
+    "kind": "model-launch",
+    "title": "Qwen3.8 Flash first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Qwen3.8 Flash — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/qwen/qwen3.8-flash"
+    },
+    "model": "Qwen3.8 Flash"
+  },
+  {
+    "id": "seen-deepseek-deepseek-v4-flash-vision-exp",
+    "date": "2026-08-21",
+    "platform": "deepseek",
+    "kind": "model-launch",
+    "title": "DeepSeek V4 Flash Vision Exp first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "DeepSeek V4 Flash Vision Exp — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/deepseek/deepseek-v4-flash-vision-exp"
+    },
+    "model": "DeepSeek V4 Flash Vision Exp"
+  },
+  {
+    "id": "seen-tencent-hy-mt2-1-8b",
+    "date": "2026-08-20",
+    "platform": "yuanbao",
+    "kind": "model-launch",
+    "title": "Hy-MT2-1.8B first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Hy-MT2-1.8B — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/tencent/hy-mt2-1.8b"
+    },
+    "model": "Hy-MT2-1.8B"
+  },
+  {
+    "id": "seen-tencent-hy-mt2-30b-a3b",
+    "date": "2026-08-20",
+    "platform": "yuanbao",
+    "kind": "model-launch",
+    "title": "Hy-MT2-30B-A3B first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Hy-MT2-30B-A3B — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/tencent/hy-mt2-30b-a3b"
+    },
+    "model": "Hy-MT2-30B-A3B"
+  },
+  {
+    "id": "seen-tencent-hy-mt2-7b",
+    "date": "2026-08-19",
+    "platform": "yuanbao",
+    "kind": "model-launch",
+    "title": "Hy-MT2-7B first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Hy-MT2-7B — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/tencent/hy-mt2-7b"
+    },
+    "model": "Hy-MT2-7B"
+  },
+  {
+    "id": "seen-qwen-qwen3-8-27b",
+    "date": "2026-08-14",
+    "platform": "qwen",
+    "kind": "model-launch",
+    "title": "Qwen3.8 27B first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Qwen3.8 27B — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/qwen/qwen3.8-27b"
+    },
+    "model": "Qwen3.8 27B"
+  },
+  {
+    "id": "seen-google-gemini-3-7-flash",
+    "date": "2026-08-13",
+    "platform": "gemini",
+    "kind": "model-launch",
+    "title": "Gemini 3.7 Flash first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Gemini 3.7 Flash — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/google/gemini-3.7-flash"
+    },
+    "model": "Gemini 3.7 Flash"
+  },
+  {
+    "id": "seen-bytedance-seed-seed-2-0-code",
+    "date": "2026-08-12",
+    "platform": "doubao",
+    "kind": "model-launch",
+    "title": "Seed-2.0-Code first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Seed-2.0-Code — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/bytedance-seed/seed-2.0-code"
+    },
+    "model": "Seed-2.0-Code"
+  },
+  {
+    "id": "seen-bytedance-seed-seed-2-1-turbo",
+    "date": "2026-08-12",
+    "platform": "doubao",
+    "kind": "model-launch",
+    "title": "Seed 2.1 Turbo first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Seed 2.1 Turbo — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/bytedance-seed/seed-2-1-turbo"
+    },
+    "model": "Seed 2.1 Turbo"
+  },
+  {
+    "id": "seen-deepseek-deepseek-v4-pro-0813",
+    "date": "2026-08-12",
+    "platform": "deepseek",
+    "kind": "model-launch",
+    "title": "DeepSeek V4 Pro 0813 first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "DeepSeek V4 Pro 0813 — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/deepseek/deepseek-v4-pro-0813"
+    },
+    "model": "DeepSeek V4 Pro 0813"
+  },
+  {
+    "id": "seen-qwen-qwen3-8-2-4t-a95b",
+    "date": "2026-08-12",
+    "platform": "qwen",
+    "kind": "model-launch",
+    "title": "Qwen3.8 2.4T A95B first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Qwen3.8 2.4T A95B — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/qwen/qwen3.8-2.4t-a95b"
+    },
+    "model": "Qwen3.8 2.4T A95B"
+  },
+  {
+    "id": "seen-x-ai-grok-4-6",
+    "date": "2026-08-12",
+    "platform": "grok",
+    "kind": "model-launch",
+    "title": "Grok 4.6 first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Grok 4.6 — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/x-ai/grok-4.6"
+    },
+    "model": "Grok 4.6"
+  }
+]
