@@ -136,12 +136,19 @@ integrated and art-directed in the main checkout.
       no-WebGL layout; toasts never cover panels; race usable on short screens and above the
       timeline on phones; HUD "so far" wording and accessible name; data table says it is live.
 
-## Next — Milestone 6
+## Milestone 6 — in progress
 
-- [ ] Prompt visualizer (client tokenizer, token flight into an HQ, per-prompt energy/water with ranges).
-- [ ] Compare mode (2–3 platforms side by side), incident mode (status feeds), cinematic tour (idle),
-      discoveries tracker (localStorage, try/catch), share card (image with tiers), sound (off by
-      default), uncertainty glass (the chosen extra idea).
+Wave 1 builders (isolated worktrees, disjoint files, own `copy.ts` sections; branched from 56f713b):
+`m6-prompt` (prompt visualizer + token flight), `m6-glass-sound` (uncertainty glass + procedural
+sound), `m6-incidents-tour` (incident banner/alarm + cinematic tour), `m6-discoveries-share` (40
+discoveries + tracker + share card). Integration hooks already on the branch: `campus.pulseHall`,
+`campus.setFlicker`, `campus.setGlassMode`, `world.captureFrame`, `world.tourTo`, page roots
+`#prompt`, `#incidents`, `#tour`. Full multi-agent review after integration (D-051).
+
+- [x] Compare mode (built directly): split-screen viewports with one camera + bloom pipeline each,
+      metrics card per column with ranges, tiers and the latest source; phones use half-height columns.
+- [x] "Since you arrived" equivalences: words, electricity, cooling water (range + tier each).
+- [ ] Merge + integrate wave 1; screenshots and two art passes; full review; docs.
 
 ## Blocked (needs the owner)
 

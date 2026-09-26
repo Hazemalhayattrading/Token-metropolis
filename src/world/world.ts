@@ -61,6 +61,10 @@ export interface World {
    * its own camera orbiting that campus. null returns to the single city view.
    */
   setCompare(ids: readonly string[] | null, layout: 'columns' | 'rows', area?: number): void;
+  /** Render the current view and copy it into a 2D canvas (for the share card). */
+  captureFrame(): HTMLCanvasElement;
+  /** A camera flight for the cinematic tour: the overview or one campus (no selection, no panel). */
+  tourTo(stop: { kind: 'overview' | 'hq'; id?: string }, seconds?: number): void;
   readonly view: InteriorView;
   dispose(): void;
 }
@@ -727,6 +731,23 @@ export function createWorld(
     },
     resetTimeline() {
       prevT = null;
+    },
+    captureFrame() {
+      // Render and copy in the same task, while the drawing buffer still holds this frame.
+      if (compare) renderCompare(0);
+      else post.render();
+      const out = document.createElement('canvas');
+      out.width = canvas.width;
+      out.height = canvas.height;
+      out.getContext('2d')?.drawImage(canvas, 0, 0);
+      return out;
+    },
+    tourTo(stop, seconds = 3.2) {
+      if (selected) world.select(null);
+      const pose =
+        stop.kind === 'hq' && stop.id && slots.has(stop.id) ? campusPose(stop.id) : overviewPose();
+      controls.autoRotate = stop.kind === 'overview' && !opts.reducedMotion;
+      void director.flyTo(pose, seconds);
     },
     setCompare(ids, layout, area = 1) {
       disposeCompare();

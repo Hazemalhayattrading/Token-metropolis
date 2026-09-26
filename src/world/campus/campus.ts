@@ -43,6 +43,8 @@ import {
 import { buildTypology, type TowerParts } from './typologies';
 
 const MAX_HALLS = 6;
+const FACADE_INTENSITY = 1.6;
+const HALL_INTENSITY = 2.4;
 const MAX_COOLING = 4;
 const MAX_TRUCKS = 8;
 
@@ -91,6 +93,12 @@ export interface Campus {
   currentHeight: number;
   update(s: CampusState): void;
   setHighlight(on: boolean): void;
+  /** A brief flash of the server-hall LEDs (a prompt's token arriving). */
+  pulseHall(): void;
+  /** Window-light multiplier 0..1 (incident flicker); 1 = normal. */
+  setFlicker(f: number): void;
+  /** While the uncertainty glass is shown, the tower facade steps back so the glass reads. */
+  setGlassMode(on: boolean): void;
   /**
    * Make room for an interior: offices turn the tower to glass, the server
    * hall lifts the hall roofs away, the lab parks the trucks.
@@ -149,8 +157,13 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
   const { palette, motif } = platform.identity;
   const seed = seedOf(platform.id);
 
-  const facadeU = patternUniforms(seed, '#ffd9a0', '#bcd6ff', 1.6);
-  const hallU: PatternUniforms = patternUniforms(seed + 5, palette.accent, '#ff3b3b', 2.4);
+  const facadeU = patternUniforms(seed, '#ffd9a0', '#bcd6ff', FACADE_INTENSITY);
+  const hallU: PatternUniforms = patternUniforms(
+    seed + 5,
+    palette.accent,
+    '#ff3b3b',
+    HALL_INTENSITY,
+  );
   const facade = facadeMaterial({ color: palette.primary, uniforms: facadeU });
   const facadeAlt = facadeMaterial({ color: palette.secondary, uniforms: facadeU, roughness: 0.7 });
   const accent = accentMaterial(palette.accent, 1.6);
@@ -314,6 +327,9 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
 
   let currentHeight = 0;
   let interior: InteriorView = 'overview';
+  let pulse = 0;
+  let flicker = 1;
+  let glassMode = false;
   const towerMaterials = [facade, facadeAlt, accent, accentSoft, dark, glass];
   const probe = new Raycaster();
   const probeOrigin = new Vector3();
@@ -361,9 +377,12 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
       sun.visible = sunMat.opacity > 0.002;
 
       facadeU.uLit.value = s.lit;
+      facadeU.uIntensity.value = FACADE_INTENSITY * flicker * (glassMode ? 0.45 : 1);
       facadeU.uDaylight.value = s.daylight;
       facadeU.uTime.value = s.time;
-      hallU.uActivity.value = Math.min(1, s.activity * 0.6);
+      pulse = Math.max(0, pulse - s.dt / 1.6);
+      hallU.uActivity.value = Math.min(1, s.activity * 0.6 + pulse);
+      hallU.uIntensity.value = HALL_INTENSITY * (1 + pulse * 1.5);
       hallU.uTime.value = s.time;
       steamMat.uniforms.uTime!.value = s.time;
       steamMat.uniforms.uRate!.value = 0.6 + s.activity * 0.6;
@@ -452,6 +471,15 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
         m.depthWrite = !ghost;
         m.needsUpdate = true;
       }
+    },
+    pulseHall() {
+      pulse = 1;
+    },
+    setFlicker(f) {
+      flicker = Math.min(1, Math.max(0, f));
+    },
+    setGlassMode(on) {
+      glassMode = on;
     },
     setHighlight(on) {
       highlightTarget = on ? 1 : 0;

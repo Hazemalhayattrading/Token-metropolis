@@ -1203,3 +1203,62 @@ a {
   color: var(--faint);
   font-size: 11px;
 }
+
+/* --- M6 layout roots ---------------------------------------------------------------------- */
+.incidents-root {
+  position: absolute;
+  top: calc(var(--gap) + 12px);
+  left: 50%;
+  width: min(560px, calc(100vw - 2 * var(--gap) - 800px));
+  min-width: 320px;
+  transform: translateX(-50%);
+  z-index: 7;
+}
+.incidents-root:empty {
+  display: none;
+}
+.tour-root {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--footer-h) + var(--gap) + 84px);
+  width: min(720px, calc(100vw - 2 * var(--gap)));
+  transform: translateX(-50%);
+  z-index: 8;
+}
+.tour-root[hidden] {
+  display: none;
+}
+.prompt-root {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(480px, calc(100vw - 2 * var(--gap)));
+  max-height: calc(100% - 2 * var(--gap) - var(--footer-h));
+  transform: translate(-50%, -50%);
+  z-index: 9;
+}
+.prompt-root[hidden] {
+  display: none;
+}
+@media (max-width: 720px) {
+  .incidents-root {
+    top: calc(var(--gap) + 104px + env(safe-area-inset-top));
+    left: var(--gap);
+    right: var(--gap);
+    width: auto;
+    min-width: 0;
+    transform: none;
+  }
+  .tour-root {
+    bottom: calc(var(--footer-h) + var(--gap) + 64px);
+  }
+  .prompt-root {
+    top: auto;
+    left: 0;
+    right: 0;
+    bottom: var(--footer-h);
+    width: auto;
+    max-height: 70svh;
+    transform: none;
+  }
+}
