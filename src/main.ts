@@ -115,6 +115,7 @@ async function boot(): Promise<void> {
         onModel: (id) => {
           if (panel.view === 'lab') panel.selectModel(id);
         },
+        onViewChange: (view) => panel.showView(view),
       });
       new ResizeObserver(updateInsets).observe(panelEl);
       mountControls((mode) => world.setScale(mode));

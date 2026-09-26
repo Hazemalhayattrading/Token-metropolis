@@ -531,8 +531,8 @@
     "id": "launch-copilot-gpt-5",
     "date": "2025-08-07",
     "platform": "copilot",
-    "kind": "model-launch",
-    "title": "GPT-5 in Microsoft Copilot and Foundry released",
+    "kind": "model-available",
+    "title": "GPT-5 in Microsoft Copilot and Foundry available in Microsoft Copilot",
     "source": {
       "title": "Microsoft FY26 Q1 earnings (GPT-5 available in Foundry this quarter)",
       "publisher": "Microsoft",
@@ -975,8 +975,8 @@
     "id": "launch-bing-chat-gpt-4",
     "date": "2023-02-07",
     "platform": "copilot",
-    "kind": "model-launch",
-    "title": "GPT-4 in Bing Chat released",
+    "kind": "model-available",
+    "title": "GPT-4 in Bing Chat available in Microsoft Copilot",
     "source": {
       "title": "Microsoft — Reinventing search with a new AI-powered Bing and Edge",
       "publisher": "Microsoft",

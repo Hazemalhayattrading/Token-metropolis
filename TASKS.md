@@ -68,7 +68,7 @@ Quick orientation: `npm install && npm run check` (type-check, lint, format, tes
 - "Homes powered" stays hidden until the EIA constant is verified.
 - "How we estimate" links to METHODOLOGY.md on GitHub until the in-site page (M8).
 
-## Milestone 4 — Zoom interiors ✅ (pending the multi-agent review below)
+## Milestone 4 — Zoom interiors ✅ (reviewed by a 4-dimension multi-agent workflow; 24 findings fixed)
 
 - [x] Panel tabs (Overview · Offices · Server hall · Power & cooling · Model lab), ARIA tablist with
       arrow/Home/End keys; each tab flies the camera to a diorama anchored in the campus.
@@ -89,6 +89,18 @@ Quick orientation: `npm install && npm run check` (type-check, lint, format, tes
       release date, context window, inputs, maker, source link, checking level.
 - [x] Every pane is filled on open so no number ever sits without its badge.
 - [x] E2E `tests/e2e/interiors.spec.ts` (desktop + mobile) + screenshots `m4-*`; two art passes.
+
+### Multi-agent review (Ultracode) — 24 confirmed findings, all addressed
+
+Interior cameras inside neighbouring HQs (others now step aside, D-046); office floors outside most
+towers (per-seat fit, D-047); hall diorama buried in base buildings (base hides); true-scale stub
+towers (interiors force log scale); Model-lab badges hard-coded Reported (D-043); Copilot's OpenAI
+models credited to Microsoft; tokens/s tier (D-045); liquid-cooling claim for undisclosed fleets
+(D-041); gauge scale changing with the time of day (D-042); traffic multiplier range + method; copy
+("feeds the campus"); mobile sheet transform bug; focus lost on close; model detail scroll; clipped
+tab focus ring; `--faint` contrast (now #8490a8); gauge tick size; interior load failure not reported
+to the panel; shader compile stall (pre-compile); InstancedMesh buffers not disposed; stale bounding
+spheres; `decadeScale` guard. 6 findings were rejected by the skeptics (see git history).
 
 ### Polish carried to M8
 
@@ -128,6 +140,14 @@ Quick orientation: `npm install && npm run check` (type-check, lint, format, tes
 - Models: GPT-3.5, GPT-4, GPT-4o, GPT-5 (OpenAI pages), Bard, Llama 3 / 3.1 / 4, GPT-4 in Bing Chat,
   GPT-5 in Copilot, DeepSeek-V3 (day), DeepSeek-R1.
 - Status pages: status.claude.com, status.deepseek.com (the pipeline must treat them as optional).
+
+### Model data to re-check (flagged during the provenance curation)
+
+- `grok-1`: marked page-verified, but its source (the open-weights README) does not state 2023-11-04.
+- `bing-chat-gpt-4`: the 2023-02-07 source says "a next-generation OpenAI model", not GPT-4 (confirmed
+  2023-03-14).
+- `qwen3-5`: sourced from the QwenLM/Qwen3.8 README rather than a Qwen3.5 page.
+- `copilot-gpt-5`: only the quarter (Jul–Sep 2025) is confirmed; stored at month precision.
 
 ### Snippet-only metrics
 

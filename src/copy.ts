@@ -28,6 +28,9 @@ export const COPY = {
     derived: 'Estimated',
     modeled: 'Modeled',
   },
+  unchecked: 'Not yet checked',
+  uncheckedHelp:
+    'A published fact we have not yet checked against its source page (see the verification backlog).',
   tierHelp: {
     reported: 'Published by the company or a primary source.',
     derived: 'Calculated from published figures.',
@@ -85,6 +88,8 @@ export const COPY = {
     honesty: 'Desks and people are a visual scale of load, not a staff count.',
     traffic: 'Traffic right now',
     trafficUnit: '× the daily average',
+    trafficNote:
+      'The time-of-day curve is an assumption — regional waking hours plus the one published production load curve — so this figure is Modeled.',
     hardwareLabel: 'Desk hardware',
     hardware: [
       'Boxy monitors — the lighter load band',
@@ -101,8 +106,9 @@ export const COPY = {
       'Rows of racks grow with the daily rate; their LEDs blink faster when traffic is above the daily average.',
     honesty: 'Racks are a visual scale of load, not a count of real machines.',
     accelerator: 'Likely accelerator class',
-    liquid: 'Coolant pipes are drawn because this accelerator class is usually liquid-cooled.',
-    air: 'No coolant pipes: this accelerator class is often air-cooled.',
+    liquid:
+      'The coolant pipes are illustrative: this accelerator class is usually liquid-cooled at scale.',
+    air: 'No coolant pipes are drawn: cooling for this hardware varies or is not disclosed.',
     sources: 'Sources',
     classes: {
       'nvidia-ampere': 'NVIDIA Ampere-class GPUs',
@@ -117,7 +123,7 @@ export const COPY = {
   },
   power: {
     intro:
-      'The substation feeds the halls; cooling towers carry the heat away. Both gauges are live and share one log scale across all 15 HQs.',
+      'The substation feeds the campus; cooling towers carry the heat away. Both gauges are live, and each log scale spans every HQ so the needles compare.',
     powerGauge: 'Power now',
     waterGauge: 'Cooling water',
     inputs: 'Inputs',
@@ -139,13 +145,14 @@ export const COPY = {
     list: 'Models, newest first',
     choose: 'Select a model to see its details.',
     released: 'Released',
+    firstSeen: 'First seen',
     context: 'Context window',
     contextUnit: 'tokens',
     notPublished: 'not published',
     modalities: 'Inputs',
     origin: 'Made by',
     own: (parent: string) => parent,
-    offered: 'Another company (offered on this platform)',
+    offered: (maker: string) => `${maker} — offered on this platform`,
     flagship: 'flagship',
     offeredTag: 'offered',
     source: 'Source',

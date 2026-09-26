@@ -11,7 +11,7 @@
   --line-strong: rgb(255 255 255 / 0.18);
   --text: #eef1f8;
   --muted: #9aa6bd;
-  --faint: #6c7890;
+  --faint: #8490a8;
   --accent: #ffc566;
 
   /* Tier colours — AA contrast on --bg */
@@ -245,6 +245,15 @@ a {
 .tier--modeled {
   color: var(--tier-modeled);
   background: rgb(167 176 192 / 0.1);
+}
+.tier--unchecked {
+  color: var(--muted);
+  border-style: dashed;
+  background: transparent;
+}
+.tier--unchecked::before {
+  background: transparent;
+  border: 1px solid currentcolor;
 }
 
 .button {
@@ -694,11 +703,16 @@ a {
   color: var(--text);
   border-bottom-color: var(--accent);
 }
-.tabs__tab:focus-visible,
 .pane:focus-visible,
 .lab-list__item:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+  border-radius: 6px;
+}
+/* The tab strip scrolls horizontally (which clips overflow), so the ring sits inside the tab. */
+.tabs__tab:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
   border-radius: 6px;
 }
 .pane {
@@ -752,7 +766,8 @@ a {
 }
 .gauge__tick-label {
   fill: var(--muted);
-  font: 400 11px var(--font-ui);
+  /* SVG user units: the gauge renders at ~0.6×, so this reads as ~11px. */
+  font: 400 18px var(--font-ui);
 }
 .gauge__needle {
   stroke: var(--text);
@@ -923,15 +938,18 @@ a {
     bottom: var(--footer-h);
     width: auto;
     max-height: 60svh;
+    border-radius: 18px 18px 0 0;
+    transform: translateY(24px);
+  }
+  .hq-panel.panel--open {
+    transform: none;
+  }
+  .hq-panel:not([data-view='overview']) {
+    max-height: 52svh;
   }
   .tabs__tab {
     padding-inline: 5px;
     font-size: 12px;
-  }
-  .hq-panel:not([data-view='overview']) {
-    max-height: 52svh;
-    border-radius: 18px 18px 0 0;
-    transform: translateY(24px);
   }
   .panel-open .hud,
   .panel-open .masthead {

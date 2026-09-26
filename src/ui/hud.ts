@@ -5,7 +5,12 @@
  */
 import { COPY } from '../copy';
 import type { LoadedData } from '../data/load';
-import { globalBetween, globalDailyRate, globalTokensPerSecond, rateTier } from '../model/estimate';
+import {
+  globalBetween,
+  globalDailyRate,
+  globalTokensPerSecond,
+  instantTier,
+} from '../model/estimate';
 import { weakest } from '../model/tier';
 import { utcDayStart } from '../model/time';
 import type { City } from '../state/city';
@@ -20,7 +25,8 @@ export interface Hud {
 
 export function mountHud(city: City, data: LoadedData, clock: Clock, arrivedAt: number): Hud {
   const root = byId('hud');
-  const tier = weakest(...city.platforms.map((pm) => rateTier(pm, clock.now())));
+  // Today-so-far and per-second figures depend on the time-of-day curve (see instantTier).
+  const tier = weakest(...city.platforms.map((pm) => instantTier(pm, clock.now())));
 
   const today = h('output', { class: 'counter__value', 'aria-live': 'off' });
   const range = h('p', { class: 'counter__range' });

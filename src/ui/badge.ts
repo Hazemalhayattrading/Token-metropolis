@@ -6,3 +6,8 @@ import { h } from './dom';
 export function tierBadge(tier: Tier): HTMLSpanElement {
   return h('span', { class: `tier tier--${tier}`, title: COPY.tierHelp[tier] }, COPY.tiers[tier]);
 }
+
+/** Shown instead of a tier where a published fact has not yet been checked against its source. */
+export function uncheckedBadge(): HTMLSpanElement {
+  return h('span', { class: 'tier tier--unchecked', title: COPY.uncheckedHelp }, COPY.unchecked);
+}

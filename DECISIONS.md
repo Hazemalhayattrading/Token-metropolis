@@ -260,21 +260,28 @@ built only for the selected campus.
 
 Desks, people and racks are a visual scale of load (log daily rate), not staff or machine counts, and
 each tab says so. Desk-hardware bands follow the daily rate at 1.78T and 56.2T tokens/day (log-load
-0.45 / 0.75). Liquid-cooling pipes are drawn for accelerator classes usually deployed with liquid
-cooling at scale (Blackwell rack systems, TPU pods, Trainium, and "mixed" fleets at the largest
-platforms) — a cosmetic assumption, labelled as such.
+0.45 / 0.75). Liquid-cooling pipes are drawn only for accelerator classes usually deployed with
+liquid cooling at scale (Blackwell rack systems, TPU pods, Trainium); "mixed" (varied or undisclosed
+fleets) gets none, and the panel calls the pipes illustrative. The traffic multiplier ("× the daily
+average") is shown with a range from the traffic-shape amplitude bounds and the note that the curve is
+an assumption.
 
-### D-042 — Power and water gauges share one log scale
+### D-042 — Power and water gauges span every HQ on a log scale
 
-Gauges span whole decades covering every HQ's plausible range, so the needle position compares across
-HQs (a linear scale would pin every platform but the largest at zero). The shaded band is the range,
-the needle the central value; the numbers and tier badge are in text beside the drawing.
+Each gauge spans whole decades covering every HQ's daily-average range widened by the largest possible
+traffic swing, so the needle position compares across HQs and the decades do not change with the time
+of day (a linear scale would pin every platform but the largest at zero). The shaded band is the
+range, the needle the central value; the numbers and tier badge are in text beside the drawing.
 
-### D-043 — Model facts carry the "Reported" badge; checking level is separate
+### D-043 — Model facts are badged by who published them
 
-Release dates and context windows come from announcements, so they are badged Reported. Whether we
-read the page, only a search summary, or have not yet checked is shown as a separate note, as for
-metrics. Models listed only for context (offered from other companies) are marked as offered.
+As for metrics: a release date or context window is Reported only when it comes from the model maker's
+own publication (`sourceKind: primary`) and was checked; figures from anyone else are Estimated; facts
+not yet checked against their source show a dashed "Not yet checked" chip instead of a tier. Dates
+carry a precision (`datePrecision: month` shows YYYY-MM) and a kind: `first-seen` dates (a repository's
+first commit, another product adding the model, a first sighting) are labelled "First seen", never
+"Released". Offered models must name their `maker`; `origin` has no default any more (Microsoft
+Copilot's OpenAI models were wrongly credited to Microsoft through that default).
 
 ### D-044 — Multi-agent orchestration ("Ultracode")
 
@@ -283,3 +290,29 @@ multi-agent workflow (parallel reviewers across correctness, data honesty, acces
 performance, with adversarial verification of every finding) before pushing, and independent modules
 in later milestones may be built in parallel with strict file ownership. This supersedes the
 CLAUDE.md default of avoiding subagents, at the owner's request.
+
+### D-045 — Time-of-day figures are at best Modeled
+
+Tokens per second and tokens so far today multiply the daily rate by the time-of-day traffic curve,
+whose constants are assumptions, so by the weakest-input rule they are badged
+`instantTier = weakest(rateTier, traffic tier)` — i.e. Modeled — even when the daily rate is Reported.
+Full-day figures (the daily rate, tokens/day labels) do not depend on the curve (its terms average to
+zero) and keep the rate's tier.
+
+### D-046 — Inside an interior, the rest of the city steps aside
+
+Fixed camera offsets put interior cameras inside or behind neighbouring HQs (the island is dense), and
+a sight-line check alone still left neighbours filling the frame. While an interior is open the other
+HQs sink away (their towers ease to zero and their campuses hide; streams and labels hide too), and
+regrow when the visitor returns to the overview. The selected campus shows log scale meanwhile,
+because the interiors are laid out for log-scale towers (true scale can leave a stub tower). Camera
+directions are still searched so the campus's own tower never blocks the view, and taps inside an
+interior never jump to another HQ.
+
+### D-047 — Office floors are cut to each tower's real shape
+
+Rectangular floors from a bounding box stuck out of round, hexagonal, triangular and twin towers. Desks
+are now packed greedily on a fine grid and kept only where the desk and chair are inside the tower
+body at that floor (a per-mesh ray-parity test, since towers are unions of overlapping solids); each
+desk gets its own floor tile. Base parts (plazas, workshops, canopies) hide in the offices and hall
+views so they never cut through a diorama.

@@ -9,11 +9,14 @@ import {
   dailyRate,
   globalCumulative,
   globalDailyRate,
+  instantTier,
   latestAnchor,
   metricRange,
   rateTier,
   tokensPerSecond,
   tokensToday,
+  trafficNow,
+  trafficNowRange,
 } from '../estimate';
 import { compact, plain } from '../format';
 import { isoToDays } from '../time';
@@ -217,6 +220,26 @@ describe('anchors from metrics', () => {
     expect(() =>
       metric({ id: 'bad3', kind: 'revenue', period: 'month', value: 1, asOf: '2025-01-01' }),
     ).toThrow();
+  });
+});
+
+describe('time-of-day figures', () => {
+  it('are never better than Modeled, because the traffic shape is an assumption', () => {
+    for (let d = 0; d < 400; d += 37) {
+      const t = NOW - d;
+      expect(instantTier(pm, t)).toBe('modeled');
+    }
+  });
+
+  it('give the traffic multiplier an ordered range around the central curve', () => {
+    for (let h = 0; h < 48; h++) {
+      const t = NOW + h / 24;
+      const r = trafficNowRange(pm, t);
+      expect(r.low).toBeLessThanOrEqual(r.central);
+      expect(r.central).toBeLessThanOrEqual(r.high);
+      expect(r.central).toBeCloseTo(trafficNow(pm, t), 12);
+      expect(r.low).toBeGreaterThan(0);
+    }
   });
 });
 

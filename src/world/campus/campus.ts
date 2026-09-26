@@ -10,6 +10,8 @@ import {
   BufferGeometry,
   CircleGeometry,
   Color,
+  DoubleSide,
+  FrontSide,
   Float32BufferAttribute,
   Group,
   InstancedMesh,
@@ -19,7 +21,9 @@ import {
   MeshStandardMaterial,
   Object3D,
   Points,
+  Raycaster,
   ShaderMaterial,
+  type Side,
   TorusGeometry,
   Vector2,
   Vector3,
@@ -60,6 +64,8 @@ export interface CampusState {
   time: number;
   /** Seconds since last frame. */
   dt: number;
+  /** How fast the height eases (1/s); default 5 (~0.6 s). */
+  ease?: number;
 }
 
 export interface Campus {
@@ -70,8 +76,14 @@ export interface Campus {
   /** World-space point just above the crown (for labels and camera framing). */
   readonly top: Vector3;
   readonly footprint: number;
-  /** Half-extents (x, z) of the tower body at ground level, for the office cutaway. */
+  /** Half-extents (x, z) of the tower body's bounding box, for the office cutaway. */
   readonly bodyHalf: { x: number; z: number };
+  /**
+   * Whether a campus-local point lies inside the tower body when the tower is
+   * `height` tall (ray-parity test against the body meshes). Used to cut the
+   * office floors to the tower's real shape.
+   */
+  insideBody(x: number, y: number, z: number, height: number): boolean;
   /** Local-space anchors for the interiors (M4). */
   readonly anchors: { halls: Vector3; power: Vector3; lab: Vector3 };
   currentHeight: number;
@@ -155,7 +167,7 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
     accentColor: palette.accent,
   });
 
-  const bodyBox = new Box3().setFromObject(tower.body);
+  const bodyBox = new Box3().setFromObject(tower.body, true);
   const bodyHalf = {
     x: Math.max(Math.abs(bodyBox.min.x), Math.abs(bodyBox.max.x)),
     z: Math.max(Math.abs(bodyBox.min.z), Math.abs(bodyBox.max.z)),
@@ -301,6 +313,9 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
   let currentHeight = 0;
   let interior: InteriorView = 'overview';
   const towerMaterials = [facade, facadeAlt, accent, accentSoft, dark, glass];
+  const probe = new Raycaster();
+  const probeOrigin = new Vector3();
+  const probeDir = new Vector3();
   let highlight = 0;
   let highlightTarget = 0;
 
@@ -324,7 +339,7 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
     },
     update(s) {
       // Ease towards the target height (frame-rate independent, ~0.6 s).
-      const k = 1 - Math.exp(-s.dt * 5);
+      const k = 1 - Math.exp(-s.dt * (s.ease ?? 5));
       currentHeight +=
         (s.height - currentHeight) * (Math.abs(s.height - currentHeight) < 0.01 ? 1 : k);
       const h = Math.max(currentHeight, 0.001);
@@ -380,8 +395,42 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
       top.set(0, h + 5, 0);
       group.localToWorld(top);
     },
+    insideBody(x, y, z, height) {
+      // Temporarily set the body to `height`, make every face hit-testable from inside,
+      // cast a ray along local +x and count crossings. Restored before returning.
+      const sides: Side[] = towerMaterials.map((m) => m.side);
+      const prevScale = tower.body.scale.y;
+      towerMaterials.forEach((m) => (m.side = DoubleSide));
+      tower.body.scale.y = Math.max(height, 0.001);
+      group.updateMatrixWorld(true);
+      probeOrigin.set(x, y, z);
+      group.localToWorld(probeOrigin);
+      probeDir.set(1, 0, 0).applyQuaternion(group.quaternion);
+      probe.set(probeOrigin, probeDir);
+      // Towers are unions of overlapping solids (core + skirts + fins), so parity is taken per
+      // mesh: inside any one part means inside the tower.
+      let inside = false;
+      tower.body.traverse((o) => {
+        if (inside || !(o instanceof Mesh)) return;
+        const hits = probe.intersectObject(o, false);
+        let crossings = 0;
+        let last = -Infinity;
+        for (const hit of hits) {
+          if (hit.distance - last > 1e-4) crossings++; // shared edges report twice
+          last = hit.distance;
+        }
+        if (crossings % 2 === 1) inside = true;
+      });
+      towerMaterials.forEach((m, i) => (m.side = sides[i] ?? FrontSide));
+      tower.body.scale.y = prevScale;
+      group.updateMatrixWorld(true);
+      return inside;
+    },
     setInterior(view) {
       if (view === interior) return;
+      // Base parts (plazas, workshops, canopies) would cut through the office floors and
+      // the hall diorama, so they step aside for those two views.
+      tower.base.visible = view !== 'offices' && view !== 'hall';
       const wasGhost = interior === 'offices';
       interior = view;
       const ghost = view === 'offices';
@@ -399,6 +448,7 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
     dispose() {
       group.traverse((o) => {
         if (o instanceof Mesh || o instanceof Points) o.geometry.dispose();
+        if (o instanceof InstancedMesh) o.dispose();
       });
       materials.forEach((m) => m.dispose());
     },

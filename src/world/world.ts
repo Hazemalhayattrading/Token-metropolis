@@ -6,10 +6,12 @@
  */
 import {
   ACESFilmicToneMapping,
+  Box3,
   FogExp2,
   HemisphereLight,
   DirectionalLight,
   PerspectiveCamera,
+  Ray,
   Raycaster,
   Scene,
   SRGBColorSpace,
@@ -58,6 +60,8 @@ export interface WorldOptions {
   onSelect?: (id: string | null) => void;
   /** A model crystal was clicked in the lab. */
   onModel?: (id: string) => void;
+  /** The world changed view on its own (e.g. the interiors failed to load and it fell back). */
+  onViewChange?: (view: InteriorView) => void;
 }
 
 interface Slot {
@@ -173,19 +177,49 @@ export function createWorld(
     return { position, target };
   }
 
-  /** Interior framings, in the campus's local space (+z faces the city centre). */
+  // --- interior framings ------------------------------------------------------
+  const UP = new Vector3(0, 1, 0);
+  const probeRay = new Ray();
+  const probeBox = new Box3();
+  const probeHit = new Vector3();
+
+  /**
+   * How far a sight line from `from` along `dir` stays clear of the campus's own tower (its pick
+   * box). Other HQs step aside while an interior is open (see the frame loop), so only the
+   * campus itself can block the view.
+   */
+  function clearDistance(from: Vector3, dir: Vector3, max: number, own: Campus | null): number {
+    if (!own) return max;
+    probeRay.set(from, dir);
+    probeBox.setFromObject(own.hit);
+    return probeRay.intersectBox(probeBox, probeHit)
+      ? Math.min(max, from.distanceTo(probeHit))
+      : max;
+  }
+
+  /**
+   * Interior framings, in the campus's local space (+z faces the city centre). The campus's own
+   * tower can stand in the preferred line of sight, so candidate directions are tried in order
+   * (turning around the target, then climbing) and the first with a clear view wins.
+   */
   function viewPose(id: string, v: InteriorView): Pose {
     if (v === 'overview') return campusPose(id);
     const c = slots.get(id)!.campus;
     let target: Vector3;
     let dir: Vector3;
     let distance: number;
+    let yaws = [0, 30, -30, 60, -60, 90, -90, 120, -120, 150, -150, 180];
+    // The target sits inside the campus's own pick box only for the offices.
+    let own: Campus | null = c;
     switch (v) {
-      case 'offices':
-        target = new Vector3(0, 3.8, 0);
+      case 'offices': {
+        const f = interiors?.officeFrame() ?? { y: 3.8, radius: 3 };
+        target = new Vector3(0, f.y, 0);
         dir = new Vector3(0.55, 0.55, 1);
-        distance = 11 + Math.max(c.bodyHalf.x, c.bodyHalf.z) * 2.2;
+        distance = 9 + f.radius * 2.2;
+        own = null;
         break;
+      }
       case 'hall':
         target = c.anchors.halls.clone().setY(0.8);
         dir = new Vector3(0.55, 1.35, -0.75);
@@ -200,16 +234,31 @@ export function createWorld(
         target = c.anchors.lab.clone().setY(1.5);
         dir = new Vector3(0.12, 0.38, 1);
         distance = 9 + (interiors?.labHalfWidth() ?? 6) * 1.8;
+        yaws = [0, 20, -20, 40, -40, 60, -60]; // the display case has a back wall
         break;
     }
     // Portrait screens see ~27° across, so step back to keep the scene in frame.
     if (camera.aspect < 1) distance *= 1.7;
     c.group.updateMatrixWorld();
     const worldTarget = c.group.localToWorld(target);
-    const worldDir = dir.normalize().applyQuaternion(c.group.quaternion);
+    let best = { dir: new Vector3(), clear: -1 };
+    search: for (const lift of [0, 0.7, 1.6]) {
+      for (const yaw of yaws) {
+        const d = dir
+          .clone()
+          .setY(dir.y + lift)
+          .normalize()
+          .applyAxisAngle(UP, (yaw * Math.PI) / 180)
+          .applyQuaternion(c.group.quaternion);
+        const clear = clearDistance(worldTarget, d, distance, own);
+        if (clear > best.clear) best = { dir: d, clear };
+        if (clear >= distance) break search;
+      }
+    }
+    const finalDistance = Math.max(6, Math.min(distance, best.clear - 1.5));
     return {
       target: worldTarget,
-      position: worldTarget.clone().addScaledVector(worldDir, distance),
+      position: worldTarget.clone().addScaledVector(best.dir, finalDistance),
     };
   }
 
@@ -280,6 +329,8 @@ export function createWorld(
       const m = raycaster.intersectObjects(crystals as Object3D[], false)[0];
       if (m) return { platform: null, model: m.object.userData.modelId as string };
     }
+    // Inside an interior, taps never jump to a neighbouring HQ; the panel's tabs lead out.
+    if (view !== 'overview') return { platform: null, model: null };
     const hit = raycaster.intersectObjects(hitMeshes, false)[0];
     return {
       platform: (hit?.object.userData.platformId as string | undefined) ?? null,
@@ -356,8 +407,13 @@ export function createWorld(
       const load = logLoad(rate);
       const activity = rate > 0 ? trafficNow(pm, t) : 0;
       const counts = facilityCounts(rate);
+      // While an interior is open, the other HQs sink away (and regrow on the way out) so nothing
+      // stands between the camera and the interior; the selected campus shows log scale, which
+      // the interiors are laid out for.
+      const inside = id === selected && view !== 'overview';
+      const away = view !== 'overview' && id !== selected;
       slot.campus.update({
-        height: towerHeight(rate, scaleMode, maxRate),
+        height: away ? 0 : towerHeight(rate, inside ? 'log' : scaleMode, maxRate),
         lit: occupancy(slot.hour) * (0.45 + 0.55 * load),
         hour: slot.hour,
         daylight: daylight(slot.hour),
@@ -367,13 +423,13 @@ export function createWorld(
         trucks: counts.trucks,
         time: elapsed,
         dt,
+        ease: away ? 10 : 5,
       });
-      const inside = id === selected && view !== 'overview';
       if (inside) {
         interiors?.update({ load, occupancy: occupancy(slot.hour), activity, time: elapsed });
       }
       slot.streams.update(elapsed, rate > 0 ? (0.25 + 0.75 * load) * Math.min(1.4, activity) : 0);
-      slot.streams.group.visible = rate > 0 && !inside;
+      slot.streams.group.visible = rate > 0 && view === 'overview';
       labelPositions.set(id, slot.campus.top);
       labelValues.set(id, {
         text: rate > 0 ? `${humanNumber(rate, 'short')} tokens/day` : '',
@@ -445,23 +501,34 @@ export function createWorld(
       }
       interiorsModule ??= import('./interiors');
       interiorsModule
-        .then((mod) => {
+        .then(async (mod) => {
           if (selected !== id || view !== next) return; // superseded while loading
           const pm = city.byId.get(id)!;
+          const slot = slots.get(id)!;
           interiors ??= mod.createInteriors(
             pm.platform,
-            slots.get(id)!.campus,
+            slot.campus,
             city.dataset.models.filter((m) => m.platform === id),
+            towerHeight(dailyRate(pm, clock.now()).central, 'log', 0),
           );
           interiors.show(next);
           interiors.selectModel(selectedModel);
+          // Compile the interior's shaders before the flight so the first frames don't stall
+          // (in parallel where the browser supports it; otherwise once, right now).
+          if (renderer.extensions.has('KHR_parallel_shader_compile')) {
+            await renderer.compileAsync(slot.campus.group, camera, scene).catch(() => undefined);
+          } else {
+            renderer.compile(slot.campus.group, camera, scene);
+          }
+          if (selected !== id || view !== next) return;
           void director.flyTo(viewPose(id, next), 1.4);
         })
         .catch(() => {
-          // Chunk failed to load (offline): stay on the campus overview.
+          // Chunk failed to load (offline): stay on the campus overview and tell the panel.
           interiorsModule = null;
           view = 'overview';
           opts.labels.classList.remove('labels--interior');
+          opts.onViewChange?.('overview');
         });
     },
     selectModel(id) {

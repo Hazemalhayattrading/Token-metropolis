@@ -20,14 +20,13 @@ export const LED_COLORS: Readonly<Record<Accelerator, readonly [string, string]>
 
 /**
  * Classes usually deployed with direct liquid cooling at scale (rack-scale
- * Blackwell systems, TPU pods, Trainium2 racks). "mixed" fleets at the largest
- * platforms include such racks, so they get pipes too. Cosmetic assumption.
+ * Blackwell systems, TPU pods, Trainium2 racks). "mixed" (undisclosed or
+ * varied fleets) gets no pipes. Illustrative, and labelled so in the panel.
  */
 const LIQUID: ReadonlySet<Accelerator> = new Set<Accelerator>([
   'nvidia-blackwell',
   'google-tpu',
   'aws-trainium',
-  'mixed',
 ]);
 
 export function isLiquidCooled(a: Accelerator): boolean {

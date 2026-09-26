@@ -10,6 +10,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "OpenAI — Introducing ChatGPT",
       "publisher": "OpenAI",
@@ -29,6 +32,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "OpenAI — GPT-4",
       "publisher": "OpenAI",
@@ -49,6 +55,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "OpenAI — Hello GPT-4o",
       "publisher": "OpenAI",
@@ -68,6 +77,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "OpenAI — Introducing GPT-5",
       "publisher": "OpenAI",
@@ -87,6 +99,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "GPT-5.6 and the Codex user surge",
       "publisher": "The New Stack",
@@ -106,6 +121,9 @@
     ],
     "flagship": true,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -125,6 +143,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Introducing Claude",
       "publisher": "Anthropic",
@@ -143,6 +164,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude 2",
       "publisher": "Anthropic",
@@ -162,6 +186,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Introducing the next generation of Claude",
       "publisher": "Anthropic",
@@ -181,6 +208,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude 3.5 Sonnet",
       "publisher": "Anthropic",
@@ -200,6 +230,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude 3.7 Sonnet and Claude Code",
       "publisher": "Anthropic",
@@ -219,6 +252,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Introducing Claude 4",
       "publisher": "Anthropic",
@@ -238,6 +274,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Introducing Claude Sonnet 4.5",
       "publisher": "Anthropic",
@@ -257,6 +296,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Introducing Claude Opus 4.5",
       "publisher": "Anthropic",
@@ -276,6 +318,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Opus 4.6",
       "publisher": "Anthropic",
@@ -295,6 +340,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Opus 4.7",
       "publisher": "Anthropic",
@@ -314,6 +362,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Opus 4.8 overview",
       "publisher": "Anthropic",
@@ -333,6 +384,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Fable 5 overview",
       "publisher": "Anthropic",
@@ -352,6 +406,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Sonnet 5",
       "publisher": "Anthropic",
@@ -371,6 +428,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Opus 5",
       "publisher": "Anthropic",
@@ -390,6 +450,9 @@
     ],
     "flagship": true,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Fable and Mythos 5.1",
       "publisher": "Anthropic",
@@ -409,6 +472,9 @@
     ],
     "flagship": true,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Claude Opus 5.5",
       "publisher": "Anthropic",
@@ -426,7 +492,11 @@
       "text"
     ],
     "flagship": false,
-    "origin": "own",
+    "origin": "offered",
+    "maker": "OpenAI",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Microsoft — Reinventing search with a new AI-powered Bing and Edge",
       "publisher": "Microsoft",
@@ -445,7 +515,11 @@
       "image"
     ],
     "flagship": false,
-    "origin": "own",
+    "origin": "offered",
+    "maker": "OpenAI",
+    "sourceKind": "third-party",
+    "datePrecision": "month",
+    "dateKind": "release",
     "source": {
       "title": "Microsoft FY26 Q1 earnings (GPT-5 available in Foundry this quarter)",
       "publisher": "Microsoft",
@@ -466,6 +540,10 @@
     ],
     "flagship": false,
     "origin": "offered",
+    "maker": "xAI",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI — Grok 4.5",
       "publisher": "xAI",
@@ -485,6 +563,10 @@
     ],
     "flagship": false,
     "origin": "offered",
+    "maker": "xAI",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "SpaceXAI releases Grok 4.7",
       "publisher": "MarkTechPost",
@@ -504,6 +586,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "deepseek-ai/DeepSeek-V2",
       "publisher": "DeepSeek (GitHub)",
@@ -522,6 +607,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "month",
+    "dateKind": "release",
     "source": {
       "title": "deepseek-ai/DeepSeek-V3",
       "publisher": "DeepSeek (GitHub)",
@@ -541,6 +629,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "month",
+    "dateKind": "release",
     "source": {
       "title": "deepseek-ai/DeepSeek-R1",
       "publisher": "DeepSeek (GitHub)",
@@ -560,6 +651,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "DeepSeek-V4 Preview release notes",
       "publisher": "DeepSeek",
@@ -578,6 +672,9 @@
     ],
     "flagship": true,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "DeepSeek ships V4-Pro as its flagship model, leaves preview",
       "publisher": "Unite.AI",
@@ -596,6 +693,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "字节跳动最新披露：豆包大模型日均tokens使用量超30万亿",
       "publisher": "Yicai",
@@ -616,6 +716,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "month",
+    "dateKind": "release",
     "source": {
       "title": "日均token调用量狂飙137倍！火山引擎展示字节AI实力：新模型豆包1.6支持多模态思考",
       "publisher": "Toutiao",
@@ -635,6 +738,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "火山引擎发布豆包系列模型升级",
       "publisher": "Tencent News",
@@ -655,6 +761,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "豆包大模型日均tokens调用量超过50万亿",
       "publisher": "Economic Observer",
@@ -673,6 +782,9 @@
     ],
     "flagship": true,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Volcano Engine launches Doubao 2.1 with daily token usage exceeding 180 trillion",
       "publisher": "KuCoin News",
@@ -691,6 +803,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Google — Try Bard and share your feedback",
       "publisher": "Google",
@@ -711,6 +826,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Gemini Pro is now available on Vertex AI",
       "publisher": "Google Cloud",
@@ -734,6 +852,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Gemini 2.5 Pro and Flash on Vertex AI",
       "publisher": "Google Cloud",
@@ -757,6 +878,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Gemini 3 is available for enterprise",
       "publisher": "Google Cloud",
@@ -778,6 +902,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Gemini 3 Flash for enterprises",
       "publisher": "Google Cloud",
@@ -799,6 +926,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Gemini 3.1 Pro on Gemini CLI, Gemini Enterprise and Vertex AI",
       "publisher": "Google Cloud",
@@ -818,6 +948,9 @@
     ],
     "flagship": true,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -839,6 +972,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Gemini 3.8 Live with Live Avatar is now generally available",
       "publisher": "Google Cloud",
@@ -858,6 +994,10 @@
     ],
     "flagship": false,
     "origin": "offered",
+    "maker": "OpenAI",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -877,6 +1017,10 @@
     ],
     "flagship": false,
     "origin": "offered",
+    "maker": "Anthropic",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -895,6 +1039,10 @@
     ],
     "flagship": false,
     "origin": "offered",
+    "maker": "Moonshot AI",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -913,6 +1061,10 @@
     ],
     "flagship": false,
     "origin": "offered",
+    "maker": "Microsoft",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -932,6 +1084,10 @@
     ],
     "flagship": false,
     "origin": "offered",
+    "maker": "Google",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -951,6 +1107,10 @@
     ],
     "flagship": true,
     "origin": "offered",
+    "maker": "OpenAI",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "GitHub Docs — Copilot model release status (commit history)",
       "publisher": "GitHub",
@@ -969,6 +1129,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xai-org/grok-1 README",
       "publisher": "xAI (GitHub)",
@@ -988,6 +1151,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI — Announcing Grok-1.5",
       "publisher": "xAI",
@@ -1007,6 +1173,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI's Grok can now generate images on X",
       "publisher": "TechCrunch",
@@ -1026,6 +1195,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI — Grok 4",
       "publisher": "xAI",
@@ -1044,6 +1216,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI — Grok Code Fast 1",
       "publisher": "xAI",
@@ -1063,6 +1238,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI — Grok 4.1",
       "publisher": "xAI",
@@ -1082,6 +1260,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI launches Grok 4.20",
       "publisher": "NextBigFuture",
@@ -1101,6 +1282,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "xAI — Grok 4.5",
       "publisher": "xAI",
@@ -1120,6 +1304,9 @@
     ],
     "flagship": true,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "SpaceXAI releases Grok 4.7",
       "publisher": "MarkTechPost",
@@ -1140,6 +1327,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "MoonshotAI/Kimi-VL README",
       "publisher": "Moonshot AI (GitHub)",
@@ -1158,6 +1348,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "MoonshotAI/Kimi-K2",
       "publisher": "Moonshot AI (GitHub)",
@@ -1179,6 +1372,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "MoonshotAI/Kimi-K2.5",
       "publisher": "Moonshot AI (GitHub)",
@@ -1199,6 +1395,9 @@
     ],
     "flagship": true,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "MoonshotAI/Kimi-K3",
       "publisher": "Moonshot AI (GitHub)",
@@ -1218,6 +1417,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Meta — Introducing Meta Llama 3",
       "publisher": "Meta",
@@ -1236,6 +1438,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Meta — Introducing Llama 3.1",
       "publisher": "Meta",
@@ -1255,6 +1460,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Meta — The Llama 4 herd",
       "publisher": "Meta",
@@ -1273,6 +1481,9 @@
     ],
     "flagship": true,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "month",
+    "dateKind": "release",
     "source": {
       "title": "Zuckerberg unveils Meta's first paid AI (Q2 2026 earnings)",
       "publisher": "StartupHub.ai",
@@ -1292,6 +1503,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Perplexity — Meet new Sonar",
       "publisher": "Perplexity",
@@ -1310,6 +1524,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "R1 1776 — model page",
       "publisher": "Artificial Analysis",
@@ -1328,6 +1545,9 @@
     ],
     "flagship": true,
     "origin": "own",
+    "sourceKind": "third-party",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "TestingCatalog on X (Sonar 2 spotted)",
       "publisher": "TestingCatalog (X)",
@@ -1347,6 +1567,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen README",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -1365,6 +1588,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen README",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -1383,6 +1609,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen3 README",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -1401,6 +1630,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen3 README",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -1419,6 +1651,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen3 README",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -1437,6 +1672,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen3 README",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -1458,6 +1696,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen3-Omni README",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -1477,6 +1718,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen3.8",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -1496,6 +1740,9 @@
     ],
     "flagship": true,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "QwenLM/Qwen3.8",
       "publisher": "Alibaba Qwen team (GitHub)",
@@ -1514,6 +1761,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Tencent-Hunyuan/Tencent-Hunyuan-Large",
       "publisher": "Tencent (GitHub)",
@@ -1532,6 +1782,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "release",
     "source": {
       "title": "Tencent-Hunyuan/Hunyuan-A13B",
       "publisher": "Tencent (GitHub)",
@@ -1550,6 +1803,9 @@
     ],
     "flagship": false,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "Tencent-Hunyuan/Hy3",
       "publisher": "Tencent (GitHub)",
@@ -1569,6 +1825,9 @@
     ],
     "flagship": true,
     "origin": "own",
+    "sourceKind": "primary",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
     "source": {
       "title": "Tencent-Hunyuan/Hy4-preview",
       "publisher": "Tencent (GitHub)",

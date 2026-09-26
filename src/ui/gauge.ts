@@ -21,6 +21,9 @@ export function gaugeFraction(v: number, min: number, max: number): number {
 
 /** Decade ticks covering [lo, hi]: min is the decade at or below lo, max the one at or above hi. */
 export function decadeScale(lo: number, hi: number): { min: number; max: number; ticks: number[] } {
+  if (!(lo > 0 && Number.isFinite(lo) && hi > 0 && Number.isFinite(hi))) {
+    return { min: 1, max: 10, ticks: [1, 10] };
+  }
   const a = Math.floor(Math.log10(Math.max(lo, 1e-9)));
   const b = Math.max(a + 1, Math.ceil(Math.log10(Math.max(hi, 1e-9))));
   const ticks: number[] = [];

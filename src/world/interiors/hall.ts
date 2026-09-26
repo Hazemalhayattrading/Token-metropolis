@@ -88,6 +88,8 @@ export function createHall(platform: Platform): Hall {
       racks.setMatrixAt(i++, dummy.matrix);
     }
   }
+  // Row count changes with load, so a cached bounding sphere would go stale.
+  racks.frustumCulled = false;
   group.add(racks);
 
   // Cold aisles (between row pairs) glow faintly on the floor.
@@ -148,7 +150,10 @@ export function createHall(platform: Platform): Hall {
       pipeMat.uniforms.uSpeed!.value = 0.4 + s.activity * 0.8;
     },
     dispose() {
-      group.traverse((o) => o instanceof Mesh && o.geometry.dispose());
+      group.traverse((o) => {
+        if (o instanceof Mesh) o.geometry.dispose();
+        if (o instanceof InstancedMesh) o.dispose();
+      });
       materials.forEach((m) => m.dispose());
     },
   };

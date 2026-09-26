@@ -301,7 +301,7 @@ export function tokensPerSecond(pm: PlatformModel, t: number): Range {
 }
 
 /** Traffic multiplier (1 = daily average) of the platform's largest component. */
-export function trafficNow(pm: PlatformModel, t: number): number {
+function dominant(pm: PlatformModel, t: number): ComponentModel | undefined {
   let best: ComponentModel | undefined;
   let bestRate = -1;
   for (const c of pm.components) {
@@ -311,7 +311,28 @@ export function trafficNow(pm: PlatformModel, t: number): number {
       best = c;
     }
   }
+  return best;
+}
+
+export function trafficNow(pm: PlatformModel, t: number): number {
+  const best = dominant(pm, t);
   return best ? evalShape(best.terms, t) : 1;
+}
+
+/**
+ * The traffic multiplier with a range: the same curve evaluated with the
+ * shape's amplitude bounds (TRAFFIC low/high). Peak-hour uncertainty is not
+ * included, so the range is a lower bound on the real uncertainty.
+ */
+export function trafficNowRange(pm: PlatformModel, t: number): Range {
+  const best = dominant(pm, t);
+  if (!best) return range(1, 1, 1);
+  const k = TRAFFIC[best.component.profile];
+  const s = trafficShape(best.component.profile);
+  const central = evalShape(best.terms, t);
+  const a = evalShape(shapeTerms(pm.mix, { ...s, a1: k.a1.low, a2: k.a2.low, w: k.w.low }), t);
+  const b = evalShape(shapeTerms(pm.mix, { ...s, a1: k.a1.high, a2: k.a2.high, w: k.w.high }), t);
+  return range(Math.min(a, b, central), central, Math.max(a, b, central));
 }
 
 /** Tokens processed since launch. */
@@ -342,6 +363,17 @@ function significant(pm: PlatformModel, t: number, share = 0.05): ComponentModel
 export function rateTier(pm: PlatformModel, t: number): Tier {
   const fresh = GROWTH.reportedFreshnessDays.value;
   return weakest(...significant(pm, t).map((c) => rateTierAt(c.curve, t, fresh)));
+}
+
+/**
+ * Tier of anything that depends on the time-of-day traffic curve (tokens per
+ * second, tokens so far today): the daily-rate tier, capped by the tier of the
+ * traffic-shape constants (assumptions → Modeled). Full-day totals do not
+ * depend on the shape (its terms average to zero), so they keep `rateTier`.
+ */
+export function instantTier(pm: PlatformModel, t: number): Tier {
+  const shapes = significant(pm, t).map((c) => tierOfBasis(TRAFFIC[c.component.profile].a1.basis));
+  return weakest(rateTier(pm, t), ...shapes);
 }
 
 export function cumulativeTier(pm: PlatformModel, t: number): Tier {

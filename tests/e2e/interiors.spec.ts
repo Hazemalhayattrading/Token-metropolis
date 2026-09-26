@@ -79,18 +79,41 @@ test('zoom interiors: every tab explains itself and every number carries a tier'
   await items.first().click();
   await expect(items.first()).toHaveAttribute('aria-pressed', 'true');
   const detail = labPane.locator('.lab-detail');
-  await expect(detail).toContainText('Released');
+  await expect(detail).toContainText(/Released|First seen/);
   await expect(detail).toContainText('Context window');
   await expect(detail.locator('a')).toHaveAttribute('href', /^https:\/\//);
   await page.waitForTimeout(2600);
   await page.screenshot({ path: `screenshots/m4-${info.project.name}-lab.png` });
 
-  // Back to the overview, then close.
+  // A model not yet checked against its source says so instead of claiming a tier.
+  await labPane.locator('.lab-list__item[data-model="gpt-4"]').click();
+  await expect(detail.locator('.tier--unchecked')).toHaveCount(1);
+  await expect(detail.locator('.tier--reported')).toHaveCount(0);
+
+  // Back to the overview, then close from inside the panel: focus returns to the city.
   await panel.getByRole('tab', { name: 'Overview' }).click();
   await expect(panel.getByRole('tabpanel', { name: 'Overview' })).toBeVisible();
+  await panel.getByRole('tab', { name: 'Overview' }).focus();
   await page.keyboard.press('Escape');
   await expect(panel).toBeHidden();
   await expect(page.locator('#labels')).not.toHaveClass(/labels--interior/);
+  // Focus is not lost: it returns to the HQ's label, or to the city canvas while that label is out of view.
+  expect(
+    await page.evaluate(() => {
+      const a = document.activeElement;
+      return a?.id === 'scene' || a?.getAttribute('data-id') === 'chatgpt';
+    }),
+  ).toBe(true);
+  expect(problems).toEqual([]);
+});
+
+test('offered models name their maker', async ({ page }) => {
+  const problems = watchConsole(page);
+  await openHq(page, 'copilot');
+  await page.locator('#panel').getByRole('tab', { name: 'Model lab' }).click();
+  const lab = page.getByRole('tabpanel', { name: 'Model lab' });
+  await lab.locator('.lab-list__item', { hasText: 'GPT-5 in Microsoft Copilot' }).click();
+  await expect(lab.locator('.lab-detail')).toContainText('OpenAI — offered on this platform');
   expect(problems).toEqual([]);
 });
 

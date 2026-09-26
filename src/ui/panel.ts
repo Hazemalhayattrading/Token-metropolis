@@ -8,17 +8,18 @@
  */
 import { COPY } from '../copy';
 import type { Model } from '../data/schema';
-import { COMPUTE, isDisplayable } from '../model/constants';
+import { COMPUTE, isDisplayable, TRAFFIC } from '../model/constants';
 import { gpuEquivalents, powerMW, waterLitersPerDay } from '../model/derived';
 import {
   between,
   cumulative,
   cumulativeTier,
   dailyRate,
+  instantTier,
   latestAnchor,
   rateTier,
   tokensPerSecond,
-  trafficNow,
+  trafficNowRange,
 } from '../model/estimate';
 import { tierOfBasis } from '../model/tier';
 import { daysToIso, utcDayStart } from '../model/time';
@@ -30,7 +31,7 @@ import { isLiquidCooled } from '../world/hardware';
 import type { InteriorView } from '../world/interiors';
 import { LAB_MAX, labLineup } from '../world/interiors/lineup';
 import { DESK_BANDS, deskTier, logLoad, tokensAtLoad } from '../world/scale';
-import { tierBadge } from './badge';
+import { tierBadge, uncheckedBadge } from './badge';
 import { byId, h } from './dom';
 import { describeValue, fullNumber, humanNumber } from './format';
 import { createGauge, decadeScale, type Gauge } from './gauge';
@@ -47,6 +48,8 @@ export interface Panel {
   update(): void;
   /** Reflect a model picked in the 3D lab. */
   selectModel(id: string | null): void;
+  /** Switch tabs without asking the world to fly (e.g. the world fell back to the overview). */
+  showView(view: InteriorView): void;
   readonly openId: string | null;
   readonly view: InteriorView;
 }
@@ -147,6 +150,7 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
   let hardwareLine: HTMLElement | null = null;
   let lastSlow = 0;
   let lastFast = 0;
+  let returnFocus: HTMLElement | null = null;
 
   const close = h(
     'button',
@@ -158,7 +162,7 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
     if (e.key === 'Escape') cb.onClose();
   });
 
-  function setView(next: InteriorView, focus = false): void {
+  function setView(next: InteriorView, focus = false, notify = true): void {
     const changed = next !== view;
     view = next;
     tabs.forEach((t, i) => {
@@ -173,7 +177,7 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
     if (changed) {
       lastSlow = 0;
       lastFast = 0;
-      cb.onView(next);
+      if (notify) cb.onView(next);
     }
   }
 
@@ -311,6 +315,8 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
     const traffic = row(COPY.offices.traffic, COPY.offices.trafficUnit);
     rows.offPerDay = perDay.row;
     rows.offTraffic = traffic.row;
+    const shapeNote = h('p', { class: 'panel__note' }, COPY.offices.trafficNote, ' ');
+    shapeNote.append(h('a', { href: METHODOLOGY_URL, rel: 'noopener' }, COPY.hud.methodLink));
     hardwareLine = h('p', { class: 'panel__lead', id: 'offices-hardware' });
     const band = (x: number) => humanNumber(tokensAtLoad(x), 'short');
     return pane(
@@ -318,6 +324,7 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
       h('p', { class: 'panel__lead' }, COPY.offices.intro),
       h('p', { class: 'panel__honesty' }, COPY.offices.honesty),
       h('div', { class: 'panel__grid' }, perDay.el, traffic.el),
+      shapeNote,
       h('h3', { class: 'panel__section' }, COPY.offices.hardwareLabel),
       hardwareLine,
       h(
@@ -360,20 +367,29 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
   }
 
   function powerPane(): HTMLElement {
-    // One shared log scale across all HQs, so the gauges compare.
+    // One log scale per gauge spanning every HQ, so the needles compare. It is built from each
+    // HQ's daily-average range widened by the largest possible traffic swing, so the decades do
+    // not change with the time of day.
     const t = clock.now();
     let mwLo = Infinity;
     let mwHi = 0;
     let wLo = Infinity;
     let wHi = 0;
     for (const pm of city.platforms) {
+      const day = dailyRate(pm, t);
+      if (!(day.central > 0)) continue;
       const tier = rateTier(pm, t);
-      const tps = tokensPerSecond(pm, t);
-      if (!(tps.central > 0)) continue;
-      const mw = powerMW(gpuEquivalents(tps, tier).range, tier).range;
-      const w = waterLitersPerDay(dailyRate(pm, t), tier).range;
-      mwLo = Math.min(mwLo, mw.low);
-      mwHi = Math.max(mwHi, mw.high);
+      const swing = Math.max(
+        ...pm.components.map((c) => {
+          const k = TRAFFIC[c.component.profile];
+          return k.a1.high + k.a2.high + k.w.high;
+        }),
+      );
+      const avg = { low: day.low / 86_400, central: day.central / 86_400, high: day.high / 86_400 };
+      const mw = powerMW(gpuEquivalents(avg, tier).range, tier).range;
+      const w = waterLitersPerDay(day, tier).range;
+      mwLo = Math.min(mwLo, mw.low * Math.max(0.05, 1 - swing));
+      mwHi = Math.max(mwHi, mw.high * (1 + swing));
       wLo = Math.min(wLo, w.low);
       wHi = Math.max(wHi, w.high);
     }
@@ -427,21 +443,26 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
     );
   }
 
+  /** Reported only for a checked figure from the maker's own publication (as for metrics). */
+  function factBadge(m: Model): HTMLSpanElement {
+    if (m.verified === 'pending') return uncheckedBadge();
+    return tierBadge(m.sourceKind === 'primary' ? 'reported' : 'derived');
+  }
+
+  function modelDate(m: Model): string {
+    return m.datePrecision === 'month' ? m.released.slice(0, 7) : m.released;
+  }
+
   function modelDetails(m: Model | undefined, parent: string): Node[] {
     if (!m) return [h('p', { class: 'panel__note' }, COPY.lab.choose)];
-    const checked =
-      m.verified === 'pending'
-        ? COPY.lab.pending
-        : m.verified === 'snippet'
-          ? COPY.panel.snippet
-          : null;
+    const checked = m.verified === 'snippet' ? COPY.panel.snippet : null;
     return [
       h('h4', { class: 'lab-detail__name' }, m.name),
       h(
         'dl',
         { class: 'lab-detail__facts' },
-        h('dt', {}, COPY.lab.released),
-        h('dd', {}, m.released, ' ', tierBadge('reported')),
+        h('dt', {}, m.dateKind === 'first-seen' ? COPY.lab.firstSeen : COPY.lab.released),
+        h('dd', {}, modelDate(m), ' ', factBadge(m)),
         h('dt', {}, COPY.lab.context),
         h(
           'dd',
@@ -450,17 +471,22 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
             ? COPY.lab.notPublished
             : `${fullNumber(m.contextWindowTokens)} ${COPY.lab.contextUnit}`,
           m.contextWindowTokens === null ? null : ' ',
-          m.contextWindowTokens === null ? null : tierBadge('reported'),
+          m.contextWindowTokens === null ? null : factBadge(m),
         ),
         h('dt', {}, COPY.lab.modalities),
         h('dd', {}, m.modalities.join(', ')),
         h('dt', {}, COPY.lab.origin),
-        h('dd', {}, m.origin === 'own' ? COPY.lab.own(parent) : COPY.lab.offered),
+        h(
+          'dd',
+          {},
+          m.origin === 'own' ? COPY.lab.own(m.maker ?? parent) : COPY.lab.offered(m.maker ?? '—'),
+        ),
         h('dt', {}, COPY.lab.source),
         h('dd', {}, link(m.source.url, `${m.source.publisher} — ${m.source.title}`)),
       ),
       m.note ? h('p', { class: 'panel__note' }, m.note) : null,
       checked ? h('p', { class: 'panel__note' }, checked) : null,
+      m.verified === 'pending' ? h('p', { class: 'panel__note' }, COPY.lab.pending) : null,
     ].filter((x): x is HTMLHeadingElement | HTMLDListElement | HTMLParagraphElement => x !== null);
   }
 
@@ -478,7 +504,7 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
         h(
           'span',
           { class: 'lab-list__meta' },
-          m.released,
+          modelDate(m),
           m.flagship ? ` · ${COPY.lab.flagship}` : '',
           m.origin === 'offered' ? ` · ${COPY.lab.offeredTag}` : '',
         ),
@@ -515,6 +541,7 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
     const p = city.byId.get(openId)!.platform;
     const m = city.dataset.models.find((x) => x.id === id && x.platform === openId);
     modelDetail.replaceChildren(...modelDetails(m, p.parent));
+    if (id) modelDetail.scrollIntoView({ block: 'nearest' });
   }
 
   function render(id: string): void {
@@ -559,6 +586,8 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
     const pm = city.byId.get(openId)!;
     const t = clock.now();
     const tier = rateTier(pm, t);
+    // Anything depending on the time-of-day curve is at best Modeled (see instantTier).
+    const iTier = instantTier(pm, t);
     const tps = tokensPerSecond(pm, t);
     // Right after a render or a tab switch every pane is filled, so no number
     // ever sits without its badge; after that only the visible pane ticks.
@@ -566,10 +595,10 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
     const on = (v: InteriorView) => all || view === v;
     if (on('overview')) {
       const today = between(pm, utcDayStart(t), t);
-      setRow(rows.today!, fullNumber(today.central), today, tier);
-      setRow(rows.now!, humanNumber(tps.central), tps, tier);
+      setRow(rows.today!, fullNumber(today.central), today, iTier);
+      setRow(rows.now!, humanNumber(tps.central), tps, iTier);
     }
-    if (on('hall')) setRow(rows.hallNow!, humanNumber(tps.central), tps, tier);
+    if (on('hall')) setRow(rows.hallNow!, humanNumber(tps.central), tps, iTier);
     if (nowMs - lastSlow < 2000) return;
     lastSlow = nowMs;
     const day = dailyRate(pm, t);
@@ -588,7 +617,8 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
     if (on('offices')) {
       setRow(rows.offPerDay!, humanNumber(day.central), day, tier);
       // The traffic curve is a modeled shape (TRAFFIC constants).
-      setRow(rows.offTraffic!, trafficNow(pm, t).toFixed(2), null, 'modeled');
+      const tr = trafficNowRange(pm, t);
+      setRow(rows.offTraffic!, tr.central.toFixed(2), tr, iTier, (n) => n.toFixed(2));
       if (hardwareLine)
         hardwareLine.textContent = COPY.offices.hardware[deskTier(logLoad(day.central))];
     }
@@ -621,6 +651,8 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
       return view;
     },
     show(id) {
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && !root.contains(active)) returnFocus = active;
       openId = id;
       render(id);
       update();
@@ -629,10 +661,29 @@ export function createPanel(city: City, clock: Clock, cb: PanelCallbacks): Panel
       requestAnimationFrame(() => root.classList.add('panel--open'));
     },
     hide() {
+      const id = openId;
       openId = null;
       view = 'overview';
+      // Never strand keyboard focus on a panel that is about to disappear: go back to where the
+      // visitor came from (usually the HQ's label), else to the city canvas.
+      if (root.contains(document.activeElement)) {
+        const candidates = [
+          returnFocus,
+          document.querySelector<HTMLElement>(`.label[data-id="${id ?? ''}"]`),
+          byId('scene'),
+        ];
+        for (const el of candidates) {
+          if (!el?.isConnected) continue;
+          el.focus({ preventScroll: true });
+          if (document.activeElement === el) break;
+        }
+      }
+      returnFocus = null;
       root.classList.remove('panel--open');
       root.hidden = true;
+    },
+    showView(v) {
+      setView(v, false, false);
     },
     selectModel,
     update,

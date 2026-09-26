@@ -44,6 +44,10 @@ export interface Interiors {
   selectModel(id: string | null): void;
   /** Half the width of the lab display (for framing). */
   labHalfWidth(): number;
+  /** Where the office floors are (for framing). */
+  officeFrame(): { y: number; radius: number };
+  /** The groups built so far (for shader pre-compilation). */
+  groups(): Object3D[];
   dispose(): void;
 }
 
@@ -54,6 +58,8 @@ export function createInteriors(
   platform: Platform,
   campus: Campus,
   models: readonly Model[],
+  /** Tower height the interiors are laid out for (interiors are always shown at log scale). */
+  towerHeight: number,
 ): Interiors {
   let view: InteriorView = 'overview';
   let offices: Offices | null = null;
@@ -64,7 +70,11 @@ export function createInteriors(
 
   function ensure(v: InteriorView): void {
     if (v === 'offices' && !offices) {
-      offices = createOffices(campus.bodyHalf, accent);
+      offices = createOffices({
+        half: campus.bodyHalf,
+        accent,
+        fits: (x, y, z) => campus.insideBody(x, y, z, towerHeight),
+      });
       offices.group.visible = view === v;
       campus.group.add(offices.group);
     }
@@ -111,6 +121,13 @@ export function createInteriors(
     labHalfWidth() {
       ensure('lab');
       return lab!.halfWidth;
+    },
+    officeFrame() {
+      ensure('offices');
+      return offices!.frame;
+    },
+    groups() {
+      return [offices, hall, lab].filter((p) => p !== null).map((p) => p.group);
     },
     dispose() {
       campus.setInterior('overview');

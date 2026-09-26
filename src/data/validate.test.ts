@@ -35,6 +35,8 @@ function dataset() {
         contextWindowTokens: 128000,
         modalities: ['text'],
         flagship: true,
+        origin: 'own',
+        sourceKind: 'primary',
         source: src,
         verified: 'page',
       },

@@ -137,6 +137,10 @@ export function validateDataset(
   for (const x of models) {
     if (!byId.has(x.platform)) errors.push(`models/${x.id}: unknown platform "${x.platform}"`);
     if (isoToDays(x.released) > now + 1) errors.push(`models/${x.id}: release date in the future`);
+    if (x.origin === 'offered' && !x.maker)
+      errors.push(`models/${x.id}: offered models must name their maker`);
+    if (x.dateKind === 'first-seen' && !x.note)
+      errors.push(`models/${x.id}: a first-seen date needs a note saying where it was seen`);
   }
   for (const pl of platforms) {
     if (!models.some((x) => x.platform === pl.id)) warnings.push(`${pl.id}: no models listed`);

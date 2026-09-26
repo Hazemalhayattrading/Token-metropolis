@@ -238,7 +238,18 @@ export const ModelSchema = z.object({
   modalities: z.array(z.enum(MODALITIES)).min(1),
   flagship: z.boolean(),
   /** own = built by the platform's company; offered = another company's model made available here. */
-  origin: z.enum(['own', 'offered']).default('own'),
+  origin: z.enum(['own', 'offered']),
+  /** The company that built the model. Required for offered models (own models are the platform's parent). */
+  maker: z.string().min(2).optional(),
+  /** primary = the maker's own publication (blog, docs, repository); third-party = anyone else. */
+  sourceKind: z.enum(['primary', 'third-party']),
+  /** How precise `released` is; month precision is shown as YYYY-MM. */
+  datePrecision: z.enum(['day', 'month']).default('day'),
+  /**
+   * release = the maker's launch/availability date; first-seen = the earliest date the model was seen
+   * on some surface (a repository commit, another product adding it) when no launch date was reached.
+   */
+  dateKind: z.enum(['release', 'first-seen']).default('release'),
   source: SourceSchema,
   verified: VerificationSchema,
   note: z.string().optional(),
