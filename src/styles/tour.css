@@ -21,7 +21,7 @@
 
 .tour__card {
   position: relative;
-  width: min(760px, 100%);
+  width: min(620px, 100%);
   padding: 18px 26px 11px;
   background: linear-gradient(180deg, rgb(12 17 32 / 0.74), var(--panel-strong) 70%);
   border: 1px solid var(--line);
@@ -68,7 +68,7 @@
 .tour__caption {
   margin: 0;
   padding: 0 4px 2px;
-  font: 400 clamp(21px, 2.35vw, 32px) / 1.24 var(--font-display);
+  font: 400 clamp(19px, 1.7vw, 25px) / 1.26 var(--font-display);
   font-variation-settings: 'opsz' 72;
   letter-spacing: 0.004em;
   text-wrap: balance;

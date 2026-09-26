@@ -1221,7 +1221,7 @@ a {
   position: absolute;
   left: 50%;
   bottom: calc(var(--footer-h) + var(--gap) + 84px);
-  width: min(720px, calc(100vw - 2 * var(--gap)));
+  width: min(620px, calc(100vw - 2 * var(--gap)));
   transform: translateX(-50%);
   z-index: 8;
 }
@@ -1261,4 +1261,117 @@ a {
     max-height: 70svh;
     transform: none;
   }
+}
+
+/* Screen-reader-only text */
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* How to read the uncertainty glass */
+.glass-legend {
+  position: absolute;
+  right: var(--gap);
+  bottom: calc(var(--footer-h) + var(--gap) + 72px);
+  width: min(300px, calc(100vw - 2 * var(--gap)));
+  z-index: 4;
+}
+.glass-legend[hidden],
+.race-open .glass-legend,
+.compare-open .glass-legend {
+  display: none;
+}
+.glass-legend__box {
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-strong);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  font-size: 12px;
+  color: var(--muted);
+}
+.glass-legend__box summary {
+  color: var(--text);
+  font: 500 13px/1.3 var(--font-ui);
+  cursor: pointer;
+}
+.glass-legend__box summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.glass-legend__box ul {
+  margin: 8px 0 6px;
+  padding-left: 16px;
+}
+.glass-legend__box li {
+  margin: 3px 0;
+}
+.glass-legend__box p {
+  margin: 0;
+  color: var(--faint);
+}
+@media (max-width: 720px) {
+  .glass-legend {
+    bottom: auto;
+    top: calc(var(--gap) + 150px + env(safe-area-inset-top));
+    right: var(--gap);
+    left: var(--gap);
+    width: auto;
+  }
+  .panel-open .glass-legend {
+    display: none;
+  }
+}
+
+/* During the cinematic tour the stage clears; the footer disclaimer stays. */
+.tour-on .controls,
+.tour-on .race-root,
+.tour-on .toasts-root,
+.tour-on .hq-panel,
+.tour-on .glass-legend {
+  display: none;
+}
+@media (max-width: 720px) {
+  .tour-on .hud {
+    display: none;
+  }
+}
+
+/* Phones: the control row is one swipeable strip; the glass legend is a small pill that opens on
+   demand, above the notices. */
+@media (max-width: 720px) {
+  .controls {
+    right: 0;
+    left: 0;
+    padding: 0 var(--gap);
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-padding-inline: var(--gap);
+  }
+  .controls::-webkit-scrollbar {
+    display: none;
+  }
+  .controls > * {
+    flex: none;
+  }
+  .glass-legend {
+    top: calc(var(--gap) + 100px + env(safe-area-inset-top));
+    left: auto;
+    width: min(300px, calc(100vw - 2 * var(--gap)));
+    z-index: 8;
+  }
+}
+.segmented__option,
+.control-button {
+  white-space: nowrap;
 }

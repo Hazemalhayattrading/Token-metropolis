@@ -23,10 +23,11 @@ import {
   type Object3D,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import type { TimelineEvent } from '../data/schema';
+import type { Incident, TimelineEvent } from '../data/schema';
 import { dailyRate, rateTier, trafficNow } from '../model/estimate';
 import { daysToMs } from '../model/time';
 import { activeLaunches, celebrates, crossedEvents } from '../state/events';
+import { incidentSeverity } from '../state/incidents';
 import type { City } from '../state/city';
 import type { Clock } from '../state/clock';
 import { daylight, localHour, occupancy } from '../state/localtime';
@@ -36,7 +37,10 @@ import { CameraDirector, type Pose } from './director';
 import { createEnvironment, MOON_DIRECTION } from './environment';
 import type { InteriorView, Interiors } from './interiors';
 import { releasedBy } from './interiors/lineup';
+import { zoomFromDistance, type Sound } from '../audio/sound';
+import { createAlarmFx, type AlarmFx } from './alarm';
 import { createLaunchFx, type LaunchFx } from './launch';
+import { createUncertaintyGlass, type UncertaintyGlass } from './uncertainty';
 import { createLabels, type LabelValue, type Labels } from './labels';
 import { layoutPlots } from './layout';
 import { createPost, type Post } from './post';
@@ -65,6 +69,10 @@ export interface World {
   captureFrame(): HTMLCanvasElement;
   /** A camera flight for the cinematic tour: the overview or one campus (no selection, no panel). */
   tourTo(stop: { kind: 'overview' | 'hq'; id?: string }, seconds?: number): void;
+  /** Uncertainty glass: every tower shows its plausible range (core, frosted glass, central ring). */
+  setGlass(on: boolean): void;
+  /** Unresolved status-page incidents by HQ (alarm beacons and flickering lights). */
+  setIncidents(active: ReadonlyMap<string, Incident>): void;
   readonly view: InteriorView;
   dispose(): void;
 }
@@ -84,12 +92,16 @@ export interface WorldOptions {
   onLaunch?: (e: TimelineEvent) => void;
   /** Whether the time machine is playing (playback fires every launch it crosses). */
   isPlaying?: () => boolean;
+  /** Procedural sound (off by default): the world feeds it zoom, activity and launch chimes. */
+  sound?: Sound;
 }
 
 interface Slot {
   campus: Campus;
   streams: Streams;
   launch: LaunchFx;
+  glass: UncertaintyGlass;
+  alarm: AlarmFx;
   /** Remaining fraction of the short launch pulse (1 → 0 over BURST_SECONDS). */
   burst: number;
   tz: string;
@@ -156,11 +168,20 @@ export function createWorld(
       blocked: (x, z) => campus.groundBlocked(x, z),
     });
     campus.group.add(launch.group);
+    const glass = createUncertaintyGlass({
+      accent: pm.platform.identity.palette.accent,
+      half: campus.bodyHalf,
+    });
+    campus.group.add(glass.group);
+    const alarm = createAlarmFx({ footprint: campus.footprint });
+    campus.group.add(alarm.group);
     scene.add(campus.group, streams.group);
     slots.set(pm.platform.id, {
       campus,
       streams,
       launch,
+      glass,
+      alarm,
       burst: 0,
       tz: pm.platform.hq.timezone,
       hour: 12,
@@ -520,6 +541,9 @@ export function createWorld(
   let prevT: number | null = null;
   let tierT = Number.NaN;
   let hourT = Number.NaN;
+  let glassOn = false;
+  let compileGlass = false;
+  let incidents: ReadonlyMap<string, Incident> = new Map();
 
   /**
    * Keep an open interior true to the date shown: before launch there is nothing to show, so go
@@ -565,7 +589,10 @@ export function createWorld(
     if (prevT !== null && t > prevT && (playing || t - prevT < MAX_LIVE_STEP_DAYS)) {
       for (const e of crossedEvents(events, prevT, t)) {
         const slot = slots.get(e.platform);
-        if (slot && celebrates(e)) slot.burst = 1;
+        if (slot && celebrates(e)) {
+          slot.burst = 1;
+          opts.sound?.launch();
+        }
         opts.onLaunch?.(e);
       }
     }
@@ -584,11 +611,15 @@ export function createWorld(
     }
     let maxRate = 0;
     const rates = new Map<string, number>();
+    const ranges = new Map<string, ReturnType<typeof dailyRate>>();
     for (const pm of city.platforms) {
-      const r = dailyRate(pm, t).central;
-      rates.set(pm.platform.id, r);
-      maxRate = Math.max(maxRate, r);
+      const range = dailyRate(pm, t);
+      ranges.set(pm.platform.id, range);
+      rates.set(pm.platform.id, range.central);
+      maxRate = Math.max(maxRate, range.central);
     }
+    let activitySum = 0;
+    let rateSum = 0;
     for (const pm of city.platforms) {
       const id = pm.platform.id;
       const slot = slots.get(id)!;
@@ -601,6 +632,15 @@ export function createWorld(
       // the interiors are laid out for.
       const inside = id === selected && view !== 'overview';
       const away = view !== 'overview' && id !== selected;
+      const incident = incidents.get(id);
+      slot.alarm.update({
+        active: !!incident && rate > 0 && view === 'overview',
+        severity: incident ? incidentSeverity(incident.impact) : 0,
+        time: elapsed,
+        height: slot.campus.currentHeight,
+        reducedMotion: opts.reducedMotion,
+      });
+      slot.campus.setFlicker(slot.alarm.flicker);
       slot.campus.update({
         height: away ? 0 : towerHeight(rate, inside ? 'log' : scaleMode, maxRate),
         lit: occupancy(slot.hour) * (0.45 + 0.55 * load),
@@ -628,12 +668,45 @@ export function createWorld(
         height: slot.campus.currentHeight,
         reducedMotion: opts.reducedMotion,
       });
+      // Uncertainty glass: the plausible range on the towers' own height scale.
+      const glassShown = glassOn && view === 'overview' && !away && rate > 0;
+      slot.glass.group.visible = glassShown;
+      slot.campus.setGlassMode(glassShown);
+      if (glassShown) {
+        const r = ranges.get(id)!;
+        slot.glass.update({
+          low: towerHeight(r.low, scaleMode, maxRate),
+          central: towerHeight(r.central, scaleMode, maxRate),
+          high: towerHeight(r.high, scaleMode, maxRate),
+          tier: tiers.get(id) ?? 'modeled',
+          time: elapsed,
+          reducedMotion: opts.reducedMotion,
+          ease: 5,
+        });
+      }
+      activitySum += rate * activity;
+      rateSum += rate;
       labelPositions.set(id, slot.campus.top);
       labelValues.set(id, {
         text: rate > 0 ? `${humanNumber(rate, 'short')} tokens/day` : '',
         tier: tiers.get(id) ?? 'modeled',
         priority: rate,
       });
+    }
+    if (compileGlass) {
+      compileGlass = false;
+      renderer.compile(scene, camera);
+    }
+    if (opts.sound) {
+      const zoom =
+        view !== 'overview'
+          ? 1
+          : compare
+            ? 0.5
+            : zoomFromDistance(camera.position.distanceTo(controls.target));
+      opts.sound.setZoom(zoom);
+      const sel = selected ? city.byId.get(selected) : undefined;
+      opts.sound.setActivity(sel ? trafficNow(sel, t) : rateSum > 0 ? activitySum / rateSum : 1);
     }
     director.update(dt);
     controls.update();
@@ -749,6 +822,14 @@ export function createWorld(
       controls.autoRotate = stop.kind === 'overview' && !opts.reducedMotion;
       void director.flyTo(pose, seconds);
     },
+    setIncidents(active) {
+      incidents = active;
+      opts.sound?.alarm(active.size > 0);
+    },
+    setGlass(on) {
+      if (on && !glassOn) compileGlass = true;
+      glassOn = on;
+    },
     setCompare(ids, layout, area = 1) {
       disposeCompare();
       if (!ids || ids.length === 0) {
@@ -783,6 +864,8 @@ export function createWorld(
       disposeCompare();
       closeInteriors();
       slots.forEach((s) => {
+        s.alarm.dispose();
+        s.glass.dispose();
         s.launch.dispose();
         s.campus.dispose();
         s.streams.dispose();

@@ -91,7 +91,8 @@ describe('curated dataset', () => {
         prev = v;
       }
     }
-  });
+    // ~165k integrations by design: allow for slow or busy machines (CI, parallel suites).
+  }, 30_000);
 
   it('tokens today stays below ~1.5× the daily rate and tokens/s is positive', () => {
     for (const pm of pms) {

@@ -11,17 +11,24 @@ import './styles/timeline.css';
 import './styles/race.css';
 import './styles/feed.css';
 import './styles/compare.css';
+import './styles/incidents.css';
+import './styles/tour.css';
+import { createSound } from './audio/sound';
 import { COPY } from './copy';
 import { DataUnavailableError, loadData } from './data/load';
 import { dailyRate } from './model/estimate';
 import { buildCity } from './state/city';
 import { liveClock } from './state/clock';
+import { activeIncidents } from './state/incidents';
 import { createTimeMachine } from './state/timemachine';
+import { createIdleTimer, TOUR_IDLE_MS, tourStops } from './state/tour';
 import { renderDataTable } from './ui/data-table';
 import { byId, h } from './ui/dom';
 import { mountHud } from './ui/hud';
 import { mountCompare } from './ui/compare';
 import { mountFeed, mountToasts } from './ui/feed';
+import { mountIncidentBanner } from './ui/incidents';
+import { mountTourCaptions } from './ui/tour';
 import { createPanel } from './ui/panel';
 import { mountRace } from './ui/race';
 import { mountTimeline } from './ui/timeline';
@@ -49,6 +56,24 @@ function applyStaticCopy(): void {
   byId('disclaimer').textContent = COPY.footer.disclaimer;
   byId('skip-link').textContent = COPY.skipToData;
   byId('loader-status').textContent = COPY.loading.status;
+}
+
+/** A control-row toggle (aria-pressed); `onToggle` returns the resulting state. */
+function toggleButton(
+  label: string,
+  title: string,
+  onToggle: (on: boolean) => boolean | Promise<boolean>,
+): HTMLButtonElement {
+  const b = h(
+    'button',
+    { class: 'control-button', type: 'button', 'aria-pressed': 'false', title },
+    label,
+  );
+  b.addEventListener('click', () => {
+    const next = b.getAttribute('aria-pressed') !== 'true';
+    void Promise.resolve(onToggle(next)).then((on) => b.setAttribute('aria-pressed', String(on)));
+  });
+  return b;
 }
 
 /**
@@ -194,8 +219,10 @@ async function boot(): Promise<void> {
         },
         { history: () => tm.state().mode === 'history', live: liveClock },
       );
+      const sound = createSound();
       const world = createWorld(byId<HTMLCanvasElement>('scene'), city, tm, {
         reducedMotion,
+        sound,
         labels: byId('labels'),
         events: data.events,
         onLaunch: (e) => toasts.push(e),
@@ -280,6 +307,96 @@ async function boot(): Promise<void> {
         platformName,
         accent,
         onSelect: (id) => openHq(id),
+      });
+      // Uncertainty glass and sound: view toggles in the control row.
+      const status = byId('sr-status');
+      const legend = byId('glass-legend');
+      legend.replaceChildren(
+        h(
+          'details',
+          { class: 'glass-legend__box', open: !mobile.matches },
+          h('summary', {}, COPY.glass.legendTitle),
+          h(
+            'ul',
+            {},
+            h('li', { 'data-part': 'core' }, COPY.glass.legend.core),
+            h('li', { 'data-part': 'glass' }, COPY.glass.legend.glass),
+            h('li', { 'data-part': 'ring' }, COPY.glass.legend.ring),
+            h('li', { 'data-part': 'frost' }, COPY.glass.legend.frost),
+          ),
+          h('p', {}, COPY.glass.rangeNote),
+        ),
+      );
+      const glassButton = toggleButton(COPY.glass.toggle, COPY.glass.tooltip, (on) => {
+        world.setGlass(on);
+        legend.hidden = !on;
+        status.textContent = on ? COPY.glass.announceOn : COPY.glass.announceOff;
+        return on;
+      });
+      const soundButton = toggleButton(COPY.sound.toggle, COPY.sound.tooltip, async (on) => {
+        await sound.setEnabled(on);
+        if (on && !sound.enabled) status.textContent = COPY.sound.failed;
+        return sound.enabled;
+      });
+      controls.feedSlot.before(glassButton, soundButton);
+
+      // Incident mode: official status-page notices. incidents.json is a snapshot of *current*
+      // status, so notices follow the live clock only (not the time machine).
+      const banner = mountIncidentBanner(byId('incidents'), { platformName, onSelect: openHq });
+      const refreshIncidents = () => {
+        const live = tm.state().mode === 'live';
+        const active = live
+          ? activeIncidents(data.incidents, Date.now(), { staleAfterMs: 3 * 86_400_000 })
+          : new Map<string, (typeof data.incidents)[number]>();
+        banner.update(active);
+        world.setIncidents(active);
+      };
+      refreshIncidents();
+      setInterval(refreshIncidents, 1000);
+
+      // Cinematic tour: after 30 s without input (and nothing open), the camera flies a curated
+      // loop with captions; any input hands control back.
+      const tourEl = byId('tour');
+      let tourRun = 0;
+      // The prompt dialog (set once it is mounted) also counts as "something open".
+      const promptRef: { current: { readonly isOpen: boolean } | null } = { current: null };
+      const captions = mountTourCaptions(tourEl, { onStop: () => stopTour() });
+      const stopTour = () => {
+        if (!document.documentElement.classList.contains('tour-on')) return;
+        tourRun++;
+        document.documentElement.classList.remove('tour-on');
+        captions.hide();
+        setTimeout(() => {
+          if (!document.documentElement.classList.contains('tour-on')) tourEl.hidden = true;
+        }, 700);
+      };
+      const wait = (ms: number, run: number) =>
+        new Promise<boolean>((resolve) => setTimeout(() => resolve(run === tourRun), ms));
+      const startTour = async () => {
+        const busy =
+          !panelEl.hidden ||
+          compare.open ||
+          race.open ||
+          promptRef.current?.isOpen ||
+          tm.state().playing;
+        if (busy || document.hidden) return;
+        const run = ++tourRun;
+        tm.goLive();
+        document.documentElement.classList.add('tour-on');
+        tourEl.hidden = false;
+        while (run === tourRun) {
+          for (const stop of tourStops(city, liveClock.now())) {
+            world.tourTo(stop.id ? { kind: stop.kind, id: stop.id } : { kind: stop.kind });
+            if (!(await wait(reducedMotion ? 300 : 3200, run))) return;
+            captions.show(stop.caption, stop.tier);
+            if (!(await wait(stop.holdSeconds * 1000, run))) return;
+          }
+        }
+      };
+      createIdleTimer({
+        timeoutMs: TOUR_IDLE_MS,
+        onIdle: () => void startTour(),
+        onActive: stopTour,
       });
       world.start();
     } else {
