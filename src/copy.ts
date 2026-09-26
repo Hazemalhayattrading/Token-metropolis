@@ -405,11 +405,227 @@ export const COPY = {
   },
   // ---- M6: discoveries (src/state/discoveries.ts, src/ui/discoveries.ts) — owned by that module's builder
   discoveries: {
-    // (strings for this module go here)
+    /** The control-row chip. */
+    chip: (found: number, total: number) => `${found}/${total} details found`,
+    /** The chip on narrow screens. */
+    chipShort: (found: number, total: number) => `${found}/${total}`,
+    /** The chip's accessible name. */
+    chipLabel: (found: number, total: number) =>
+      `Hidden details: ${found} of ${total} found. Show the list`,
+    title: 'Hidden details',
+    count: (found: number, total: number) => `${found} of ${total}`,
+    intro:
+      'Small details are hidden around the island and inside the HQs. When you spot one, click it.',
+    honesty: 'Decorative easter eggs — they are not data.',
+    close: 'Close the list',
+    /** Shown in place of the title of a detail not found yet. */
+    unknown: '?',
+    unknownLabel: 'Not found yet. Hint:',
+    foundLabel: 'Found:',
+    toast: (title: string) => `Found: ${title}`,
+    toastProgress: (found: number, total: number) => `${found} of ${total} details`,
+    allFound: (total: number) => `All ${total} hidden details found — thank you for exploring!`,
+    reset: 'Reset progress',
+    resetConfirm: (found: number) =>
+      `Forget the ${found} detail${found === 1 ? '' : 's'} you found on this device?`,
+    resetYes: 'Yes, reset',
+    resetNo: 'Cancel',
+    resetDone: 'Progress reset.',
+    /** Group headings in the list. */
+    where: {
+      city: 'Around the island',
+      offices: 'Offices',
+      hall: 'Server halls',
+      power: 'Power & cooling',
+      lab: 'Model labs',
+    },
+    /** Where a found detail tied to one HQ lives: "Server halls · DeepSeek". */
+    inHq: (where: string, hq: string) => `${where} · ${hq}`,
+    items: {
+      lighthouse: {
+        title: 'The lighthouse',
+        hint: 'Out past the shore, something keeps watch over the sea.',
+      },
+      'fishing-boat': {
+        title: 'A night fishing boat',
+        hint: 'A small warm light bobs on the water, well away from the towers.',
+      },
+      fox: {
+        title: 'A fox on the shore',
+        hint: 'Someone with a bushy tail sits at the water’s edge, watching the waves.',
+      },
+      telescope: {
+        title: 'A telescope aimed at the moon',
+        hint: 'On the shore that faces the moon, someone is stargazing.',
+      },
+      bench: {
+        title: 'Two on a bench',
+        hint: 'Two friends sit on the promenade, watching the skyline.',
+      },
+      jogger: {
+        title: 'The midnight jogger',
+        hint: 'Someone is doing laps along the shore path.',
+      },
+      'delivery-drone': {
+        title: 'A delivery drone',
+        hint: 'A parcel is on its way to someone who lives on a rock.',
+      },
+      'paper-plane': {
+        title: 'A paper plane',
+        hint: 'Something folded glides in circles above the central plaza.',
+      },
+      'street-musician': {
+        title: 'A street musician',
+        hint: 'Music drifts across the very heart of the city.',
+      },
+      'vending-machine': {
+        title: 'A glowing vending machine',
+        hint: 'Snacks for the night shift, lit up beside the ring road.',
+      },
+      'radio-dish': {
+        title: 'A radio dish',
+        hint: 'A big ear on the shore is listening to the sky.',
+      },
+      'rooftop-garden': {
+        title: 'A rooftop garden',
+        hint: 'Someone grows vegetables on a little roof by the sea.',
+      },
+      campfire: {
+        title: 'A beach campfire',
+        hint: 'Friends are keeping warm around a fire on the beach.',
+      },
+      'pier-angler': {
+        title: 'Fishing off the pier',
+        hint: 'At the end of a long walk over the water, someone waits for a bite.',
+      },
+      'hot-air-balloon': {
+        title: 'A hot-air balloon',
+        hint: 'Look up: something drifts slowly around the island.',
+      },
+      'message-bottle': {
+        title: 'A message in a bottle',
+        hint: 'Something small glints on the sea, out towards the moon.',
+      },
+      'night-shift': {
+        title: 'The night-shift nap',
+        hint: 'When it is night at an HQ, someone in its offices has nodded off.',
+      },
+      'coffee-machine': {
+        title: 'The office coffee machine',
+        hint: 'Every office has one — and the busier the HQ, the harder it works.',
+      },
+      'office-dog': {
+        title: 'The office dog',
+        hint: 'In one HQ’s offices, someone small is napping by a desk.',
+      },
+      'birthday-cake': {
+        title: 'A birthday cake',
+        hint: 'Somebody’s birthday is being celebrated in one of the offices.',
+      },
+      aquarium: {
+        title: 'A desk aquarium',
+        hint: 'Two small fish swim laps in one HQ’s offices.',
+      },
+      'pizza-night': {
+        title: 'Late-night pizza',
+        hint: 'A tall stack of boxes: one office team is working late.',
+      },
+      'server-cat': {
+        title: 'The server-room cat',
+        hint: 'In one server hall, something warm is curled up on top of a rack.',
+      },
+      'sticky-note': {
+        title: 'A sticky note',
+        hint: 'One rack in one server hall has a reminder stuck to it.',
+      },
+      'cable-spaghetti': {
+        title: 'Cable spaghetti',
+        hint: 'One server hall has a rack with a very tangled secret.',
+      },
+      'mop-bucket': {
+        title: 'The mop and bucket',
+        hint: 'Every server hall needs someone to keep the floor spotless.',
+      },
+      'hall-bicycle': {
+        title: 'A hall bicycle',
+        hint: 'The rows are long, so someone in one hall rides between the racks.',
+      },
+      'heart-leds': {
+        title: 'A heart of lights',
+        hint: 'In one hall, a rack’s status lights have been arranged into a shape.',
+      },
+      'night-inspector': {
+        title: 'The night inspector',
+        hint: 'Someone in a hard hat does the rounds at every substation.',
+      },
+      'birds-on-wire': {
+        title: 'Birds on a wire',
+        hint: 'Three small visitors rest on one HQ’s power line.',
+      },
+      owl: {
+        title: 'An owl on the transformer',
+        hint: 'At one substation, someone wise keeps watch through the night.',
+      },
+      'grazing-sheep': {
+        title: 'The grazing sheep',
+        hint: 'At one power yard, the grass is kept short the natural way.',
+      },
+      'rubber-duck': {
+        title: 'A rubber duck in the cooling pond',
+        hint: 'One HQ’s cooling pond has a very small, very yellow visitor.',
+      },
+      'lost-balloon': {
+        title: 'A lost balloon',
+        hint: 'At one HQ, a party balloon got caught on a cooling tower.',
+      },
+      'lab-plant': {
+        title: 'The lab’s houseplant',
+        hint: 'Every model lab keeps a plant that someone remembers to water.',
+      },
+      'paper-crane': {
+        title: 'An origami crane',
+        hint: 'In one model lab, someone left a folded bird beside the display.',
+      },
+      'snow-globe': {
+        title: 'A snow globe',
+        hint: 'One model lab keeps a tiny winter on its display.',
+      },
+      'lava-lamp': {
+        title: 'A lava lamp',
+        hint: 'Slow, glowing bubbles rise and fall in one model lab.',
+      },
+      'robot-vacuum': {
+        title: 'The robot vacuum',
+        hint: 'In one model lab, a small round cleaner does its rounds.',
+      },
+      hourglass: {
+        title: 'An hourglass',
+        hint: 'In one model lab, sand is quietly falling.',
+      },
+    },
   },
   // ---- M6: share card (src/ui/share.ts) — owned by that module's builder
   share: {
-    // (strings for this module go here)
+    button: 'Share',
+    /** The button while the image is being made. */
+    busy: 'Preparing…',
+    buttonLabel: 'Share an image of this view',
+    dialogTitle: 'Share this view',
+    dialogNote:
+      'The image keeps every number’s tier badge and range. Figures are estimates unless marked Reported.',
+    previewAlt: (title: string, subtitle: string) => `Share card — ${title}, ${subtitle}`,
+    download: 'Download PNG',
+    share: 'Share…',
+    close: 'Close',
+    /** Text that goes with the image in the system share sheet. */
+    shareText: (title: string) => `${title} — Token Metropolis`,
+    error: 'Sorry — the image could not be made. Please try again.',
+    shareError: 'Sharing is not available here — you can download the image instead.',
+    dismiss: 'Dismiss',
+    /** Used on the card when the full disclaimer does not fit on one line. */
+    disclaimerShort:
+      'Independent project, not affiliated with any company shown. Estimates unless marked Reported.',
+    disclaimerShortest: 'Independent project · estimates unless marked Reported',
   },
   compare: {
     open: 'Compare',
