@@ -109,6 +109,32 @@ is always rendered: it is the whole page when WebGL is missing and a skip-link t
 Static HTML text (title, disclaimer) duplicates `src/copy.ts` only as a no-JS/SEO fallback; the script
 overwrites it from `copy.ts` on boot.
 
+### D-025 — World-space windows
+
+Facade windows are computed in the shader from world position, so towers can grow (time machine,
+scale toggle) without stretching windows, and a whole campus shares one material program.
+
+### D-026 — Light streams show only the final approach
+
+Full horizon-to-campus arcs swept past the camera as giant ribbons. Only the last ~40% of each arc is
+drawn, regions under 15% of a platform's users get no arc, and the glow is kept low.
+
+### D-027 — No permanent spotlights
+
+Sweeping spotlight cones read as artifacts at overview distance; spotlights are reserved for launch
+events (M5), where they carry meaning.
+
+### D-028 — Day/night approximation
+
+Daylight follows a smooth sunrise ~06:30 / sunset ~19:00 curve at each HQ's local time (latitude and
+season ignored). Office occupancy (lit windows) follows local working hours; server activity follows
+the platform's user-weighted traffic curve — the two are deliberately independent.
+
+### D-029 — Label collisions
+
+Labels are placed in order of platform size: full label, then lifted on a longer leader, then
+name-only, then a dot. UI chrome marked `data-reserve` is off-limits. Selected/hovered labels win.
+
 ### D-022 — No CO₂ figures
 
 No sourced central value for the carbon intensity of AI data centres was found (only a regional range),

@@ -110,13 +110,16 @@
           role="img"
           aria-label="3D city: one headquarters per AI platform, sized by tokens processed"
         ></canvas>
-        <header class="masthead">
+        <header class="masthead" data-reserve>
           <h1 id="site-title">Token Metropolis</h1>
           <p id="site-tagline">
             The world’s biggest AI platforms as a living city, sized by the tokens they process.
           </p>
         </header>
-        <div id="hud" class="hud"></div>
+        <div id="labels" class="labels"></div>
+        <div id="hud" class="hud" data-reserve></div>
+        <aside id="panel" class="hq-panel" hidden data-reserve></aside>
+        <div id="controls" class="controls" data-reserve></div>
       </section>
 
       <section id="data-view" class="data-view" aria-labelledby="data-view-title" tabindex="-1">

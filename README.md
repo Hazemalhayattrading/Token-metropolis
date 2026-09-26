@@ -7,9 +7,9 @@ formula and its uncertainty range.
 > **Independent project.** Not affiliated with, endorsed by, or sponsored by any company shown.
 > Figures are estimates unless marked **Reported**.
 
-**Status:** Milestones 1–2 of 8 complete: research, sourced data, estimation model, and the app skeleton
-(data loading, live counters, placeholder 3D scene, CI/deploy workflows). See [PLAN.md](PLAN.md) and
-[TASKS.md](TASKS.md).
+**Status:** Milestones 1–3 of 8 complete: research, sourced data and estimation model; app skeleton
+with CI/deploy; the 3D city overview (15 original campuses driven by live estimates, day/night per HQ,
+light streams, labels, HQ info panels with tier badges). See [PLAN.md](PLAN.md) and [TASKS.md](TASKS.md).
 
 ## How the numbers work (short version)
 

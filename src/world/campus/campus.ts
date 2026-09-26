@@ -1,0 +1,350 @@
+/**
+ * One HQ campus: the tower (typology) plus facilities that grow with load —
+ * server halls whose LEDs blink with tokens/second, cooling towers with steam,
+ * a substation feeding the tower, and delivery trucks on the service loop.
+ */
+import {
+  AdditiveBlending,
+  BoxGeometry,
+  BufferGeometry,
+  CircleGeometry,
+  Color,
+  Float32BufferAttribute,
+  Group,
+  InstancedMesh,
+  LatheGeometry,
+  Mesh,
+  MeshBasicMaterial,
+  MeshStandardMaterial,
+  Object3D,
+  Points,
+  ShaderMaterial,
+  Vector2,
+  Vector3,
+  type Material,
+} from 'three';
+import type { Platform } from '../../data/schema';
+import type { Plot } from '../layout';
+import {
+  accentMaterial,
+  facadeMaterial,
+  hallMaterial,
+  patternUniforms,
+  plainMaterial,
+  type PatternUniforms,
+} from '../materials';
+import { buildTypology, type TowerParts } from './typologies';
+
+const MAX_HALLS = 6;
+const MAX_COOLING = 4;
+const MAX_TRUCKS = 8;
+
+export interface CampusState {
+  /** Target tower height (world units); the campus eases towards it. */
+  height: number;
+  /** Office occupancy 0..1 (lit windows). */
+  lit: number;
+  /** Local daylight 0..1 at the HQ. */
+  daylight: number;
+  /** Local hour at the HQ (for the colour of its light). */
+  hour: number;
+  /** Traffic intensity (1 = daily average). */
+  activity: number;
+  halls: number;
+  cooling: number;
+  trucks: number;
+  /** Seconds, for cosmetic animation. */
+  time: number;
+  /** Seconds since last frame. */
+  dt: number;
+}
+
+export interface Campus {
+  readonly id: string;
+  readonly group: Group;
+  /** Invisible box used for picking. */
+  readonly hit: Mesh;
+  /** World-space point just above the crown (for labels and camera framing). */
+  readonly top: Vector3;
+  readonly footprint: number;
+  currentHeight: number;
+  update(s: CampusState): void;
+  setHighlight(on: boolean): void;
+  dispose(): void;
+}
+
+function hash(n: number): number {
+  const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+  return x - Math.floor(x);
+}
+
+function seedOf(id: string): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 1000;
+  return h / 10;
+}
+
+function steamMaterial(): ShaderMaterial {
+  return new ShaderMaterial({
+    transparent: true,
+    depthWrite: false,
+    blending: AdditiveBlending,
+    uniforms: { uTime: { value: 0 }, uRate: { value: 1 }, uColor: { value: new Color('#9fb4d8') } },
+    vertexShader: /* glsl */ `
+      attribute float aSeed;
+      uniform float uTime;
+      uniform float uRate;
+      varying float vLife;
+      void main() {
+        float life = fract(aSeed * 7.13 + uTime * 0.12 * uRate);
+        vLife = life;
+        vec3 p = position;
+        p.y += life * 9.0;
+        p.x += sin(aSeed * 40.0 + uTime * 0.6) * life * 1.6;
+        p.z += cos(aSeed * 23.0) * life * 1.2;
+        vec4 mv = modelViewMatrix * vec4(p, 1.0);
+        gl_Position = projectionMatrix * mv;
+        gl_PointSize = (60.0 + 160.0 * life) / -mv.z;
+      }
+    `,
+    fragmentShader: /* glsl */ `
+      uniform vec3 uColor;
+      varying float vLife;
+      void main() {
+        float d = length(gl_PointCoord - 0.5);
+        float a = smoothstep(0.5, 0.0, d) * (1.0 - vLife) * vLife * 0.55;
+        gl_FragColor = vec4(uColor, a);
+      }
+    `,
+  });
+}
+
+export function createCampus(platform: Platform, plot: Plot): Campus {
+  const { palette, motif } = platform.identity;
+  const seed = seedOf(platform.id);
+
+  const facadeU = patternUniforms(seed, '#ffd9a0', '#bcd6ff', 1.6);
+  const hallU: PatternUniforms = patternUniforms(seed + 5, palette.accent, '#ff3b3b', 2.4);
+  const facade = facadeMaterial({ color: palette.primary, uniforms: facadeU });
+  const facadeAlt = facadeMaterial({ color: palette.secondary, uniforms: facadeU, roughness: 0.7 });
+  const accent = accentMaterial(palette.accent, 1.6);
+  const accentSoft = accentMaterial(palette.accent, 0.6);
+  const dark = plainMaterial('#0d1018', 0.7, 0.3);
+  const glass = new MeshStandardMaterial({ color: '#0a1428', roughness: 0.08, metalness: 0.9 });
+  const materials: Material[] = [facade, facadeAlt, accent, accentSoft, dark, glass];
+
+  const tower: TowerParts = buildTypology(motif, {
+    facade,
+    facadeAlt,
+    accent,
+    accentSoft,
+    dark,
+    glass,
+    accentColor: palette.accent,
+  });
+
+  const group = new Group();
+  group.position.set(plot.x, 0, plot.z);
+  group.rotation.y = plot.facing;
+  group.add(tower.body, tower.crown, tower.base);
+
+  // --- server halls (behind the tower) ------------------------------------
+  const hallMat = hallMaterial('#161b26', hallU);
+  materials.push(hallMat);
+  const halls = new InstancedMesh(new BoxGeometry(3.4, 1.6, 5.2), hallMat, MAX_HALLS);
+  const dummy = new Object3D();
+  for (let i = 0; i < MAX_HALLS; i++) {
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    dummy.position.set(-4.2 + col * 4.2, 0.8, -tower.footprint - 5 - row * 6);
+    dummy.updateMatrix();
+    halls.setMatrixAt(i, dummy.matrix);
+  }
+  halls.count = 0;
+  group.add(halls);
+
+  // --- cooling towers + steam (to the side) --------------------------------
+  const lathe: Vector2[] = [];
+  for (let i = 0; i <= 12; i++) {
+    const y = i / 12;
+    lathe.push(new Vector2(1.5 - 0.55 * Math.sin(Math.PI * y * 0.85), y * 4.2));
+  }
+  const coolGeo = new LatheGeometry(lathe, 24);
+  const coolMat = plainMaterial('#3a4150', 0.9);
+  materials.push(coolMat);
+  const cooling = new InstancedMesh(coolGeo, coolMat, MAX_COOLING);
+  const coolPos: Vector3[] = [];
+  for (let i = 0; i < MAX_COOLING; i++) {
+    const p = new Vector3(tower.footprint + 5.5 + (i % 2) * 3.4, 0, -2 - Math.floor(i / 2) * 3.6);
+    coolPos.push(p);
+    dummy.position.copy(p);
+    dummy.updateMatrix();
+    cooling.setMatrixAt(i, dummy.matrix);
+  }
+  cooling.count = 0;
+  group.add(cooling);
+
+  const steamMat = steamMaterial();
+  materials.push(steamMat);
+  const puffsPer = 14;
+  const steamPos: number[] = [];
+  const steamSeed: number[] = [];
+  for (let i = 0; i < MAX_COOLING; i++) {
+    for (let j = 0; j < puffsPer; j++) {
+      const c = coolPos[i]!;
+      steamPos.push(
+        c.x + (hash(i * 50 + j) - 0.5) * 1.2,
+        4.3,
+        c.z + (hash(i * 70 + j) - 0.5) * 1.2,
+      );
+      steamSeed.push(hash(i * 13 + j * 7 + seed));
+    }
+  }
+  const steamGeo = new BufferGeometry();
+  steamGeo.setAttribute('position', new Float32BufferAttribute(steamPos, 3));
+  steamGeo.setAttribute('aSeed', new Float32BufferAttribute(steamSeed, 1));
+  const steam = new Points(steamGeo, steamMat);
+  steam.frustumCulled = false;
+  group.add(steam);
+
+  // --- substation + feeder line ---------------------------------------------
+  const sub = new Group();
+  const subMat = plainMaterial('#2a303c', 0.6, 0.5);
+  materials.push(subMat);
+  for (let i = 0; i < 3; i++) {
+    const tr = new Mesh(new BoxGeometry(1.1, 1.3, 1.1), subMat);
+    tr.position.set(-tower.footprint - 5.5, 0.65, -1.5 + i * 1.6);
+    sub.add(tr);
+  }
+  const feederMat = new MeshBasicMaterial({
+    color: palette.accent,
+    transparent: true,
+    opacity: 0.8,
+  });
+  materials.push(feederMat);
+  const feederLen = tower.footprint + 4.2;
+  const feeder = new Mesh(new BoxGeometry(feederLen, 0.08, 0.08), feederMat);
+  feeder.position.set(-(tower.footprint + 4.2) / 2 - 0.8, 1.4, 0);
+  sub.add(feeder);
+  group.add(sub);
+
+  // --- trucks on the service loop -------------------------------------------
+  const truckMat = new MeshStandardMaterial({
+    color: '#2c323e',
+    emissive: '#ff9d4d',
+    emissiveIntensity: 0.3,
+    roughness: 0.5,
+  });
+  materials.push(truckMat);
+  const trucks = new InstancedMesh(new BoxGeometry(0.55, 0.45, 1.25), truckMat, MAX_TRUCKS);
+  trucks.count = 0;
+  group.add(trucks);
+  const loopR = tower.footprint + 9.5;
+
+  // --- local sunlight: a soft pool of light on the plot during the HQ's daytime ---
+  const sunMat = new MeshBasicMaterial({
+    color: '#fff1d6',
+    transparent: true,
+    opacity: 0,
+    blending: AdditiveBlending,
+    depthWrite: false,
+  });
+  materials.push(sunMat);
+  const sun = new Mesh(new CircleGeometry(tower.footprint + 8, 48), sunMat);
+  sun.rotation.x = -Math.PI / 2;
+  sun.position.y = 0.06;
+  sun.renderOrder = 2;
+  group.add(sun);
+  const dawn = new Color('#ffb27a');
+  const noon = new Color('#fff4e0');
+  const dusk = new Color('#ff9a8a');
+
+  // --- picking box & label anchor -------------------------------------------
+  const hit = new Mesh(new BoxGeometry(1, 1, 1), new MeshBasicMaterial({ visible: false }));
+  hit.userData.platformId = platform.id;
+  group.add(hit);
+  const top = new Vector3();
+
+  let currentHeight = 0;
+  let highlight = 0;
+  let highlightTarget = 0;
+
+  const campus: Campus = {
+    id: platform.id,
+    group,
+    hit,
+    top,
+    footprint: tower.footprint,
+    get currentHeight() {
+      return currentHeight;
+    },
+    set currentHeight(v: number) {
+      currentHeight = v;
+    },
+    update(s) {
+      // Ease towards the target height (frame-rate independent, ~0.6 s).
+      const k = 1 - Math.exp(-s.dt * 5);
+      currentHeight +=
+        (s.height - currentHeight) * (Math.abs(s.height - currentHeight) < 0.01 ? 1 : k);
+      const h = Math.max(currentHeight, 0.001);
+      const exists = s.height > 0 || currentHeight > 0.05;
+      group.visible = exists;
+      tower.body.scale.y = h;
+      tower.crown.position.y = h;
+      tower.animate?.(s.time, h);
+
+      // Dawn and dusk tint the light warm; midday is pale.
+      const warm =
+        s.hour < 12
+          ? Math.max(0, 1 - Math.abs(s.hour - 7) / 2.5)
+          : Math.max(0, 1 - Math.abs(s.hour - 18.5) / 2.5);
+      sunMat.color.copy(noon).lerp(s.hour < 12 ? dawn : dusk, warm);
+      sunMat.opacity = Math.max(s.daylight, warm * 0.6) * 0.05;
+      sun.visible = sunMat.opacity > 0.002;
+
+      facadeU.uLit.value = s.lit;
+      facadeU.uDaylight.value = s.daylight;
+      facadeU.uTime.value = s.time;
+      hallU.uActivity.value = Math.min(1, s.activity * 0.6);
+      hallU.uTime.value = s.time;
+      steamMat.uniforms.uTime!.value = s.time;
+      steamMat.uniforms.uRate!.value = 0.6 + s.activity * 0.6;
+
+      halls.count = Math.min(MAX_HALLS, s.halls);
+      cooling.count = Math.min(MAX_COOLING, s.cooling);
+      steamGeo.setDrawRange(0, Math.min(MAX_COOLING, s.cooling) * puffsPer);
+      sub.visible = s.halls > 0;
+
+      // Trucks: evenly spaced around a loop, speed follows traffic.
+      const n = Math.min(MAX_TRUCKS, s.trucks);
+      trucks.count = n;
+      for (let i = 0; i < n; i++) {
+        const a = (i / Math.max(n, 1)) * Math.PI * 2 + s.time * 0.05 * (0.6 + s.activity * 0.5);
+        dummy.position.set(Math.cos(a) * loopR, 0.23, Math.sin(a) * loopR);
+        dummy.rotation.set(0, -a, 0);
+        dummy.updateMatrix();
+        trucks.setMatrixAt(i, dummy.matrix);
+      }
+      trucks.instanceMatrix.needsUpdate = true;
+
+      highlight += (highlightTarget - highlight) * k;
+      accent.emissiveIntensity = 1.6 + highlight * 1.6;
+
+      const pickH = Math.max(h + 4, 6);
+      hit.scale.set(tower.footprint * 2 + 6, pickH, tower.footprint * 2 + 6);
+      hit.position.set(0, pickH / 2, 0);
+      top.set(0, h + 5, 0);
+      group.localToWorld(top);
+    },
+    setHighlight(on) {
+      highlightTarget = on ? 1 : 0;
+    },
+    dispose() {
+      group.traverse((o) => {
+        if (o instanceof Mesh || o instanceof Points) o.geometry.dispose();
+      });
+      materials.forEach((m) => m.dispose());
+    },
+  };
+  return campus;
+}

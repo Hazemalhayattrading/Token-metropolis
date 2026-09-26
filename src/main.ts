@@ -14,6 +14,8 @@ import { liveClock } from './state/clock';
 import { renderDataTable } from './ui/data-table';
 import { byId, h } from './ui/dom';
 import { mountHud } from './ui/hud';
+import { createPanel } from './ui/panel';
+import type { ScaleMode } from './world/scale';
 
 type AppState = 'loading' | 'ready' | 'error';
 
@@ -39,6 +41,30 @@ function applyStaticCopy(): void {
   byId('loader-status').textContent = COPY.loading.status;
 }
 
+/** Scale toggle (log ↔ true scale): a segmented control with aria-pressed buttons. */
+function mountControls(onScale: (mode: ScaleMode) => void): void {
+  const make = (mode: ScaleMode, label: string) => {
+    const b = h(
+      'button',
+      { class: 'segmented__option', type: 'button', 'aria-pressed': String(mode === 'log') },
+      label,
+    );
+    b.addEventListener('click', () => {
+      for (const el of group.querySelectorAll('button'))
+        el.setAttribute('aria-pressed', String(el === b));
+      onScale(mode);
+    });
+    return b;
+  };
+  const group = h(
+    'div',
+    { class: 'segmented', role: 'group', 'aria-label': COPY.controls.scale },
+    make('log', COPY.controls.log),
+    make('true', COPY.controls.true),
+  );
+  byId('controls').replaceChildren(group);
+}
+
 async function boot(): Promise<void> {
   setState('loading');
   applyStaticCopy();
@@ -52,10 +78,32 @@ async function boot(): Promise<void> {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (hasWebGL()) {
       const { createWorld } = await import('./world/world');
+      const panel = createPanel(city, liveClock, () => world.select(null));
       const world = createWorld(byId<HTMLCanvasElement>('scene'), city, liveClock, {
         reducedMotion,
-        onFrame: hud.update,
+        labels: byId('labels'),
+        onFrame: () => {
+          hud.update();
+          panel.update();
+        },
+        onSelect: (id) => {
+          if (id) panel.show(id);
+          else panel.hide();
+          document.documentElement.classList.toggle('panel-open', id !== null);
+          const el = byId('panel');
+          const stage = byId('scene').getBoundingClientRect();
+          const r = el.getBoundingClientRect();
+          const mobile = window.matchMedia('(max-width: 720px)').matches;
+          world.setInsets(
+            id === null
+              ? { left: 0, bottom: 0 }
+              : mobile
+                ? { left: 0, bottom: stage.bottom - r.top }
+                : { left: r.right - stage.left, bottom: 0 },
+          );
+        },
       });
+      mountControls((mode) => world.setScale(mode));
       world.start();
     } else {
       document.documentElement.classList.add('no-webgl');

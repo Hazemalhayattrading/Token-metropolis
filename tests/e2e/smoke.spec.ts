@@ -34,7 +34,7 @@ test('loads, validates data and renders the city with live counters', async ({ p
 
   await expect(page.locator('#loader')).toBeHidden();
   await page.waitForTimeout(1000); // let the scene settle for the screenshot
-  await page.screenshot({ path: `screenshots/m2-${info.project.name}.png` });
+  await page.screenshot({ path: `screenshots/m3-${info.project.name}.png` });
   expect(problems).toEqual([]);
 });
 
@@ -56,7 +56,7 @@ test('falls back to the 2D dashboard without WebGL', async ({ page }, info) => {
   await expect(page.locator('.data-table tbody tr')).toHaveCount(15);
   await expect(page.locator('#loader')).toBeHidden();
   await page.screenshot({
-    path: `screenshots/m2-${info.project.name}-no-webgl.png`,
+    path: `screenshots/m3-${info.project.name}-no-webgl.png`,
     fullPage: true,
   });
   expect(problems).toEqual([]);

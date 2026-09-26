@@ -46,16 +46,35 @@ Quick orientation: `npm install && npm run check` (type-check, lint, format, tes
       no-WebGL fallback, cached-data fallback; screenshots at 1440×900 and 390×844 in `screenshots/`.
 - [ ] **Live on Pages** — blocked: needs merge to `main` and Pages source set to "GitHub Actions".
 
-## Next — Milestone 3: City overview
+## Milestone 3 — City overview ✅
 
-- [ ] Island layout and 15 original campus typologies (PLAN.md §5, `identity` in platforms.yaml).
-- [ ] Load-driven detail: height (log / true-scale toggle), lit windows following each platform's
-      traffic curve, server halls, cooling steam, substations, trucks, incoming light streams.
-- [ ] Day/night per HQ time zone; lighting language (moonlight, warm windows, accent crowns), selective
-      bloom, fog.
-- [ ] Picking + camera director (eased, interruptible flights) + info panel per HQ with tier badges,
-      ranges, formula and sources (bottom sheet on mobile).
-- [ ] Two art-direction passes with desktop + mobile screenshots.
+- [x] Fixed island layout (plots never move when data changes); 15 original campus typologies
+      (`src/world/campus/typologies.ts`) with world-space procedural windows (`materials.ts`).
+- [x] Load-driven campuses: log/true-scale height toggle, server halls with LED rows blinking with the
+      live traffic curve, cooling towers with steam, substation feeder, trucks on a service loop.
+- [x] Light streams from each region's horizon direction, weighted by regional user mix.
+- [x] Day/night per HQ time zone (facade daylight + subtle local light pool); office occupancy drives
+      lit windows; night sky with stars and moon; bloom; fog.
+- [x] Keyboard-accessible labels with tier dots and collision handling (lift, compact, dot; avoid UI).
+- [x] Picking + camera director (eased, interruptible flights; reduced motion = cuts); scene recentres
+      beside the side panel / above the bottom sheet.
+- [x] HQ info panel: tokens today, tokens/s, daily rate, since launch, GPU-eq, MW, water — each with
+      tier badge and range; latest published figure with quote, date, source link and verification.
+- [x] Two art-direction passes (see git history); E2E covers panel open/close and true scale.
+
+### Known gaps carried forward
+
+- Draw calls are not yet optimized (per-campus meshes, ~45 stream tubes) → quality governor in M8.
+- "Homes powered" stays hidden until the EIA constant is verified.
+- "How we estimate" links to METHODOLOGY.md on GitHub until the in-site page (M8).
+
+## Next — Milestone 4: Zoom interiors
+
+- [ ] Office floors (instanced employees; desk hardware tiers by load; typing speed with traffic).
+- [ ] Server hall (racks, LEDs synced to tokens/s, liquid-cooling shader, accelerator class by platform).
+- [ ] Power & cooling (substation, cooling towers, live MW and water gauges).
+- [ ] Model lab (trophy wall of the model lineup; newest glows; click → release date, context, source).
+- [ ] Lazy-loaded interior scenes with seamless camera transitions from the campus view.
 
 ## Blocked (needs the owner)
 

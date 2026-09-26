@@ -47,6 +47,36 @@ export const COPY = {
     disclaimer:
       'Independent project. Not affiliated with, endorsed by, or sponsored by any company shown. Figures are estimates unless marked Reported.',
   },
+  panel: {
+    close: 'Close',
+    today: 'Tokens today (UTC)',
+    now: 'Right now',
+    perDay: 'Daily rate',
+    sinceLaunch: 'Since launch',
+    tokens: 'tokens',
+    perSecond: 'tokens / second',
+    gpus: 'GPU equivalents',
+    gpuUnit: 'H100-class, busy now',
+    power: 'Power now',
+    water: 'Cooling water',
+    waterUnit: 'litres / day',
+    infrastructure: 'What it takes to serve',
+    infraNote:
+      'Hardware, power and water are modeled from tokens with one H100-equivalent efficiency figure for every platform — the biggest uncertainty on this site.',
+    latest: 'Latest published figure',
+    how: 'How this estimate is made',
+    snippet: 'checked against a search summary of the source',
+    range: (low: string, high: string) => `range ${low} – ${high}`,
+    extrapolated: (days: number) =>
+      `The latest figure is ${days} days old, so today's value is extrapolated and its range widens with time.`,
+    localTime: (time: string) => `${time} local time`,
+  },
+  controls: {
+    scale: 'Building height',
+    log: 'Log scale',
+    true: 'True scale',
+    overview: 'Back to the city',
+  },
   noWebgl: 'Your browser can’t show the 3D city, so here is the same data as a dashboard.',
   skipToData: 'Skip to the data table',
 } as const;
