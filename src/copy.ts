@@ -22,6 +22,14 @@ export const COPY = {
     offline: 'Showing the last saved copy of the data — the latest could not be loaded.',
     methodLink: 'How we estimate',
     dataLink: 'Data view',
+    /** Rotating equivalences under "Since you arrived". */
+    equivalences: {
+      words: 'words',
+      energy: 'kWh of electricity',
+      water: 'litres of cooling water',
+      lead: '≈',
+      label: 'In other words',
+    },
   },
   tiers: {
     reported: 'Reported',
@@ -251,6 +259,26 @@ export const COPY = {
   // ---- M6: share card (src/ui/share.ts) — owned by that module's builder
   share: {
     // (strings for this module go here)
+  },
+  compare: {
+    open: 'Compare',
+    title: 'Compare',
+    add: 'Add a platform…',
+    addLabel: 'Add a platform to compare',
+    remove: (name: string) => `Remove ${name} from the comparison`,
+    close: 'Close compare',
+    hint: 'Pick two or three platforms to see their campuses side by side.',
+    scaleNote: 'Towers keep the city’s current scale (log or true).',
+    rows: {
+      perDay: 'Daily rate',
+      now: 'Right now',
+      nowHistory: 'At the time shown',
+      total: 'Since launch',
+      gpus: 'GPU equivalents',
+      power: 'Power',
+      water: 'Cooling water',
+      latest: 'Latest published figure',
+    },
   },
   controls: {
     scale: 'Building height',

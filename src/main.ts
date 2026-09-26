@@ -10,14 +10,17 @@ import './styles/main.css';
 import './styles/timeline.css';
 import './styles/race.css';
 import './styles/feed.css';
+import './styles/compare.css';
 import { COPY } from './copy';
 import { DataUnavailableError, loadData } from './data/load';
+import { dailyRate } from './model/estimate';
 import { buildCity } from './state/city';
 import { liveClock } from './state/clock';
 import { createTimeMachine } from './state/timemachine';
 import { renderDataTable } from './ui/data-table';
 import { byId, h } from './ui/dom';
 import { mountHud } from './ui/hud';
+import { mountCompare } from './ui/compare';
 import { mountFeed, mountToasts } from './ui/feed';
 import { createPanel } from './ui/panel';
 import { mountRace } from './ui/race';
@@ -55,7 +58,12 @@ function applyStaticCopy(): void {
 function mountControls(
   onScale: ((mode: ScaleMode) => void) | null,
   onRace: () => void,
-): { raceButton: HTMLButtonElement; feedSlot: HTMLElement } {
+  onCompare: (() => void) | null = null,
+): {
+  raceButton: HTMLButtonElement;
+  compareButton: HTMLButtonElement | null;
+  feedSlot: HTMLElement;
+} {
   const make = (mode: ScaleMode, label: string) => {
     const b = h(
       'button',
@@ -81,9 +89,27 @@ function mountControls(
     COPY.race.open,
   );
   raceButton.addEventListener('click', onRace);
+  const compareButton = onCompare
+    ? h(
+        'button',
+        {
+          class: 'control-button',
+          type: 'button',
+          'aria-pressed': 'false',
+          'aria-controls': 'compare',
+        },
+        COPY.compare.open,
+      )
+    : null;
+  if (compareButton && onCompare) compareButton.addEventListener('click', onCompare);
   const feedSlot = h('div', { class: 'feed-slot' });
-  byId('controls').replaceChildren(...(onScale ? [group] : []), raceButton, feedSlot);
-  return { raceButton, feedSlot };
+  byId('controls').replaceChildren(
+    ...(onScale ? [group] : []),
+    raceButton,
+    ...(compareButton ? [compareButton] : []),
+    feedSlot,
+  );
+  return { raceButton, compareButton, feedSlot };
 }
 
 async function boot(): Promise<void> {
@@ -180,6 +206,7 @@ async function boot(): Promise<void> {
           timeline.update();
           race.update();
           feed.update();
+          compare.update();
         },
         onSelect: (id) => {
           // Toggle the class first, so controls hidden under the panel are visible again before
@@ -212,9 +239,40 @@ async function boot(): Promise<void> {
       onRaceOpen = () => {
         if (mobile.matches) world.select(null);
       };
+      // Compare mode: split-screen campuses with a metrics card per column.
+      const compareEl = byId('compare');
+      // Towers are vertical, so compare always uses columns; on phones they fill the top half and
+      // the metrics cards the bottom half.
+      const layout = () => 'columns' as const;
+      const area = () => (mobile.matches ? 0.5 : 1);
+      const setCompareOpen = (open: boolean) => {
+        document.documentElement.classList.toggle('compare-open', open);
+        controls.compareButton?.setAttribute('aria-pressed', String(open));
+        if (open) {
+          if (race.open) setRace(false);
+          const ranked = [...city.platforms]
+            .map((pm) => ({ id: pm.platform.id, r: dailyRate(pm, tm.now()).central }))
+            .sort((a, b) => b.r - a.r)
+            .map((x) => x.id);
+          const first = panel.openId ?? ranked[0]!;
+          compare.show([first, ranked.find((x) => x !== first)!]);
+        } else {
+          compare.hide();
+          world.setCompare(null, layout(), area());
+        }
+      };
+      const compare = mountCompare(compareEl, city, tm, {
+        onChange: (ids) => world.setCompare(ids, layout(), area()),
+        onClose: () => setCompareOpen(false),
+        history: () => tm.state().mode === 'history',
+      });
+      mobile.addEventListener('change', () => {
+        if (compare.open) world.setCompare(compare.ids, layout(), area());
+      });
       controls = mountControls(
         (mode) => world.setScale(mode),
         () => setRace(!race.open),
+        () => setCompareOpen(!compare.open),
       );
       const feed = mountFeed(controls.feedSlot, {
         events: data.events,

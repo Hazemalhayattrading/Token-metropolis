@@ -1184,3 +1184,22 @@ a {
     max-height: 50svh;
   }
 }
+
+/* "Since you arrived", in other words */
+.stat__equiv {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+.stat__equiv .tier {
+  font-size: 10px;
+  line-height: 14px;
+  padding: 0 6px;
+}
+.equiv__range {
+  display: block;
+  color: var(--faint);
+  font-size: 11px;
+}

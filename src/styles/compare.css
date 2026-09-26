@@ -1,0 +1,260 @@
+/* ==========================================================================
+   Compare mode — split-screen campuses (the world renders one viewport per
+   column/row; this overlay lines up with them exactly: equal fractions of the
+   stage, no gaps).
+   ========================================================================== */
+
+.compare-root {
+  position: absolute;
+  inset: 0;
+  z-index: 6;
+  pointer-events: none;
+}
+.compare-root[hidden] {
+  display: none;
+}
+.compare-open .hud,
+.compare-open .masthead,
+.compare-open .controls,
+.compare-open .toasts-root,
+.compare-open .race-root {
+  display: none;
+}
+
+.compare {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.compare__bar {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: var(--gap) var(--gap) 0;
+  padding: 8px 8px 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--panel-strong);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+}
+.compare__title {
+  margin: 0;
+  font: 400 22px/1.1 var(--font-display);
+}
+.compare__picker {
+  min-width: 190px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: rgb(255 255 255 / 0.04);
+  color: var(--text);
+  font: 500 13px/1 var(--font-ui);
+}
+.compare__picker:disabled {
+  color: var(--muted);
+}
+.compare__note {
+  flex: 1;
+  margin: 0;
+  color: var(--faint);
+  font-size: 12px;
+}
+.compare__close,
+.compare__remove {
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+.compare__remove {
+  width: 28px;
+  height: 28px;
+  font-size: 17px;
+}
+.compare__close:hover,
+.compare__remove:hover {
+  border-color: var(--accent);
+}
+.compare__close:focus-visible,
+.compare__remove:focus-visible,
+.compare__picker:focus-visible,
+.compare__latest a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.compare__grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(var(--compare-n, 2), minmax(0, 1fr));
+  min-height: 0;
+  /* the time machine bar sits at the bottom centre */
+  padding-bottom: calc(var(--footer-h) + var(--gap) + 72px);
+  margin-top: calc(-1 * var(--gap));
+}
+.compare__col {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  padding: calc(var(--gap) * 2) 14px 0;
+  border-left: 1px solid rgb(255 255 255 / 0.12);
+}
+.compare__col:first-child {
+  border-left: 0;
+}
+.compare__head,
+.compare__card {
+  pointer-events: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel-strong);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+}
+.compare__head {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 6px 6px 6px 12px;
+  border-top: 3px solid var(--accent);
+}
+.compare__swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+.compare__name {
+  margin: 0;
+  font: 400 18px/1.1 var(--font-display);
+}
+.compare__card {
+  padding: 10px 12px 12px;
+}
+.compare__metrics {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 8px 12px;
+  margin: 0;
+}
+.compare__metric {
+  min-width: 0;
+}
+.compare__metric dt {
+  color: var(--muted);
+  font-size: 11px;
+}
+.compare__metric dd {
+  margin: 2px 0 0;
+  font-variant-numeric: tabular-nums;
+}
+.compare__value {
+  font: 500 15px/1.2 var(--font-ui);
+  white-space: nowrap;
+}
+.compare__range {
+  display: block;
+  color: var(--faint);
+  font-size: 11px;
+}
+.compare__badge .tier,
+.compare__latest .tier {
+  font-size: 10px;
+  line-height: 14px;
+  padding: 0 6px;
+}
+.compare__latest-label {
+  margin: 10px 0 2px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.compare__latest {
+  margin: 0;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Phones: narrow columns (towers are vertical) in the top half; the cards fill the bottom half. */
+@media (max-width: 720px) {
+  .compare__bar {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 8px 8px 12px;
+  }
+  .compare__title {
+    font-size: 18px;
+  }
+  .compare__note {
+    display: none;
+  }
+  .compare__picker {
+    flex: 1;
+    min-width: 0;
+  }
+  .compare__grid {
+    padding-bottom: calc(var(--footer-h) + var(--gap) + 64px);
+    margin-top: 0;
+  }
+  .compare__col {
+    padding: 8px 4px 0;
+  }
+  .compare__head {
+    padding: 4px 4px 4px 8px;
+    gap: 4px;
+    max-width: 100%;
+  }
+  .compare__name {
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .compare__swatch {
+    display: none;
+  }
+  .compare__remove {
+    width: 24px;
+    height: 24px;
+    flex: none;
+  }
+  /* the card starts halfway down: the campus viewport is the top half */
+  .compare__card {
+    position: absolute;
+    top: calc(50% - var(--gap));
+    left: 4px;
+    right: 4px;
+    bottom: 0;
+    overflow-y: auto;
+    padding: 8px;
+  }
+  .compare__metrics {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+  .compare__value {
+    font-size: 13px;
+    white-space: normal;
+  }
+  .compare__range {
+    font-size: 10px;
+  }
+  /* four key figures fit; GPUs and water stay in the HQ panel */
+  .compare__metric[data-key='gpus'],
+  .compare__metric[data-key='water'] {
+    display: none;
+  }
+}

@@ -39,7 +39,7 @@ import { releasedBy } from './interiors/lineup';
 import { createLaunchFx, type LaunchFx } from './launch';
 import { createLabels, type LabelValue, type Labels } from './labels';
 import { layoutPlots } from './layout';
-import { createPost } from './post';
+import { createPost, type Post } from './post';
 import { facilityCounts, logLoad, towerHeight, type ScaleMode } from './scale';
 import { createStreams, type Streams } from './streams';
 
@@ -56,6 +56,11 @@ export interface World {
   selectModel(id: string | null): void;
   /** The time shown jumped (a seek, or back to live): no launch pulses for the gap. */
   resetTimeline(): void;
+  /**
+   * Compare mode: one viewport per campus (columns side by side, or rows on phones), each with
+   * its own camera orbiting that campus. null returns to the single city view.
+   */
+  setCompare(ids: readonly string[] | null, layout: 'columns' | 'rows', area?: number): void;
   readonly view: InteriorView;
   dispose(): void;
 }
@@ -192,15 +197,16 @@ export function createWorld(
     return { position, target };
   }
 
-  function campusPose(id: string): Pose {
+  /** @param compact tighter framing for narrow compare columns (their FOV already widens). */
+  function campusPose(id: string, aspect = camera.aspect, compact = false): Pose {
     const c = slots.get(id)!.campus;
     const base = c.group.position;
     const h = Math.max(c.currentHeight, 6);
-    const portrait = camera.aspect < 1;
+    const portrait = aspect < 1;
     const target = new Vector3(base.x, h * (portrait ? 0.38 : 0.45), base.z);
     const out = new Vector3(base.x, 0, base.z).normalize();
     if (out.lengthSq() < 0.01) out.set(0, 0, 1);
-    const distance = (16 + h * 0.95) * (portrait ? 2.1 : 1);
+    const distance = (16 + h * 0.95) * (portrait ? (compact ? 1.3 : 2.1) : 1);
     const side = new Vector3(-out.z, 0, out.x).multiplyScalar(distance * 0.3);
     const position = target
       .clone()
@@ -208,6 +214,90 @@ export function createWorld(
       .add(side)
       .setY(h * 0.5 + distance * 0.4);
     return { position, target };
+  }
+
+  // --- compare mode ---------------------------------------------------------------
+  interface CompareView {
+    id: string;
+    camera: PerspectiveCamera;
+    post: Post;
+    angle: number;
+  }
+  let compare: { layout: 'columns' | 'rows'; area: number; views: CompareView[] } | null = null;
+
+  /**
+   * Viewport of view i of n, in CSS pixels with y measured from the bottom (as three.js wants).
+   * `area` is the fraction of the height used, from the top (phones keep the lower part for the
+   * metrics cards).
+   */
+  function compareRect(
+    i: number,
+    n: number,
+    layout: 'columns' | 'rows',
+    w: number,
+    fullH: number,
+    area = 1,
+  ) {
+    const h = Math.round(fullH * area);
+    const bottom = fullH - h;
+    if (layout === 'columns') {
+      const x = Math.round((i * w) / n);
+      return { x, y: bottom, w: Math.round(((i + 1) * w) / n) - x, h };
+    }
+    const top = Math.round((i * h) / n);
+    const height = Math.round(((i + 1) * h) / n) - top;
+    return { x: 0, y: bottom + h - top - height, w, h: height };
+  }
+
+  /** Same framing rule as the main camera: keep ~27° across on narrow viewports. */
+  function fovFor(aspect: number): number {
+    return aspect < 1
+      ? Math.min(
+          70,
+          Math.max(38, (2 * Math.atan(Math.tan((13.5 * Math.PI) / 180) / aspect) * 180) / Math.PI),
+        )
+      : 38;
+  }
+
+  function sizeCompare(): void {
+    if (!compare) return;
+    const { clientWidth: w, clientHeight: h } = canvas;
+    compare.views.forEach((v, i, all) => {
+      const r = compareRect(i, all.length, compare!.layout, w, h, compare!.area);
+      v.camera.aspect = r.w / Math.max(1, r.h);
+      v.camera.fov = fovFor(v.camera.aspect);
+      v.camera.updateProjectionMatrix();
+      v.post.setSize(r.w, r.h, pixelRatio);
+    });
+  }
+
+  function disposeCompare(): void {
+    compare?.views.forEach((v) => {
+      v.post.dispose();
+      slots.get(v.id)?.campus.setHighlight(false);
+    });
+    compare = null;
+  }
+
+  /** Render each compare viewport through its own bloom pipeline, scissored to its rectangle. */
+  function renderCompare(dt: number): void {
+    if (!compare) return;
+    const { clientWidth: w, clientHeight: h } = canvas;
+    const n = compare.views.length;
+    compare.views.forEach((v, i) => {
+      if (!opts.reducedMotion) v.angle += dt * 0.05;
+      const pose = campusPose(v.id, v.camera.aspect, true);
+      const offset = pose.position.clone().sub(pose.target).applyAxisAngle(UP, v.angle);
+      v.camera.position.copy(pose.target).add(offset);
+      v.camera.lookAt(pose.target);
+      const r = compareRect(i, n, compare!.layout, w, h, compare!.area);
+      renderer.setViewport(r.x, r.y, r.w, r.h);
+      renderer.setScissor(r.x, r.y, r.w, r.h);
+      renderer.setScissorTest(true);
+      v.post.render();
+    });
+    renderer.setScissorTest(false);
+    renderer.setViewport(0, 0, w, h);
   }
 
   // --- interior framings ------------------------------------------------------
@@ -334,18 +424,10 @@ export function createWorld(
     post.setSize(w, h, pixelRatio);
     camera.aspect = w / h;
     // Keep ~27° of horizontal view on portrait screens so the island is not cropped.
-    camera.fov =
-      camera.aspect < 1
-        ? Math.min(
-            70,
-            Math.max(
-              38,
-              (2 * Math.atan(Math.tan((13.5 * Math.PI) / 180) / camera.aspect) * 180) / Math.PI,
-            ),
-          )
-        : 38;
+    camera.fov = fovFor(camera.aspect);
     applyViewOffset();
     if (!selected) void director.flyTo(overviewPose(), 0);
+    sizeCompare();
   };
   const observer = new ResizeObserver(resize);
   observer.observe(canvas);
@@ -384,7 +466,7 @@ export function createWorld(
   }
 
   const onMove = (ev: PointerEvent) => {
-    if (ev.pointerType !== 'mouse') return;
+    if (ev.pointerType !== 'mouse' || compare) return;
     const picked = pick(ev);
     const id = picked.platform;
     if (picked.model) {
@@ -401,7 +483,7 @@ export function createWorld(
   };
   const onDown = (ev: PointerEvent) => (down = { x: ev.clientX, y: ev.clientY });
   const onUp = (ev: PointerEvent) => {
-    if (!down) return;
+    if (!down || compare) return;
     const moved = Math.hypot(ev.clientX - down.x, ev.clientY - down.y);
     down = null;
     if (moved > 6) return; // a drag, not a tap
@@ -552,7 +634,8 @@ export function createWorld(
     director.update(dt);
     controls.update();
     labels.update(camera, labelPositions, labelValues);
-    post.render();
+    if (compare) renderCompare(dt);
+    else post.render();
     opts.onFrame?.();
   };
 
@@ -645,6 +728,27 @@ export function createWorld(
     resetTimeline() {
       prevT = null;
     },
+    setCompare(ids, layout, area = 1) {
+      disposeCompare();
+      if (!ids || ids.length === 0) {
+        controls.enabled = true;
+        opts.labels.classList.toggle('labels--interior', view !== 'overview');
+        return;
+      }
+      if (selected) world.select(null);
+      for (const id of ids) slots.get(id)?.campus.setHighlight(true);
+      compare = {
+        layout,
+        area: Math.min(1, Math.max(0.2, area)),
+        views: ids.map((id, i) => {
+          const cam = new PerspectiveCamera(38, 1, 0.5, 2000);
+          return { id, camera: cam, post: createPost(renderer, scene, cam), angle: i * 0.3 };
+        }),
+      };
+      sizeCompare();
+      controls.enabled = false;
+      opts.labels.classList.add('labels--interior');
+    },
     dispose() {
       world.stop();
       document.removeEventListener('visibilitychange', onVisibility);
@@ -655,6 +759,7 @@ export function createWorld(
       observer.disconnect();
       controls.dispose();
       labels.dispose();
+      disposeCompare();
       closeInteriors();
       slots.forEach((s) => {
         s.launch.dispose();

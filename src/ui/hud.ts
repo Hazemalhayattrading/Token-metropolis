@@ -13,6 +13,7 @@ import {
 } from '../model/estimate';
 import { weakest } from '../model/tier';
 import { daysToIso, utcDayStart } from '../model/time';
+import { arrivalEquivalences } from '../state/equivalences';
 import type { City } from '../state/city';
 import type { Clock } from '../state/clock';
 import { tierBadge } from './badge';
@@ -46,6 +47,17 @@ export function mountHud(
   const rateLabel = h('p', { class: 'stat__label' }, COPY.hud.rateLabel);
   const range = h('p', { class: 'counter__range' });
   const arrived = h('output', { class: 'stat__value' });
+  const equivValue = h('span', { class: 'equiv__value' });
+  const equivRange = h('span', { class: 'equiv__range' });
+  const equivBadge = h('span', { class: 'equiv__badge' });
+  const equiv = h(
+    'p',
+    { class: 'stat__equiv', title: COPY.hud.equivalences.label },
+    equivValue,
+    ' ',
+    equivBadge,
+    equivRange,
+  );
   const rate = h('output', { class: 'stat__value' });
   const updated = h('p', { class: 'hud__updated' });
 
@@ -65,6 +77,7 @@ export function mountHud(
           { class: 'stat' },
           h('p', { class: 'stat__label' }, COPY.hud.arrivedLabel),
           arrived,
+          equiv,
         ),
         h(
           'div',
@@ -97,6 +110,23 @@ export function mountHud(
   let lastFast = 0;
   let lastDay = '';
   let wasHistory = false;
+  let equivIndex = 0;
+  let lastEquiv = 0;
+  // "Since you arrived", in other words: rotates through words, electricity and water.
+  const updateEquivalence = (liveNow: number) => {
+    const tokens = globalBetween(city.platforms, arrivedAt, liveNow);
+    const list = arrivalEquivalences(tokens, tier);
+    equiv.hidden = list.length === 0;
+    const e = list[equivIndex % Math.max(1, list.length)];
+    if (!e) return;
+    const unit = COPY.hud.equivalences[e.id];
+    equivValue.textContent = `${COPY.hud.equivalences.lead} ${humanNumber(e.value.central, 'long')} ${unit}`;
+    equivRange.textContent = ` ${COPY.panel.range(humanNumber(e.value.low), humanNumber(e.value.high))}`;
+    if (equivBadge.dataset.tier !== e.tier) {
+      equivBadge.dataset.tier = e.tier;
+      equivBadge.replaceChildren(tierBadge(e.tier));
+    }
+  };
   const update = () => {
     const nowMs = performance.now();
     if (nowMs - lastFast < 50) return; // ~20 text updates per second is plenty
@@ -126,6 +156,11 @@ export function mountHud(
     const end = past ? Math.min(dayStart + 1, liveNow) : t;
     today.textContent = fullNumber(globalBetween(city.platforms, dayStart, end).central);
     arrived.textContent = fullNumber(globalBetween(city.platforms, arrivedAt, liveNow).central);
+    if (nowMs - lastEquiv > 6000) {
+      if (lastEquiv > 0) equivIndex++;
+      lastEquiv = nowMs;
+    }
+    updateEquivalence(liveNow);
     rate.textContent = humanNumber(globalTokensPerSecond(city.platforms, t).central, 'long');
     const now = Date.now();
     if (now - lastSlow > 5000) {
