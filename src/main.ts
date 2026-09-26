@@ -22,7 +22,7 @@ import { DataUnavailableError, loadData } from './data/load';
 import { dailyRate } from './model/estimate';
 import { buildCity } from './state/city';
 import { liveClock } from './state/clock';
-import { activeIncidents } from './state/incidents';
+import { activeIncidents, CHECKED_WITHIN_MS, STALE_AFTER_MS } from './state/incidents';
 import { createTimeMachine } from './state/timemachine';
 import { createIdleTimer, TOUR_IDLE_MS, tourStops } from './state/tour';
 import { renderDataTable } from './ui/data-table';
@@ -530,9 +530,9 @@ async function boot(): Promise<void> {
         const live = tm.state().mode === 'live';
         const active = live
           ? activeIncidents(data.incidents, Date.now(), {
-              staleAfterMs: 3 * 86_400_000,
+              staleAfterMs: STALE_AFTER_MS,
               // The pipeline reads the pages hourly; a notice not read for 3 hours is not shown.
-              checkedWithinMs: 3 * 3_600_000,
+              checkedWithinMs: CHECKED_WITHIN_MS,
             })
           : new Map<string, (typeof data.incidents)[number]>();
         banner.update(active);

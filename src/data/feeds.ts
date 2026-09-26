@@ -10,6 +10,7 @@
  *   families. A first sighting is not a launch date, so these events are never celebrated.
  */
 import { z } from 'zod';
+import { parseInstant, STALE_AFTER_MS } from '../state/incidents';
 import {
   EventSchema,
   IncidentSchema,
@@ -106,6 +107,8 @@ export function normalizeStatusSummary(
   const incidents: Incident[] = [];
   let skipped = 0;
   let otherComponents = 0;
+  /** Open entries read successfully (published or deliberately left out). */
+  let read = 0;
   const add = (raw: unknown, maintenance: boolean) => {
     const status = rawStatus(raw);
     // Resolved, post-mortem, scheduled or completed entries are not open: ignored, not skipped.
@@ -117,6 +120,13 @@ export function normalizeStatusSummary(
       return;
     }
     const e = parsed.data;
+    // An incident without a recognised impact cannot be read (a format change looks like this);
+    // it claims nothing and is not published.
+    if (!maintenance && !INCIDENT_IMPACTS.has(String(e.impact))) {
+      skipped++;
+      return;
+    }
+    read++;
     if (wanted) {
       const names = (e.components ?? []).map((c) => c.name.toLowerCase());
       if (!names.some((n) => wanted.includes(n))) {
@@ -130,8 +140,10 @@ export function normalizeStatusSummary(
       if (e.impact === 'none') return;
       impact = 'maintenance';
     } else {
-      // An unknown impact claims nothing (the site does not show "none").
-      impact = INCIDENT_IMPACTS.has(String(e.impact)) ? (e.impact as Incident['impact']) : 'none';
+      // "No impact": the site would not show it, so it is not published (it would otherwise
+      // change the file every hour as its read time moves).
+      if (e.impact === 'none') return;
+      impact = e.impact as Incident['impact'];
     }
     // The actual start when the page has it (maintenance can start early), else the plan.
     const started = maintenance
@@ -149,12 +161,21 @@ export function normalizeStatusSummary(
       checked: o.checked,
     };
     const valid = IncidentSchema.safeParse(incident);
-    if (valid.success) incidents.push(valid.data);
-    else skipped++;
+    if (!valid.success) {
+      read--;
+      skipped++;
+      return;
+    }
+    // Left open for more than three days: the site ignores it as stale, so it is not published.
+    const start = parseInstant(incident.started);
+    const at = parseInstant(o.checked);
+    if (start !== null && at !== null && at - start > STALE_AFTER_MS) return;
+    incidents.push(valid.data);
   };
   for (const raw of summary.incidents) add(raw, false);
   for (const raw of summary.scheduled_maintenances) add(raw, true);
-  if (skipped > 0 && incidents.length === 0)
+  // Open entries exist and none could be read: a format change, not an all-clear.
+  if (skipped > 0 && read === 0)
     throw new Error(`${skipped} open entr${skipped === 1 ? 'y' : 'ies'} could not be read`);
   return { incidents, skipped, otherComponents };
 }

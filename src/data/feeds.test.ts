@@ -143,7 +143,7 @@ describe('normalizeStatusSummary', () => {
     expect(r.otherComponents).toBe(2); // a notice naming no component is not guessed to be ours
   });
 
-  it('never guesses: an unknown impact claims nothing, unreadable open entries are skipped', () => {
+  it('never guesses: no or unknown impact is not published, unreadable open entries are skipped', () => {
     const r = normalizeStatusSummary(
       'cursor',
       PAGE,
@@ -158,11 +158,44 @@ describe('normalizeStatusSummary', () => {
         { id: 'b', status: 'identified' }, // no name
         { id: 'c', name: 'No start time', status: 'identified', impact: 'major' },
         'not an object',
+        // read, and deliberately not published: the page says it has no impact
+        {
+          id: 'd',
+          name: 'Quiet',
+          status: 'investigating',
+          impact: 'none',
+          created_at: '2026-09-26T02:00:00Z',
+        },
       ]),
       { checked: CHECKED },
     );
-    expect(r.incidents.map((i) => [i.id, i.impact])).toEqual([['cursor-a', 'none']]);
-    expect(r.skipped).toBe(3);
+    expect(r.incidents).toEqual([]);
+    expect(r.skipped).toBe(4);
+  });
+
+  it('does not publish a notice left open for more than three days (the site ignores it)', () => {
+    const r = normalizeStatusSummary(
+      'claude',
+      PAGE,
+      summary([
+        {
+          id: 'old',
+          name: 'Degraded',
+          status: 'monitoring',
+          impact: 'minor',
+          created_at: '2026-09-20T00:00:00Z',
+        },
+        {
+          id: 'new',
+          name: 'Errors',
+          status: 'identified',
+          impact: 'major',
+          created_at: '2026-09-26T09:00:00Z',
+        },
+      ]),
+      { checked: CHECKED },
+    );
+    expect(r.incidents.map((i) => i.id)).toEqual(['claude-new']);
   });
 
   it('fails when open entries exist but none can be read (a format change, not "all clear")', () => {

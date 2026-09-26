@@ -20,10 +20,12 @@ import { validateDataset } from './validate';
 
 const read = (f: string) =>
   parse(readFileSync(join(__dirname, '..', '..', 'data', 'manual', f), 'utf8')) as unknown;
+/** A fixed date for the numeric checks (estimates at that moment); validation uses the real clock,
+ * so figures added after it (as UPDATING.md asks) never turn the tests red. */
 const NOW = isoToDays('2026-09-25T12:00:00Z');
 const result = validateDataset(
   { platforms: read('platforms.yaml'), metrics: read('metrics.yaml'), models: read('models.yaml') },
-  { now: NOW, expectedPlatforms: 15 },
+  { expectedPlatforms: 15 },
 );
 if (!result.ok) throw new Error(`dataset invalid:\n${result.errors.join('\n')}`);
 const { platforms, metrics, models } = result.data;
@@ -41,7 +43,9 @@ describe('curated dataset', () => {
     for (const m of metrics) {
       expect(m.source.url, m.id).toMatch(/^https:\/\//);
       expect(m.quote.length, m.id).toBeGreaterThan(10);
-      expect(m.accessed, m.id).toBe('2026-09-25');
+      // A real date, not in the future (UPDATING.md: set it to the day you read the source).
+      expect(m.accessed, m.id).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(Date.parse(m.accessed), m.id).toBeLessThanOrEqual(Date.now() + 86_400_000);
     }
   });
 

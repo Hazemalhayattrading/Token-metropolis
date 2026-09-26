@@ -7,8 +7,11 @@ Two kinds of data keep the site current:
 
 - **Curated** (`data/manual/*.yaml`): reported usage figures, models and platforms, each with its
   source and date. You update these by hand (below).
-- **Automated** (a daily GitHub Actions run): status-page notices and newly seen models. See
-  [The daily update](#the-daily-update) at the end; normally there is nothing to do.
+- **Automated** (an hourly GitHub Actions run): status-page notices and newly seen models. See
+  [The automatic update](#the-automatic-update) at the end; normally there is nothing to do.
+- **Always edit `data/manual/` on a branch and open a pull request** (step 5 below): the checks run
+  on pull requests. A broken edit committed straight to `main` publishes nothing, but it makes every
+  hourly update fail until it is fixed.
 
 ## Add a new reported figure (e.g. a company announces new daily tokens)
 
@@ -99,6 +102,8 @@ Common tasks:
   Merge `main`, take either side of the conflict, then run `npm run build:data` and commit: the
   files are regenerated from the sources.
 
-If the run fails with a permissions error on `git push`, the repository's settings must let
-workflows write (Settings → Actions → General → Workflow permissions → "Read and write"), and a
-branch rule on `main` must allow the `github-actions[bot]` push.
+If a run fails to push to `main`, no settings change is needed for the token (each workflow asks
+for the permissions it needs): check **Settings → Rules** and **Settings → Branches** for a rule on
+`main` that requires pull requests or status checks, and remove it or let GitHub Actions bypass it.
+While a status notice is open on some page, each hourly run commits (the notice's "as of" time
+moves) and the site redeploys; that is expected.

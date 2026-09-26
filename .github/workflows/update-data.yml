@@ -5,7 +5,8 @@ name: Update data
 # to main only when something changed, then deploys the site.
 #
 # Hourly rather than daily: status notices last hours, and the site hides a notice whose page was
-# not read in the last three hours. Runs that find nothing new stop early and commit nothing.
+# not read in the last three hours. Runs that find nothing new stop early and commit nothing; while
+# a notice is open somewhere, each run commits (its "as of" time moves) and the site redeploys.
 
 on:
   schedule:

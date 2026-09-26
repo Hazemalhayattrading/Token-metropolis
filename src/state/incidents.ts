@@ -8,6 +8,14 @@ import type { Incident } from '../data/schema';
 
 export type Impact = Incident['impact'];
 
+/**
+ * An unresolved notice older than this is not shown: a guard against a page that left an old
+ * incident open. The data pipeline drops such notices too (src/data/feeds.ts).
+ */
+export const STALE_AFTER_MS = 3 * 86_400_000;
+/** A notice whose page was not read (by the hourly pipeline) for this long is not shown. */
+export const CHECKED_WITHIN_MS = 3 * 3_600_000;
+
 const SEVERITY: Readonly<Record<Impact, number>> = {
   none: 0,
   maintenance: 1,

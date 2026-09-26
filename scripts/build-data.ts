@@ -1,10 +1,10 @@
 /**
- * Compile data/manual/*.yaml (curated) and data/auto/*.json (written by the daily pipeline,
+ * Compile data/manual/*.yaml (curated) and data/auto/*.json (written by the hourly pipeline,
  * scripts/update-data.ts) → public/data/*.json.
  *
  * Refuses to publish anything invalid: if validation fails, public/data is
  * left untouched and the process exits non-zero. `meta.json.lastUpdated`
- * only changes when the published content changes, so the daily workflow
+ * only changes when the published content changes, so the hourly workflow
  * can commit only real updates.
  *
  * Usage: tsx scripts/build-data.ts [--check]   (--check validates without writing)
@@ -109,7 +109,7 @@ function main(): void {
       new Set(hidden),
     ),
   };
-  // incidents.json is owned by the daily pipeline (seeded empty if missing), validated here too.
+  // incidents.json is owned by the hourly pipeline (seeded empty if missing), validated here too.
   const incidentsFile = join(OUT, 'incidents.json');
   const incidents = readAuto(incidentsFile, z.array(IncidentSchema), 'public/data/incidents.json');
 

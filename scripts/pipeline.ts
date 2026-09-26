@@ -1,5 +1,5 @@
 /**
- * The daily pipeline's core (brief §4), separate from its command line (update-data.ts) so it
+ * The hourly pipeline's core (brief §4), separate from its command line (update-data.ts) so it
  * runs in tests with a fake network and temporary files.
  *
  * 1. Status pages: each HQ's Statuspage-compatible summary.json → incidents.json (open incidents

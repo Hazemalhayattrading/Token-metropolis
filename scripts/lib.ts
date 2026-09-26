@@ -6,7 +6,7 @@ import { parse } from 'yaml';
 
 export const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 export const MANUAL = join(ROOT, 'data', 'manual');
-/** Files the daily pipeline owns (committed, validated by the data build). */
+/** Files the hourly pipeline owns (committed, validated by the data build). */
 export const AUTO = join(ROOT, 'data', 'auto');
 export const OUT = join(ROOT, 'public', 'data');
 

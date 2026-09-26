@@ -1,5 +1,5 @@
 /**
- * The daily data pipeline's command line (brief §4), run by .github/workflows/update-data.yml:
+ * The hourly data pipeline's command line (brief §4), run by .github/workflows/update-data.yml:
  * reads the curated data, fetches the public feeds (scripts/pipeline.ts) and updates
  * public/data/incidents.json and data/auto/sightings.json when they change. The workflow then
  * runs the data build, which validates everything again and sets meta.json's lastUpdated.

@@ -3,7 +3,21 @@
 Resume point for any fresh session. Source brief: `token-metropolis-prompt_1.md`.
 Working agreement: `CLAUDE.md`. Decisions log: `DECISIONS.md`. Plan: `PLAN.md`.
 
-Development branch: `claude/pensive-ptolemy-0qc6e6` (pushing to `main` deploys — not done without approval).
+Development branch: `claude/pensive-ptolemy-0qc6e6` (pushing to `main` deploys — only via a PR the
+owner approved). Live site: https://hazemalhayattrading.github.io/Token-metropolis/
+
+## Current status (2026-09-26)
+
+- Milestones 1–7 done and reviewed. **Milestone 8 is paused at the owner's request** — do not start
+  it until the owner gives feedback.
+- M1–M7 merged to `main` through a pull request (owner-approved), which triggers the Pages deploy.
+  Before the next PR: merge `origin/main` into the branch (the hourly bot commits data to `main`),
+  run `npm run build:data`, commit.
+- A read-only pre-merge audit (deploy path, first pipeline run, merge content, plus a critic) found
+  no blockers; its fixes went into the last pre-merge commit: tests validate the curated data with
+  the real clock (a data edit dated after 2026-09-25 no longer fails them), the pipeline no longer
+  publishes notices the site never shows (no impact, or open more than three days), and the docs
+  now say "hourly" and what to check if the bot cannot push.
 
 Quick orientation: `npm install && npm run check` (type-check, lint, format, tests, data + app build),
 `npm run test:e2e` (Playwright, writes `screenshots/`), `npm run dev` (local site),
@@ -136,7 +150,7 @@ integrated and art-directed in the main checkout.
       no-WebGL layout; toasts never cover panels; race usable on short screens and above the
       timeline on phones; HUD "so far" wording and accessible name; data table says it is live.
 
-## Milestone 6 — in progress
+## Milestone 6 — prompt, compare, incidents, tour, discoveries, share, sound ✅ (full review, 34 findings fixed)
 
 Wave 1 builders (isolated worktrees, disjoint files, own `copy.ts` sections; branched from 56f713b):
 `m6-prompt` (prompt visualizer + token flight), `m6-glass-sound` (uncertainty glass + procedural
@@ -208,7 +222,19 @@ Known items to fold in:
 
 ## Blocked (needs the owner)
 
-- **Deploys:** GitHub Pages needs a push to `main` and Pages enabled in the repo settings.
+- **GitHub settings for the live site and the data pipeline** (see the final report of the M7
+  session and `UPDATING.md`):
+  - Settings → Pages → Build and deployment → Source: **GitHub Actions** (no branch; do not commit
+    a suggested starter workflow). Custom domain: empty.
+  - Settings → Environments → `github-pages`: keep the default (`main` allowed), no required
+    reviewers or wait timer.
+  - Settings → Actions → General: allow all actions (or GitHub's plus this repo's reusable
+    workflows); leave "require actions pinned to a full-length commit SHA" off. Workflow
+    permissions: no change needed (each workflow declares its own).
+  - No rule on `main` that requires PRs or status checks (the hourly bot pushes to it).
+- **First real pipeline run:** after the first green deploy, run Actions → Update data → Run
+  workflow once and review its "Data update" summary (the first run adds a batch of "first seen"
+  sightings; hide wrong ones in `data/manual/hidden-sightings.yaml`).
 - **Research capacity:** this session's web-search budget (200) is spent and most primary domains are
   blocked by the environment's network policy (e.g. eia.gov, loc.gov, wikipedia.org, openai.com,
   blog.google, about.fb.com, similarweb.com). To finish verification: raise the session search budget
@@ -264,5 +290,11 @@ MAU, Doubao token series, Grok S-1 figures, Perplexity queries, Cursor ARR.
 ## Newly found
 
 - Shell network egress is restricted to package registries; live source endpoints (OpenRouter, status
-  pages) are unreachable from this container. The daily pipeline will run on GitHub Actions.
+  pages, `*.github.io`) are unreachable from this container. The pipeline runs on GitHub Actions;
+  whether the site is live can only be confirmed from the deploy run's status and by the owner.
+- Curated edits committed straight to `main` skip CI (CI runs on PRs and branches); a broken one
+  publishes nothing but makes every hourly update fail. `UPDATING.md` says to use a branch + PR.
+- Optional (M8): `deploy.yml` could always check out `main` (a rare out-of-order push deploy can
+  republish an older commit); multi-line reasons are cut in `::warning::` annotations; bump action
+  major versions if GitHub warns about their Node runtime.
 - `typescript-eslint` does not yet support TypeScript 7 → pinned TS 6.0 (D-011).

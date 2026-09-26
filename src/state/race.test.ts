@@ -163,10 +163,11 @@ describe('race scale and geometry', () => {
 
 const read = (f: string) =>
   parse(readFileSync(join(__dirname, '..', '..', 'data', 'manual', f), 'utf8')) as unknown;
+// A fixed date for the checks; validation uses the real clock (see dataset.test.ts).
 const NOW = isoToDays('2026-09-25T12:00:00Z');
 const result = validateDataset(
   { platforms: read('platforms.yaml'), metrics: read('metrics.yaml'), models: read('models.yaml') },
-  { now: NOW, expectedPlatforms: 15 },
+  { expectedPlatforms: 15 },
 );
 if (!result.ok) throw new Error(`dataset invalid:\n${result.errors.join('\n')}`);
 const REAL = buildCity(result.data);
