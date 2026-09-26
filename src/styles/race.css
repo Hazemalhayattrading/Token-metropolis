@@ -17,7 +17,6 @@
   border: 1px solid var(--line);
   border-radius: var(--radius);
   backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
   box-shadow: 0 20px 60px rgb(0 0 0 / 0.45);
   color: var(--text);
   opacity: 0;

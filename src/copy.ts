@@ -36,6 +36,8 @@ export const COPY = {
     derived: 'Estimated',
     modeled: 'Modeled',
   },
+  /** Chip on an exact computation (not an estimate, so no tier), e.g. your prompt's token count. */
+  exact: 'Exact',
   unchecked: 'Not yet checked',
   uncheckedHelp:
     'A published fact we have not yet checked against its source page (see the verification backlog).',

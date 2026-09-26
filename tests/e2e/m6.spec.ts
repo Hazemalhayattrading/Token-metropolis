@@ -92,3 +92,48 @@ test('after 30 s idle, the cinematic tour starts and any key stops it', async ({
   await expect(page.locator('html')).not.toHaveClass(/tour-on/);
   expect(problems).toEqual([]);
 });
+
+test('your prompt: an exact token count, modeled energy and water, and a token sent', async ({
+  page,
+}, info) => {
+  // Software WebGL renders ~1.5 frames a second and a frame advances at most 0.1 s of animation,
+  // so the camera move and the flight (3.4 s) take ~25 s here.
+  test.setTimeout(120_000);
+  const problems = watchConsole(page);
+  await ready(page);
+  const toggle = page.getByRole('button', { name: 'Your prompt', exact: true });
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  const dialog = page.getByRole('dialog', { name: 'Your prompt, visualized' });
+  await expect(dialog).toBeVisible();
+
+  await dialog
+    .getByRole('textbox', { name: 'Your text' })
+    .fill('The quick brown fox jumps over the lazy dog. Token Metropolis never sleeps.');
+  // The tokenizer is its own chunk, fetched on first open; the count is exact (no tier applies).
+  const count = dialog.locator('.prompt__count');
+  await expect(count.locator('.prompt__num')).toHaveText(/^\d[\d,]*$/, { timeout: 15_000 });
+  await expect(count.locator('.tier--exact')).toHaveCount(1);
+  // Energy and water are Modeled estimates with ranges.
+  const results = dialog.locator('.prompt__grid > .prompt__metric');
+  await expect(results).toHaveCount(2);
+  for (const metric of await results.all()) {
+    await expect(metric.locator('.prompt__value')).toHaveText(/\d/);
+    await expect(metric.locator('.prompt__range')).toContainText('–');
+    await expect(metric.locator('.tier--modeled')).toHaveCount(1);
+  }
+  await page.waitForTimeout(600);
+  await page.screenshot({ path: `screenshots/m6-${info.project.name}-prompt.png` });
+
+  // Send it: the panel reports the flight, then the landing.
+  const send = dialog.locator('.prompt__send');
+  await expect(send).toBeEnabled();
+  await send.click();
+  await expect(dialog.locator('.prompt__sent')).toContainText('Sent');
+  await expect(dialog.locator('.prompt__sent')).toContainText('landed', { timeout: 60_000 });
+
+  await page.keyboard.press('Escape');
+  await expect(dialog).toBeHidden();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  expect(problems).toEqual([]);
+});

@@ -13,6 +13,7 @@ import './styles/feed.css';
 import './styles/compare.css';
 import './styles/incidents.css';
 import './styles/tour.css';
+import './styles/prompt.css';
 import { createSound } from './audio/sound';
 import { COPY } from './copy';
 import { DataUnavailableError, loadData } from './data/load';
@@ -30,6 +31,7 @@ import { mountFeed, mountToasts } from './ui/feed';
 import { mountIncidentBanner } from './ui/incidents';
 import { mountTourCaptions } from './ui/tour';
 import { createPanel } from './ui/panel';
+import { mountPrompt } from './ui/prompt';
 import { mountRace } from './ui/race';
 import { mountTimeline } from './ui/timeline';
 import type { ScaleMode } from './world/scale';
@@ -196,7 +198,15 @@ async function boot(): Promise<void> {
       const { createWorld } = await import('./world/world');
       const panelEl = byId('panel');
       // Recentre the scene in the screen area the panel leaves free.
+      const promptEl = byId('prompt');
       const updateInsets = () => {
+        // On phones the prompt sheet takes the lower screen: recentre the scene above it.
+        if (mobile.matches && !promptEl.hidden) {
+          const stage = byId('scene').getBoundingClientRect();
+          const r = promptEl.getBoundingClientRect();
+          world.setInsets({ left: 0, bottom: Math.max(0, stage.bottom - r.top) });
+          return;
+        }
         if (panelEl.hidden) {
           world.setInsets({ left: 0, bottom: 0 });
           return;
@@ -219,6 +229,44 @@ async function boot(): Promise<void> {
         },
         { history: () => tm.state().mode === 'history', live: liveClock },
       );
+      // "Your prompt, visualized": count a prompt's tokens and fly one into an HQ. It is about the
+      // present, so opening it returns the time machine to live. On wide screens it sits beside
+      // the HQ panel (picking an HQ in the city aims it there); on narrower ones the two share a
+      // slot, as the race and the HQ panel do on phones.
+      const roomy = window.matchMedia('(min-width: 960px)');
+      const promptButton = h(
+        'button',
+        {
+          class: 'control-button',
+          type: 'button',
+          'aria-pressed': 'false',
+          'aria-controls': 'prompt',
+        },
+        COPY.prompt.open,
+      );
+      const promptShown = (open: boolean) => {
+        promptButton.setAttribute('aria-pressed', String(open));
+        document.documentElement.classList.toggle('prompt-open', open);
+        updateInsets();
+      };
+      const prompt = mountPrompt(promptEl, city, {
+        reducedMotion,
+        onSend: (id, _tokens, origin) => world.sendToken(id, origin),
+        onClose: () => promptShown(false),
+      });
+      const closePrompt = () => {
+        if (!prompt.isOpen) return;
+        prompt.close();
+        promptShown(false);
+      };
+      // (The control row is hidden while an HQ panel is open: the prompt opens from the city view.)
+      promptButton.addEventListener('click', () => {
+        if (prompt.isOpen) return closePrompt();
+        tm.goLive();
+        if (race.open) setRace(false);
+        prompt.open();
+        promptShown(true);
+      });
       const sound = createSound();
       const world = createWorld(byId<HTMLCanvasElement>('scene'), city, tm, {
         reducedMotion,
@@ -242,6 +290,10 @@ async function boot(): Promise<void> {
           if (id) panel.show(id);
           else panel.hide();
           if (id && mobile.matches && race.open) setRace(false);
+          if (id && prompt.isOpen) {
+            if (roomy.matches) prompt.open(id);
+            else closePrompt();
+          }
           updateInsets();
         },
         onModel: (id) => {
@@ -250,6 +302,7 @@ async function boot(): Promise<void> {
         onViewChange: (view) => panel.showView(view),
       });
       new ResizeObserver(updateInsets).observe(panelEl);
+      new ResizeObserver(updateInsets).observe(promptEl);
       // Seeks, play/pause and returning to live are jumps, not playback: no launch pulses for them.
       tm.subscribe(() => world.resetTimeline());
       // On phones the race and the HQ panel share the bottom sheet: never both at once.
@@ -265,6 +318,7 @@ async function boot(): Promise<void> {
       };
       onRaceOpen = () => {
         if (mobile.matches) world.select(null);
+        closePrompt();
       };
       // Compare mode: split-screen campuses with a metrics card per column.
       const compareEl = byId('compare');
@@ -277,6 +331,7 @@ async function boot(): Promise<void> {
         controls.compareButton?.setAttribute('aria-pressed', String(open));
         if (open) {
           if (race.open) setRace(false);
+          closePrompt();
           const ranked = [...city.platforms]
             .map((pm) => ({ id: pm.platform.id, r: dailyRate(pm, tm.now()).central }))
             .sort((a, b) => b.r - a.r)
@@ -338,7 +393,7 @@ async function boot(): Promise<void> {
         if (on && !sound.enabled) status.textContent = COPY.sound.failed;
         return sound.enabled;
       });
-      controls.feedSlot.before(glassButton, soundButton);
+      controls.feedSlot.before(promptButton, glassButton, soundButton);
 
       // Incident mode: official status-page notices. incidents.json is a snapshot of *current*
       // status, so notices follow the live clock only (not the time machine).
@@ -358,8 +413,6 @@ async function boot(): Promise<void> {
       // loop with captions; any input hands control back.
       const tourEl = byId('tour');
       let tourRun = 0;
-      // The prompt dialog (set once it is mounted) also counts as "something open".
-      const promptRef: { current: { readonly isOpen: boolean } | null } = { current: null };
       const captions = mountTourCaptions(tourEl, { onStop: () => stopTour() });
       const stopTour = () => {
         if (!document.documentElement.classList.contains('tour-on')) return;
@@ -374,11 +427,7 @@ async function boot(): Promise<void> {
         new Promise<boolean>((resolve) => setTimeout(() => resolve(run === tourRun), ms));
       const startTour = async () => {
         const busy =
-          !panelEl.hidden ||
-          compare.open ||
-          race.open ||
-          promptRef.current?.isOpen ||
-          tm.state().playing;
+          !panelEl.hidden || compare.open || race.open || prompt.isOpen || tm.state().playing;
         if (busy || document.hidden) return;
         const run = ++tourRun;
         tm.goLive();

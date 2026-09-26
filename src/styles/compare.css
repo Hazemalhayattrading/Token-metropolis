@@ -38,7 +38,6 @@
   border-radius: var(--radius);
   background: var(--panel-strong);
   backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
 }
 .compare__title {
   margin: 0;
@@ -120,7 +119,6 @@
   border-radius: 12px;
   background: var(--panel-strong);
   backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
 }
 .compare__head {
   align-self: flex-start;

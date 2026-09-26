@@ -27,7 +27,6 @@
   border: 1px solid var(--line);
   border-radius: var(--radius);
   backdrop-filter: blur(var(--blur)) saturate(1.2);
-  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.2);
   box-shadow: 0 24px 70px rgb(0 0 0 / 0.5);
   color: var(--text);
   text-align: center;

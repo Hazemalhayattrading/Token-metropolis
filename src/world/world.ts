@@ -40,6 +40,7 @@ import { releasedBy } from './interiors/lineup';
 import { zoomFromDistance, type Sound } from '../audio/sound';
 import { createAlarmFx, type AlarmFx } from './alarm';
 import { createLaunchFx, type LaunchFx } from './launch';
+import { createTokenFlight, screenToWorld } from './tokenflight';
 import { createUncertaintyGlass, type UncertaintyGlass } from './uncertainty';
 import { createLabels, type LabelValue, type Labels } from './labels';
 import { layoutPlots } from './layout';
@@ -73,6 +74,11 @@ export interface World {
   setGlass(on: boolean): void;
   /** Unresolved status-page incidents by HQ (alarm beacons and flickering lights). */
   setIncidents(active: ReadonlyMap<string, Incident>): void;
+  /**
+   * "Your prompt, visualized": frame the HQ, fly one glowing token from `origin` (client pixels,
+   * e.g. the Send button) into its server hall and light the racks. Resolves on landing.
+   */
+  sendToken(platformId: string, origin?: { readonly x: number; readonly y: number }): Promise<void>;
   readonly view: InteriorView;
   dispose(): void;
 }
@@ -211,6 +217,8 @@ export function createWorld(
   );
 
   const post = createPost(renderer, scene, camera);
+  const tokenFlight = createTokenFlight({ reducedMotion: opts.reducedMotion });
+  scene.add(tokenFlight.group);
 
   // --- framing ---------------------------------------------------------------
   function overviewPose(): Pose {
@@ -239,6 +247,23 @@ export function createWorld(
       .add(side)
       .setY(h * 0.5 + distance * 0.4);
     return { position, target };
+  }
+
+  /** Where a token sent to `id` lands: the roof of its first server hall (world space). */
+  function hallRoof(id: string): Vector3 {
+    const c = slots.get(id)!.campus;
+    c.group.updateMatrixWorld();
+    return c.group.localToWorld(new Vector3(-4.2, 1.7, -c.footprint - 5));
+  }
+
+  /**
+   * Framing for a token sent to `id`: the HQ's usual viewpoint (clear of its neighbours), turned
+   * toward the hall where the token lands, so the landing is near the middle of the screen.
+   */
+  function sendPose(id: string): Pose {
+    const pose = campusPose(id);
+    pose.target.lerp(hallRoof(id), 0.75);
+    return pose;
   }
 
   // --- compare mode ---------------------------------------------------------------
@@ -708,6 +733,7 @@ export function createWorld(
       const sel = selected ? city.byId.get(selected) : undefined;
       opts.sound.setActivity(sel ? trafficNow(sel, t) : rateSum > 0 ? activitySum / rateSum : 1);
     }
+    tokenFlight.update(dt, elapsed);
     director.update(dt);
     controls.update();
     labels.update(camera, labelPositions, labelValues);
@@ -822,6 +848,23 @@ export function createWorld(
       controls.autoRotate = stop.kind === 'overview' && !opts.reducedMotion;
       void director.flyTo(pose, seconds);
     },
+    async sendToken(platformId, origin) {
+      const slot = slots.get(platformId);
+      if (!slot || compare) return;
+      // Frame the hall where the token lands first (interior views keep their camera).
+      if (view === 'overview') {
+        controls.autoRotate = false;
+        await director.flyTo(sendPose(platformId), 1.2);
+      }
+      const rect = canvas.getBoundingClientRect();
+      const o = origin ?? { x: rect.left + rect.width / 2, y: rect.top + rect.height * 0.8 };
+      const from = screenToWorld(camera, rect, o.x, o.y, 6);
+      // The roof of the first server hall (every launched platform has at least one).
+      const to = hallRoof(platformId);
+      const accent = city.byId.get(platformId)!.platform.identity.palette.accent;
+      await tokenFlight.launch(from, to, { color: accent });
+      slot.campus.pulseHall();
+    },
     setIncidents(active) {
       incidents = active;
       opts.sound?.alarm(active.size > 0);
@@ -863,6 +906,7 @@ export function createWorld(
       labels.dispose();
       disposeCompare();
       closeInteriors();
+      tokenFlight.dispose();
       slots.forEach((s) => {
         s.alarm.dispose();
         s.glass.dispose();

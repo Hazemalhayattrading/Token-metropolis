@@ -133,7 +133,6 @@ a {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   backdrop-filter: blur(var(--blur)) saturate(1.2);
-  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.2);
   box-shadow: 0 10px 40px rgb(0 0 0 / 0.35);
 }
 
@@ -255,6 +254,14 @@ a {
   background: transparent;
   border: 1px solid currentcolor;
 }
+/* an exact computation, not an estimate: neutral, with a square mark instead of a tier dot */
+.tier--exact {
+  color: var(--text);
+  background: rgb(255 255 255 / 0.06);
+}
+.tier--exact::before {
+  border-radius: 1px;
+}
 
 .button {
   appearance: none;
@@ -374,7 +381,6 @@ a {
   background: rgb(5 7 13 / 0.82);
   border-top: 1px solid var(--line);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
 }
 .site-footer p {
   margin: 0;
@@ -459,7 +465,6 @@ a {
   border-radius: 9px;
   background: rgb(8 11 22 / 0.62);
   backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
   color: var(--text);
   font: 500 12px/1.2 var(--font-ui);
   white-space: nowrap;
@@ -527,7 +532,6 @@ a {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
   box-shadow: 0 20px 60px rgb(0 0 0 / 0.45);
   opacity: 0;
   transform: translateX(-12px);
@@ -903,7 +907,6 @@ a {
   border-radius: 11px;
   background: var(--panel);
   backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
 }
 .segmented__option {
   appearance: none;
@@ -933,7 +936,6 @@ a {
   border-radius: 11px;
   background: var(--panel);
   backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
   color: var(--muted);
   font: 500 13px/1 var(--font-ui);
   cursor: pointer;
@@ -1228,17 +1230,36 @@ a {
 .tour-root[hidden] {
   display: none;
 }
+/* Centred between the top of the stage and the control row, so the controls and the time machine
+   stay usable; the panel caps its height to this box and scrolls its body. */
 .prompt-root {
   position: absolute;
-  top: 50%;
+  top: calc(var(--gap) + env(safe-area-inset-top));
+  bottom: calc(var(--footer-h) + var(--gap) + 124px);
   left: 50%;
   width: min(480px, calc(100vw - 2 * var(--gap)));
-  max-height: calc(100% - 2 * var(--gap) - var(--footer-h));
-  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transform: translateX(-50%);
+  pointer-events: none;
   z-index: 9;
+}
+/* the panel (min-height: 0) shrinks to fit the box and scrolls its body */
+.prompt-root > * {
+  pointer-events: auto;
 }
 .prompt-root[hidden] {
   display: none;
+}
+/* beside an open HQ panel: centred in the area the panel leaves free (the HUD steps aside) */
+@media (min-width: 960px) {
+  .panel-open .prompt-root {
+    left: calc(50% + (var(--gap) + 420px) / 2);
+  }
+  .panel-open.prompt-open .hud {
+    display: none;
+  }
 }
 @media (max-width: 720px) {
   .incidents-root {
@@ -1260,6 +1281,13 @@ a {
     width: auto;
     max-height: 70svh;
     transform: none;
+  }
+  /* the sheet takes the lower screen, like the HQ panel */
+  .prompt-open .hud,
+  .prompt-open .timeline-root,
+  .prompt-open .toasts-root,
+  .prompt-open .glass-legend {
+    display: none;
   }
 }
 
@@ -1295,7 +1323,6 @@ a {
   border-radius: 12px;
   background: var(--panel-strong);
   backdrop-filter: blur(var(--blur));
-  -webkit-backdrop-filter: blur(var(--blur));
   font-size: 12px;
   color: var(--muted);
 }

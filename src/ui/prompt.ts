@@ -29,7 +29,7 @@ import {
   TOKENIZER_NAME,
   type TokenCounter,
 } from '../state/prompt';
-import { tierBadge, uncheckedBadge } from './badge';
+import { exactBadge, tierBadge, uncheckedBadge } from './badge';
 import { h } from './dom';
 import { fullNumber } from './format';
 
@@ -129,8 +129,12 @@ function metric(label: string, unit: string): MetricView {
   return { el, value, range, badge };
 }
 
-/** A tier chip, the "not yet checked" chip, or nothing; the DOM is only touched on change. */
-function setBadge(el: HTMLElement, tier: Tier | 'unchecked' | null, title?: string): void {
+/** A tier chip, the "not yet checked" or "exact" chip, or nothing; the DOM is only touched on change. */
+function setBadge(
+  el: HTMLElement,
+  tier: Tier | 'unchecked' | 'exact' | null,
+  title?: string,
+): void {
   const key = `${tier ?? 'none'}:${title ?? ''}`;
   if (el.dataset.key === key) return;
   el.dataset.key = key;
@@ -138,7 +142,12 @@ function setBadge(el: HTMLElement, tier: Tier | 'unchecked' | null, title?: stri
     el.replaceChildren();
     return;
   }
-  const chip = tier === 'unchecked' ? uncheckedBadge() : tierBadge(tier);
+  const chip =
+    tier === 'unchecked'
+      ? uncheckedBadge()
+      : tier === 'exact'
+        ? exactBadge(title ?? '')
+        : tierBadge(tier);
   if (title) chip.title = title;
   el.replaceChildren(chip);
 }
@@ -280,7 +289,12 @@ export function mountPrompt(root: HTMLElement, city: City, opts: PromptOptions):
     h('div', { class: 'prompt__grid' }, energy.el, water.el),
     resultsHint,
     h('p', { class: 'prompt__note' }, COPY.prompt.scope),
-    h('h3', { class: 'prompt__section' }, COPY.prompt.formula),
+  );
+  // How the figures are calculated: after the HQ picker, so the results sit right under the count.
+  const calc = h(
+    'section',
+    { class: 'prompt__calc', 'aria-labelledby': id('calc') },
+    h('h3', { class: 'prompt__section', id: id('calc') }, COPY.prompt.formula),
     h(
       'p',
       { class: 'prompt__formula' },
@@ -380,14 +394,15 @@ export function mountPrompt(root: HTMLElement, city: City, opts: PromptOptions):
         externalLink(GPT_TOKENIZER_URL, COPY.prompt.tokenizerLibrary),
       ),
     ),
+    results,
     h(
       'div',
-      { class: 'prompt__field' },
+      { class: 'prompt__field prompt__field--hq' },
       h('label', { class: 'prompt__label', for: id('hq') }, COPY.prompt.hqLabel),
       h('div', { class: 'prompt__select-wrap' }, swatch, select),
       h('p', { class: 'prompt__note', id: id('same') }, COPY.prompt.sameForEveryHq),
     ),
-    results,
+    calc,
   );
   const panel = h(
     'section',
@@ -596,7 +611,8 @@ export function mountPrompt(root: HTMLElement, city: City, opts: PromptOptions):
     if (!counted) shownCount = null;
     setBadge(
       countBadge,
-      counted ? 'reported' : null,
+      // An exact computation on the visitor's own text, not an estimate: no tier applies.
+      counted ? 'exact' : null,
       counted ? COPY.prompt.countHelp(TOKENIZER_NAME) : undefined,
     );
 

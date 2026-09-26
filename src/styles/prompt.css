@@ -21,7 +21,6 @@
   border: 1px solid var(--line);
   border-radius: var(--radius);
   backdrop-filter: blur(var(--blur)) saturate(1.2);
-  -webkit-backdrop-filter: blur(var(--blur)) saturate(1.2);
   box-shadow: 0 24px 70px rgb(0 0 0 / 0.5);
   color: var(--text);
   font: 400 14px/1.45 var(--font-ui);
@@ -355,6 +354,9 @@
 .prompt__results {
   margin-top: 6px;
 }
+.prompt__field--hq {
+  margin-top: 16px;
+}
 .prompt__section {
   margin: 18px 0 8px;
   color: var(--muted);
@@ -647,6 +649,11 @@
   }
   .prompt--open {
     transform: none;
+  }
+  /* the sheet covers the lower screen: step fully aside, so the flight is not seen through text */
+  .prompt--open.prompt--aside {
+    opacity: 0;
+    transform: translateY(24px);
   }
   .prompt__header {
     padding: 13px 10px 8px 14px;

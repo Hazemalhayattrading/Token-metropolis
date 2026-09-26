@@ -8,7 +8,9 @@ export default defineConfig({
   build: {
     target: 'es2022',
     sourcemap: true,
-    chunkSizeWarningLimit: 800,
+    // The only large chunk is the o200k tokenizer (~2 MB), loaded lazily when the prompt panel
+    // opens; everything eager stays well below this.
+    chunkSizeWarningLimit: 2100,
     rollupOptions: {
       output: {
         manualChunks: (id) => (id.includes('node_modules/three') ? 'three' : undefined),
