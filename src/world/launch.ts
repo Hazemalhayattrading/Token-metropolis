@@ -30,6 +30,7 @@ import {
   PlaneGeometry,
   Quaternion,
   ShaderMaterial,
+  Sphere,
   UniformsLib,
   UniformsUtils,
   Vector2,
@@ -144,14 +145,27 @@ const LAMP_ANGLES: Record<3 | 4, readonly number[]> = {
   4: [-0.98, -0.33, 0.33, 0.98],
 };
 
-/** Searchlight positions: a shallow arc across the front plaza. */
-export function lampLayout(footprint: number): Lamp[] {
-  const r = footprint + LAMP_OFFSET;
-  return LAMP_ANGLES[beamCount(footprint)].map((angle) => ({
-    x: Math.sin(angle) * r,
-    z: Math.cos(angle) * r,
-    angle,
-  }));
+/**
+ * Searchlight positions: a shallow arc across the front plaza. Where the campus has solid
+ * ground geometry in the way (`blocked`), each lamp moves to the nearest clear spot nearby.
+ */
+export function lampLayout(
+  footprint: number,
+  blocked: (x: number, z: number) => boolean = () => false,
+): Lamp[] {
+  return LAMP_ANGLES[beamCount(footprint)].map((angle0) => {
+    for (const dr of [0, 0.5, 1, 1.5, 2, 2.5, 3]) {
+      for (const da of [0, 0.08, -0.08, 0.16, -0.16, 0.24, -0.24]) {
+        const r = footprint + LAMP_OFFSET + dr;
+        const angle = angle0 + da;
+        const x = Math.sin(angle) * r;
+        const z = Math.cos(angle) * r;
+        if (!blocked(x, z)) return { x, z, angle };
+      }
+    }
+    const r = footprint + LAMP_OFFSET;
+    return { x: Math.sin(angle0) * r, z: Math.cos(angle0) * r, angle: angle0 };
+  });
 }
 
 export interface BeamAim {
@@ -253,6 +267,7 @@ export function crowdLayout(
   footprint: number,
   count: number,
   avoid: readonly { x: number; z: number }[] = [],
+  blocked: (x: number, z: number) => boolean = () => false,
 ): Figure[] {
   const r0 = footprint + CROWD_INNER;
   const r1 = footprint + CROWD_OUTER;
@@ -267,7 +282,8 @@ export function crowdLayout(
     const z = Math.cos(a) * r;
     const clear =
       avoid.every((p) => Math.hypot(p.x - x, p.z - z) >= CROWD_LAMP_CLEARANCE) &&
-      out.every((f) => Math.hypot(f.x - x, f.z - z) >= CROWD_SPACING);
+      out.every((f) => Math.hypot(f.x - x, f.z - z) >= CROWD_SPACING) &&
+      !blocked(x, z);
     if (!clear) continue;
     out.push({
       x,
@@ -588,7 +604,14 @@ const CROWD_TONES = ['#c7ccd8', '#8e97ab', '#5f6882', '#b49a80', '#7f93b8', '#d9
 // the effect
 // ---------------------------------------------------------------------------
 
-export function createLaunchFx(opts: { accent: string; footprint: number }): LaunchFx {
+export interface LaunchFxOptions {
+  accent: string;
+  footprint: number;
+  /** Whether campus geometry stands on the ground at (x, z) (campus-local); lamps and crowd avoid it. */
+  blocked?: (x: number, z: number) => boolean;
+}
+
+export function createLaunchFx(opts: LaunchFxOptions): LaunchFx {
   const fp = clamp(Number.isFinite(opts.footprint) ? opts.footprint : 5, 1, 20);
   const accent = new Color(opts.accent);
   const white = new Color(1, 1, 1);
@@ -600,16 +623,20 @@ export function createLaunchFx(opts: { accent: string; footprint: number }): Lau
   const geometries: BufferGeometry[] = [];
   const materials: Material[] = [];
 
-  const lamps = lampLayout(fp);
+  // One conservative bounding sphere (campus-local) for every part, so an effect off-screen is
+  // culled; it is refreshed when the tower height changes.
+  const cullSphere = new Sphere(new Vector3(), fp + 10);
+  let cullHeight = -1;
+  const lamps = lampLayout(fp, opts.blocked);
   const nDrones = droneCount(fp);
-  const figures = crowdLayout(fp, crowdCount(fp), lamps);
+  const figures = crowdLayout(fp, crowdCount(fp), lamps, opts.blocked);
 
   // --- 1. searchlight beams --------------------------------------------------
   const beamGeo = new CylinderGeometry(1, 0.12, 1, 24, 1, true);
   beamGeo.translate(0, 0.5, 0); // base at the lamp, unit length up +y
   const beamMat = beamMaterial(accent.clone());
   const beams = new InstancedMesh(beamGeo, beamMat, lamps.length);
-  beams.frustumCulled = false;
+  beams.boundingSphere = cullSphere;
   beams.renderOrder = 5;
 
   // --- 2. glows: crown flash, lamp heads, drone lights -----------------------
@@ -619,7 +646,7 @@ export function createLaunchFx(opts: { accent: string; footprint: number }): Lau
   const glowGeo = new PlaneGeometry(2, 2);
   const glowMat = glowMaterial();
   const glows = new InstancedMesh(glowGeo, glowMat, LIGHT0 + nDrones * 2);
-  glows.frustumCulled = false;
+  glows.boundingSphere = cullSphere;
   glows.renderOrder = 6;
   const flashColor = accent.clone().lerp(white, 0.55);
   const lampColor = accent.clone().lerp(white, 0.5);
@@ -634,7 +661,7 @@ export function createLaunchFx(opts: { accent: string; footprint: number }): Lau
     metalness: 0.6,
   });
   const drones = new InstancedMesh(droneGeo, droneMat, nDrones);
-  drones.frustumCulled = false;
+  drones.boundingSphere = cullSphere;
 
   // --- 4. crowd ------------------------------------------------------------------
   const crowdGeo = new CapsuleGeometry(0.052, 0.146, 3, 6);
@@ -646,7 +673,7 @@ export function createLaunchFx(opts: { accent: string; footprint: number }): Lau
     emissiveIntensity: 0.09, // a touch of the searchlights' spill; tones still read
   });
   const crowd = new InstancedMesh(crowdGeo, crowdMat, Math.max(1, figures.length));
-  crowd.frustumCulled = false;
+  crowd.boundingSphere = cullSphere;
   const tint = new Color();
   figures.forEach((f, i) => {
     // About one in five wears the house colour.
@@ -753,6 +780,12 @@ export function createLaunchFx(opts: { accent: string; footprint: number }): Lau
       const rm = s.reducedMotion;
       const t = Number.isFinite(s.time) ? s.time : 0;
       const h = Math.max(0, Number.isFinite(s.height) ? s.height : 0);
+      if (Math.abs(h - cullHeight) > 0.5) {
+        cullHeight = h;
+        const top = Math.max(h + 6, beamLength(h));
+        cullSphere.center.set(0, top / 2, 0);
+        cullSphere.radius = Math.hypot(fp + CROWD_OUTER + 2 + beamLength(h) * 0.45, top / 2);
+      }
 
       // Beams rise as they fade in (not with reduced motion) and sweep slowly.
       beams.visible = on;
@@ -782,7 +815,8 @@ export function createLaunchFx(opts: { accent: string; footprint: number }): Lau
           dronePose(i, nDrones, fp, h, t, rm, pose);
           dummy.position.set(pose.x, pose.y - lift, pose.z);
           dummy.rotation.set(0, pose.heading, 0);
-          dummy.scale.setScalar(presence);
+          // With reduced motion only the lights fade; nothing grows or moves.
+          dummy.scale.setScalar(rm ? 1 : presence);
           dummy.updateMatrix();
           drones.setMatrixAt(i, dummy.matrix);
           // Aviation-style lights: a slow red beacon under, a short white strobe on top.
@@ -810,7 +844,7 @@ export function createLaunchFx(opts: { accent: string; footprint: number }): Lau
         drones.instanceMatrix.needsUpdate = true;
 
         // The crowd gathers (and disperses) with the fade; a few hop now and then.
-        const shown = Math.ceil(figures.length * presence);
+        const shown = rm ? figures.length : Math.ceil(figures.length * presence);
         crowd.count = shown;
         for (let i = 0; i < shown; i++) {
           const f = figures[i]!;

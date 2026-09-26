@@ -925,9 +925,88 @@ a {
 .segmented__option:hover {
   color: var(--text);
 }
+.control-button {
+  appearance: none;
+  padding: 0 14px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  color: var(--muted);
+  font: 500 13px/1 var(--font-ui);
+  cursor: pointer;
+  transition:
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+}
+.control-button:hover,
+.control-button[aria-pressed='true'] {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+.control-button:focus-visible,
+.segmented__option:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.feed-slot {
+  position: relative;
+}
 
 .panel-open .controls {
   display: none;
+}
+
+/* --- M5 layout roots: timeline (bottom centre), race (right), toasts (left) --------------- */
+.timeline-root {
+  position: absolute;
+  left: 50%;
+  bottom: calc(var(--footer-h) + var(--gap));
+  width: min(760px, calc(100vw - 2 * var(--gap)));
+  height: 60px;
+  transform: translateX(-50%);
+  z-index: 4;
+}
+.timeline-root:empty {
+  display: none;
+}
+/* the control row sits above the timeline */
+.controls {
+  bottom: calc(var(--footer-h) + var(--gap) + 72px);
+}
+.panel-open .timeline-root {
+  left: calc(var(--gap) + min(420px, calc(100vw - 2 * var(--gap))) + var(--gap));
+  width: min(760px, calc(100vw - 480px));
+  transform: none;
+}
+/* with the race open, the HUD keeps its counters and lends the race its link row */
+.race-open .hud__links,
+.race-open .hud__updated {
+  display: none;
+}
+.race-root {
+  position: absolute;
+  right: var(--gap);
+  top: calc(var(--gap) + 232px);
+  bottom: calc(var(--footer-h) + var(--gap) + 72px);
+  width: min(380px, calc(100vw - 2 * var(--gap)));
+  z-index: 5;
+}
+.race-root[hidden] {
+  display: none;
+}
+.toasts-root {
+  position: absolute;
+  left: var(--gap);
+  bottom: calc(var(--footer-h) + var(--gap) + 124px);
+  width: min(320px, calc(100vw - 2 * var(--gap)));
+  z-index: 6;
+  pointer-events: none;
+}
+.toasts-root > * {
+  pointer-events: auto;
 }
 
 @media (max-width: 720px) {
@@ -958,6 +1037,40 @@ a {
   .controls {
     top: calc(var(--gap) + 52px + env(safe-area-inset-top));
     bottom: auto;
+  }
+  .timeline-root {
+    left: var(--gap);
+    right: var(--gap);
+    width: auto;
+    height: 56px;
+    transform: none;
+  }
+  .panel-open .timeline-root,
+  .race-open .timeline-root {
+    display: none;
+  }
+  /* the HUD stacks above the timeline */
+  .hud {
+    bottom: calc(var(--footer-h) + var(--gap) + 64px);
+  }
+  /* the race sheet takes the lower screen, like the HQ panel */
+  .race-open .hud {
+    display: none;
+  }
+  .race-root {
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: var(--footer-h);
+    width: auto;
+    max-height: 60svh;
+  }
+  .toasts-root {
+    left: var(--gap);
+    right: var(--gap);
+    top: calc(var(--gap) + 104px + env(safe-area-inset-top));
+    bottom: auto;
+    width: auto;
   }
   .label {
     padding: 3px 7px 4px;

@@ -107,12 +107,21 @@ export function createTimeMachine(
     return { mode, t, playing, speed };
   };
 
-  /** Notify once the state is final; a subscriber may call back into the machine safely. */
+  /** Bumped by every delivery, so a delivery interrupted by a newer one stops early. */
+  let generation = 0;
+
+  /**
+   * Notify once the state is final; a subscriber may call back into the machine safely. If it
+   * does, the nested delivery sends the newer state to everyone, and this (older) one stops, so
+   * no subscriber is left holding a stale state.
+   */
   const flush = () => {
     if (!dirty) return;
     dirty = false;
+    const gen = ++generation;
     const s = snapshot();
     for (const fn of [...subscribers]) {
+      if (gen !== generation) break;
       try {
         fn(s);
       } catch (err) {

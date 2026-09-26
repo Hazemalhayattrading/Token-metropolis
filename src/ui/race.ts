@@ -18,14 +18,6 @@ import { tierBadge } from './badge';
 import { h } from './dom';
 import { humanNumber } from './format';
 
-/** Strings missing from src/copy.ts (to be moved there by the integrator). */
-const EXTRA_COPY = {
-  /** Unit after each race value ("1.2T tokens/day"). */
-  perDay: 'tokens/day',
-  /** The same unit, spelled out for screen readers. */
-  perDayLong: 'tokens per day',
-} as const;
-
 export interface Race {
   readonly open: boolean;
   show(): void;
@@ -58,7 +50,15 @@ let uid = 0;
 
 const pct = (f: number) => `${(f * 100).toFixed(2)}%`;
 
-function makeRow(id: string, name: string, accent: string): RowView {
+const METHODOLOGY_URL =
+  'https://github.com/Hazemalhayattrading/Token-metropolis/blob/main/METHODOLOGY.md';
+
+function makeRow(
+  id: string,
+  name: string,
+  accent: string,
+  onSelect: ((id: string) => void) | undefined,
+): RowView {
   const rank = h('span', { class: 'race__rank' });
   const bar = h('span', { class: 'race__bar' });
   const whisker = h('span', { class: 'race__whisker' });
@@ -71,7 +71,10 @@ function makeRow(id: string, name: string, accent: string): RowView {
     'li',
     { class: 'race__row', 'data-id': id },
     rank,
-    h('span', { class: 'race__name' }, name),
+    // The name opens the HQ panel, where every figure has its range, formula and source.
+    onSelect
+      ? h('button', { class: 'race__name race__name--link', type: 'button' }, name)
+      : h('span', { class: 'race__name' }, name),
     // Visible short value ("1.2T tokens/day"); screen readers get the spelled-out value + range.
     h('span', { class: 'race__value', 'aria-hidden': 'true' }, num, unit),
     spoken,
@@ -79,6 +82,7 @@ function makeRow(id: string, name: string, accent: string): RowView {
     track,
   );
   li.style.setProperty('--race-accent', accent);
+  li.querySelector('button.race__name')?.addEventListener('click', () => onSelect?.(id));
   return { li, rank, track, bar, whisker, num, unit, spoken, badge, last: {}, anim: null };
 }
 
@@ -96,7 +100,7 @@ function paint(v: RowView, r: RaceRow, rank: number, scale: number): void {
     // aria-hidden needs an explicit "true" (an empty value means "not hidden").
     if (on) v.rank.removeAttribute('aria-hidden');
     else v.rank.setAttribute('aria-hidden', 'true');
-    v.unit.textContent = on ? ` ${EXTRA_COPY.perDay}` : '';
+    v.unit.textContent = on ? ` ${COPY.race.perDay}` : '';
   });
   put(v, 'rank', on ? COPY.race.rank(rank) : '–', (s) => (v.rank.textContent = s));
   put(v, 'bar', on ? pct(barFraction(r.central, scale)) : '0%', (s) => (v.bar.style.width = s));
@@ -112,14 +116,14 @@ function paint(v: RowView, r: RaceRow, rank: number, scale: number): void {
     v.num.textContent = s;
   });
   const spoken = on
-    ? `${humanNumber(r.central, 'long')} ${EXTRA_COPY.perDayLong}, ${COPY.panel.range(
+    ? `${humanNumber(r.central, 'long')} ${COPY.race.perDayLong}, ${COPY.panel.range(
         humanNumber(r.low, 'long'),
         humanNumber(r.high, 'long'),
       )}`
     : COPY.race.notLaunched;
   put(v, 'spoken', spoken, (s) => (v.spoken.textContent = s));
   const tip = on
-    ? `${COPY.panel.range(humanNumber(r.low, 'short'), humanNumber(r.high, 'short'))} ${EXTRA_COPY.perDay}`
+    ? `${COPY.panel.range(humanNumber(r.low, 'short'), humanNumber(r.high, 'short'))} ${COPY.race.perDay}`
     : '';
   put(v, 'tip', tip, (s) => (s ? (v.track.title = s) : v.track.removeAttribute('title')));
   // No number, no tier: a platform that has not launched yet shows no chip.
@@ -132,7 +136,7 @@ export function mountRace(
   root: HTMLElement,
   city: City,
   clock: Clock,
-  opts: { onClose(): void; reducedMotion: boolean },
+  opts: { onClose(): void; reducedMotion: boolean; onSelect?: (platformId: string) => void },
 ): Race {
   const titleId = `race-title-${++uid}`;
   const date = h('time', { class: 'race__date' });
@@ -163,13 +167,19 @@ export function mountRace(
       close,
     ),
     list,
-    h('p', { class: 'race__note' }, COPY.race.scaleNote),
+    h(
+      'p',
+      { class: 'race__note' },
+      COPY.race.scaleNote,
+      ' ',
+      h('a', { href: METHODOLOGY_URL, rel: 'noopener' }, COPY.hud.methodLink),
+    ),
   );
 
   const views = new Map<string, RowView>();
   for (const pm of city.platforms) {
     const p = pm.platform;
-    const v = makeRow(p.id, p.name, p.identity.palette.accent);
+    const v = makeRow(p.id, p.name, p.identity.palette.accent, opts.onSelect);
     views.set(p.id, v);
     list.append(v.li);
   }

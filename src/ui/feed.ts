@@ -14,20 +14,9 @@ import { COPY } from '../copy';
 import type { TimelineEvent } from '../data/schema';
 import { utcDayStart } from '../model/time';
 import type { Clock } from '../state/clock';
-import { LAUNCH_WINDOW_DAYS } from '../state/events';
+import { eventDateLabel, LAUNCH_WINDOW_DAYS } from '../state/events';
 import { announceDelay, feedItems, feedSignature, stackToasts, type FeedItem } from '../state/race';
 import { h } from './dom';
-
-/** Strings missing from src/copy.ts (to be moved there by the integrator). */
-const EXTRA_COPY = {
-  /** Appended, visually hidden, to the toggle's name while the dot is shown. */
-  toggleHasNew: (hours: number) => `(includes launches from the last ${hours} hours)`,
-  /** Visually hidden hint after each "Source" link. */
-  newTab: 'opens in a new tab',
-  /** What screen readers hear for a launch toast. */
-  toastSpoken: (label: string, platform: string, title: string, date: string) =>
-    `${label}: ${platform}, ${title} (${date})`,
-} as const;
 
 const FEED_SIZE = 8;
 /** Keep the popover this far from the viewport edges. */
@@ -122,7 +111,7 @@ export function mountFeed(
       h(
         'p',
         { class: 'feed__meta' },
-        h('time', { class: 'feed__date', datetime: e.date }, COPY.time.date(e.date)),
+        h('time', { class: 'feed__date', datetime: e.date }, COPY.time.date(eventDateLabel(e))),
         chip,
       ),
       h(
@@ -136,7 +125,7 @@ export function mountFeed(
         },
         COPY.feed.source,
         h('span', { class: 'feed__ext', 'aria-hidden': 'true' }, '↗'),
-        h('span', { class: 'feed-sr' }, ` (${EXTRA_COPY.newTab})`),
+        h('span', { class: 'feed-sr' }, ` (${COPY.feed.newTab})`),
       ),
       h('p', { class: 'feed__what' }, platform, ' ', h('span', { class: 'feed__event' }, e.title)),
     );
@@ -190,7 +179,7 @@ export function mountFeed(
     items = next;
     const anyNew = items.some((i) => i.isNew);
     toggle.classList.toggle('feed__toggle--new', anyNew);
-    hint.textContent = anyNew ? ` ${EXTRA_COPY.toggleHasNew(LAUNCH_WINDOW_DAYS * 24)}` : '';
+    hint.textContent = anyNew ? ` ${COPY.feed.toggleHasNew(LAUNCH_WINDOW_DAYS * 24)}` : '';
     if (isOpen) renderList();
     else listDirty = true;
   }
@@ -236,6 +225,8 @@ export function mountFeed(
       if (isOpen) panel.classList.add('feed__panel--open');
     });
     document.addEventListener('pointerdown', onOutside, true);
+    // Escape closes from anywhere while open (a mouse click need not focus the toggle).
+    document.addEventListener('keydown', onKey, true);
     window.addEventListener('resize', place);
   }
 
@@ -247,6 +238,7 @@ export function mountFeed(
     panel.hidden = true;
     toggle.setAttribute('aria-expanded', 'false');
     document.removeEventListener('pointerdown', onOutside, true);
+    document.removeEventListener('keydown', onKey, true);
     window.removeEventListener('resize', place);
     if (focusToggle || hadFocus) toggle.focus({ preventScroll: true });
   }
@@ -262,12 +254,15 @@ export function mountFeed(
     const btn = e.target instanceof Element ? e.target.closest('.feed__platform') : null;
     const id = btn instanceof HTMLElement ? btn.dataset.platform : undefined;
     if (!id) return;
-    closePanel(true);
+    // Let the consumer move focus (e.g. into the HQ panel) before deciding where it goes.
+    closePanel(false);
     opts.onSelect(id);
+    const toggleShown = toggle.checkVisibility?.() ?? toggle.offsetParent !== null;
+    if (toggleShown && (document.activeElement === document.body || !document.activeElement))
+      toggle.focus({ preventScroll: true });
   };
   toggle.addEventListener('click', onToggle);
   close.addEventListener('click', onClose);
-  wrap.addEventListener('keydown', onKey);
   list.addEventListener('click', onListClick);
   list.addEventListener('scroll', updateScrollHint, { passive: true });
 
@@ -279,7 +274,6 @@ export function mountFeed(
       closePanel(false);
       toggle.removeEventListener('click', onToggle);
       close.removeEventListener('click', onClose);
-      wrap.removeEventListener('keydown', onKey);
       list.removeEventListener('click', onListClick);
       list.removeEventListener('scroll', updateScrollHint);
       root.replaceChildren();
@@ -335,7 +329,7 @@ export function mountToasts(
         'p',
         { class: 'toast__head' },
         h('span', { class: 'toast__label' }, COPY.feed.toastLabel),
-        h('time', { class: 'toast__date', datetime: e.date }, COPY.time.date(e.date)),
+        h('time', { class: 'toast__date', datetime: e.date }, COPY.time.date(eventDateLabel(e))),
       ),
       h(
         'p',
@@ -369,11 +363,11 @@ export function mountToasts(
     const e = pending;
     pending = null;
     lastAnnounce = performance.now();
-    status.textContent = EXTRA_COPY.toastSpoken(
+    status.textContent = COPY.feed.toastSpoken(
       COPY.feed.toastLabel,
       opts.platformName(e.platform),
       e.title,
-      COPY.time.date(e.date),
+      COPY.time.date(eventDateLabel(e)),
     );
   }
 

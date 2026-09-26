@@ -107,11 +107,35 @@ spheres; `decadeScale` guard. 6 findings were rejected by the skeptics (see git 
 - Steam is faint at night; neighbouring light streams cross some interior views.
 - Offices at night show few people (honest: local office hours) — consider a "working hours" hint.
 
-## Next — Milestone 5: Time machine, race mode, launch events
+## Milestone 5 — Time machine, race mode, launch events ✅
 
-- [ ] Time machine scrubber (Nov 2022 → today), play at cinematic speed; world driven by a virtual clock.
-- [ ] Launch events from `events.json`: 72 h launch-day animation at the HQ; "What's new" feed.
-- [ ] Race mode: animated bar-chart race of daily tokens synced with the time machine.
+Built as a multi-agent workflow (Ultracode): three builders in isolated worktrees with strict file
+ownership (time machine / launch effects / overlays), each branch reviewed by an adversarial skeptic;
+integrated and art-directed in the main checkout.
+
+- [x] Time machine (`src/state/timemachine.ts`, `src/ui/timeline.ts`): scrub 2022-11-01 → today, play
+      at 1 week / 1 month / 1 quarter per second, Live button, History badge with the modeled-history
+      note; the whole UI (world, panel, HUD, race, feed) reads the time machine; "since you arrived"
+      stays on real time. In history the HUD shows the whole UTC day's total.
+- [x] Launch events (`src/state/events.ts`, `src/world/launch.ts`): 72-hour launch day with soft beams,
+      orbiting drones and a crowd on the front plaza (avoiding base buildings); a short pulse when
+      playback crosses a launch; toasts; month-precision launches show as YYYY-MM and get no launch day.
+- [x] "What's new" feed: latest 8 launches up to the time shown, "New" chips pinned first, sources.
+- [x] Race mode (`src/state/race.ts`, `src/ui/race.ts`): 15 rows on one linear scale with range
+      whiskers and tier chips, FLIP reordering with DOM order = rank, names open the HQ panel, method
+      link; desktop fits all 15 rows; mobile bottom sheet.
+- [x] Review findings fixed at integration: subscriber-notification race (generation guard), copy moved
+      into `src/copy.ts`, event date precision, race → source path, feed Escape/focus/z-index/dot jitter,
+      launch lamps/crowd inside base geometry, reduced-motion growth, frustum culling.
+- [x] E2E `tests/e2e/time.spec.ts` (scrub to 2022, play/pause, live; race 15 rows with tiers; feed
+      sources); screenshots `m5-*`; two art passes (race density, HUD daily totals, mobile layering).
+
+## Next — Milestone 6
+
+- [ ] Prompt visualizer (client tokenizer, token flight into an HQ, per-prompt energy/water with ranges).
+- [ ] Compare mode (2–3 platforms side by side), incident mode (status feeds), cinematic tour (idle),
+      discoveries tracker (localStorage, try/catch), share card (image with tiers), sound (off by
+      default), uncertainty glass (the chosen extra idea).
 
 ## Blocked (needs the owner)
 

@@ -24,15 +24,6 @@ import {
 } from '../state/timemachine';
 import { h } from './dom';
 
-/** Strings missing from src/copy.ts (to be moved into COPY.time by the integrator). */
-const EXTRA_COPY = {
-  /** Time of day next to the date in history mode. */
-  utcTime: (hhmm: string) => `${hhmm} UTC`,
-  /** Scrubber value for screen readers (aria-valuetext). */
-  valueHistory: (date: string, hhmm: string) => `${date}, ${hhmm} UTC`,
-  valueLive: (date: string) => `${date}, live`,
-} as const;
-
 export interface Timeline {
   update(): void;
   dispose(): void;
@@ -293,7 +284,7 @@ export function mountTimeline(root: HTMLElement, tm: TimeMachine, opts: Timeline
       dateEl.textContent = shownDate;
       lastDate = shownDate;
     }
-    const timeText = live ? '' : EXTRA_COPY.utcTime(time);
+    const timeText = live ? '' : COPY.time.utcTime(time);
     if (timeText !== lastTime) {
       timeEl.textContent = timeText;
       lastTime = timeText;
@@ -304,7 +295,7 @@ export function mountTimeline(root: HTMLElement, tm: TimeMachine, opts: Timeline
       lastStamp = stamp;
     }
 
-    const vt = live ? EXTRA_COPY.valueLive(shownDate) : EXTRA_COPY.valueHistory(shownDate, time);
+    const vt = live ? COPY.time.valueLive(shownDate) : COPY.time.valueHistory(shownDate, time);
     if (vt !== lastVt && (force || !s.playing || nowMs - lastVtAt >= VALUETEXT_PLAYING_MS)) {
       range.setAttribute('aria-valuetext', vt);
       lastVt = vt;

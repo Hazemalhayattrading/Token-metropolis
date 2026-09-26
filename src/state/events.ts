@@ -13,6 +13,11 @@ export function eventDay(e: TimelineEvent): number {
   return isoToDays(e.date);
 }
 
+/** The date as precisely as it is known: YYYY-MM-DD, or YYYY-MM for month-precision launches. */
+export function eventDateLabel(e: TimelineEvent): string {
+  return e.datePrecision === 'month' ? e.date.slice(0, 7) : e.date;
+}
+
 const byId = (a: TimelineEvent, b: TimelineEvent) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
 /** Newest first; ties broken by id so the order is stable. */
@@ -33,6 +38,8 @@ export function activeLaunches(
 ): Map<string, TimelineEvent[]> {
   const out = new Map<string, TimelineEvent[]>();
   for (const e of [...events].sort(newestFirst)) {
+    // Without a known day there is no launch day to celebrate.
+    if (e.datePrecision === 'month') continue;
     const d = eventDay(e);
     if (d <= t && t < d + windowDays) {
       const list = out.get(e.platform) ?? [];

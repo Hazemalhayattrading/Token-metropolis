@@ -392,3 +392,24 @@ describe('timeline helpers', () => {
     expect(nextSpeed(12).id).toBe('week');
   });
 });
+
+describe('subscriber ordering', () => {
+  it('never leaves a later subscriber with a stale state when an earlier one mutates', () => {
+    let realMs = 0;
+    const liveT = { v: HISTORY_START + 400 };
+    const tm = createTimeMachine({ now: () => liveT.v }, () => realMs);
+    // registered first: restarts playback whenever it sees playback reach the present
+    tm.subscribe((st) => {
+      if (st.mode === 'live' && !st.playing) tm.play();
+    });
+    const seen: TimeState[] = [];
+    tm.subscribe((st) => seen.push(st));
+    tm.seek(HISTORY_START + 399);
+    tm.play();
+    realMs += 60_000; // far past the end
+    tm.now();
+    const last = seen.at(-1)!;
+    expect(last.mode).toBe(tm.state().mode);
+    expect(last.playing).toBe(tm.state().playing);
+  });
+});

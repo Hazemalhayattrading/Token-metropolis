@@ -173,9 +173,14 @@ export const COPY = {
       'Past days are read from the same growth curves as today: figures before a platform’s first published number are modeled, and ranges are wider.',
     date: (iso: string) => iso,
     todayLabelHistory: (date: string) => `Tokens processed on ${date}`,
-    todayQualifierHistory: 'all 15 platforms · 00:00 UTC to the time shown · estimate',
+    todayQualifierHistory: 'all 15 platforms · the whole UTC day · estimate',
     rateLabelHistory: 'At the time shown',
     reachedLive: 'Back to the present.',
+    /** Time of day next to the date in history mode. */
+    utcTime: (hhmm: string) => `${hhmm} UTC`,
+    /** Scrubber value for screen readers (aria-valuetext). */
+    valueHistory: (date: string, hhmm: string) => `${date}, ${hhmm} UTC`,
+    valueLive: (date: string) => `${date}, live`,
   },
   launch: {
     active: (model: string) => `Launch day: ${model}`,
@@ -189,6 +194,9 @@ export const COPY = {
       'Bars share one linear scale (the leader fills the width); thin lines show plausible ranges.',
     notLaunched: 'not launched yet',
     rank: (n: number) => `#${n}`,
+    /** Unit after each race value ("1.2T tokens/day"), and spelled out for screen readers. */
+    perDay: 'tokens/day',
+    perDayLong: 'tokens per day',
   },
   feed: {
     open: 'What’s new',
@@ -198,6 +206,13 @@ export const COPY = {
     source: 'Source',
     toastLabel: 'Model launch',
     close: 'Close what’s new',
+    /** Appended, visually hidden, to the toggle's name while the dot is shown. */
+    toggleHasNew: (hours: number) => `(includes launches from the last ${hours} hours)`,
+    /** Visually hidden hint after each "Source" link. */
+    newTab: 'opens in a new tab',
+    /** What screen readers hear for a launch toast. */
+    toastSpoken: (label: string, platform: string, title: string, date: string) =>
+      `${label}: ${platform}, ${title} (${date})`,
   },
   controls: {
     scale: 'Building height',

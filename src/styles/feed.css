@@ -45,7 +45,9 @@
   outline-offset: 2px;
 }
 .feed__dot {
-  display: none;
+  /* always in the layout, so the toggle never changes width when it appears */
+  display: inline-block;
+  visibility: hidden;
   width: 7px;
   height: 7px;
   border-radius: 50%;
@@ -53,7 +55,11 @@
   box-shadow: 0 0 8px var(--accent);
 }
 .feed__toggle--new .feed__dot {
-  display: inline-block;
+  visibility: visible;
+}
+/* while the popover is open, the control row paints above the toasts and the race sheet */
+.controls:has(.feed__panel:not([hidden])) {
+  z-index: 7;
 }
 
 /* --- popover --------------------------------------------------------------- */

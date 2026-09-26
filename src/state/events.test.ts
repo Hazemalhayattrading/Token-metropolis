@@ -4,6 +4,7 @@ import { isoToDays } from '../model/time';
 import {
   activeLaunches,
   crossedEvents,
+  eventDateLabel,
   eventDay,
   latestEvents,
   LAUNCH_WINDOW_DAYS,
@@ -59,5 +60,14 @@ describe('launch events', () => {
       'b',
     ]);
     expect(latestEvents(EVENTS, isoToDays('2023-01-01'), 3)).toEqual([]);
+  });
+});
+
+describe('month-precision launches', () => {
+  it('show as YYYY-MM and get no launch day', () => {
+    const m = { ...ev('m', '2026-07-15', 'q'), datePrecision: 'month' as const };
+    expect(eventDateLabel(m)).toBe('2026-07');
+    expect(eventDateLabel(ev('d', '2026-07-15'))).toBe('2026-07-15');
+    expect(activeLaunches([m], eventDay(m) + 0.5).size).toBe(0);
   });
 });

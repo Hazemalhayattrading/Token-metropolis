@@ -23,7 +23,9 @@ import {
   type Object3D,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import type { TimelineEvent } from '../data/schema';
 import { dailyRate, rateTier, trafficNow } from '../model/estimate';
+import { activeLaunches, crossedEvents } from '../state/events';
 import type { City } from '../state/city';
 import type { Clock } from '../state/clock';
 import { daylight, localHour, occupancy } from '../state/localtime';
@@ -32,6 +34,7 @@ import { createCampus, type Campus } from './campus/campus';
 import { CameraDirector, type Pose } from './director';
 import { createEnvironment, MOON_DIRECTION } from './environment';
 import type { InteriorView, Interiors } from './interiors';
+import { createLaunchFx, type LaunchFx } from './launch';
 import { createLabels, type LabelValue, type Labels } from './labels';
 import { layoutPlots } from './layout';
 import { createPost } from './post';
@@ -62,11 +65,18 @@ export interface WorldOptions {
   onModel?: (id: string) => void;
   /** The world changed view on its own (e.g. the interiors failed to load and it fell back). */
   onViewChange?: (view: InteriorView) => void;
+  /** Model launches (public/data/events.json), newest first. */
+  events?: readonly TimelineEvent[];
+  /** The time shown moved forward past a launch (playback, or live). */
+  onLaunch?: (e: TimelineEvent) => void;
 }
 
 interface Slot {
   campus: Campus;
   streams: Streams;
+  launch: LaunchFx;
+  /** Remaining fraction of the short launch pulse (1 → 0 over BURST_SECONDS). */
+  burst: number;
   tz: string;
   hour: number;
 }
@@ -125,8 +135,21 @@ export function createWorld(
       pm.mix,
       pm.platform.identity.palette.accent,
     );
+    const launch = createLaunchFx({
+      accent: pm.platform.identity.palette.accent,
+      footprint: campus.footprint,
+      blocked: (x, z) => campus.groundBlocked(x, z),
+    });
+    campus.group.add(launch.group);
     scene.add(campus.group, streams.group);
-    slots.set(pm.platform.id, { campus, streams, tz: pm.platform.hq.timezone, hour: 12 });
+    slots.set(pm.platform.id, {
+      campus,
+      streams,
+      launch,
+      burst: 0,
+      tz: pm.platform.hq.timezone,
+      hour: 12,
+    });
   }
 
   let selected: string | null = null;
@@ -379,11 +402,31 @@ export function createWorld(
   let lastTierUpdate = 0;
   const tiers = new Map<string, ReturnType<typeof rateTier>>();
 
+  const events = opts.events ?? [];
+  const BURST_SECONDS = 2.5;
+  // A forward jump longer than this (a seek, not playback) fires no launch pulses.
+  const MAX_PULSE_JUMP_DAYS = 7;
+  let launches = new Map<string, TimelineEvent[]>();
+  let launchesAt = Number.NaN;
+  let prevT: number | null = null;
+
   const frame = (timestamp: number) => {
     timer.update(timestamp);
     const dt = Math.min(timer.getDelta(), 0.1);
     elapsed += dt;
     const t = clock.now();
+    if (!(Math.abs(t - launchesAt) < 1 / 1440)) {
+      launches = activeLaunches(events, t);
+      launchesAt = t;
+    }
+    if (prevT !== null && t > prevT && t - prevT < MAX_PULSE_JUMP_DAYS) {
+      for (const e of crossedEvents(events, prevT, t)) {
+        const slot = slots.get(e.platform);
+        if (slot) slot.burst = 1;
+        opts.onLaunch?.(e);
+      }
+    }
+    prevT = t;
     const nowMs = Date.now();
     if (nowMs - lastTierUpdate > 5_000) {
       lastTierUpdate = nowMs;
@@ -430,6 +473,14 @@ export function createWorld(
       }
       slot.streams.update(elapsed, rate > 0 ? (0.25 + 0.75 * load) * Math.min(1.4, activity) : 0);
       slot.streams.group.visible = rate > 0 && view === 'overview';
+      slot.burst = Math.max(0, slot.burst - dt / BURST_SECONDS);
+      slot.launch.update({
+        active: launches.has(id) && rate > 0 && view === 'overview',
+        burst: view === 'overview' ? slot.burst : 0,
+        time: elapsed,
+        height: slot.campus.currentHeight,
+        reducedMotion: opts.reducedMotion,
+      });
       labelPositions.set(id, slot.campus.top);
       labelValues.set(id, {
         text: rate > 0 ? `${humanNumber(rate, 'short')} tokens/day` : '',
@@ -547,6 +598,7 @@ export function createWorld(
       labels.dispose();
       closeInteriors();
       slots.forEach((s) => {
+        s.launch.dispose();
         s.campus.dispose();
         s.streams.dispose();
       });

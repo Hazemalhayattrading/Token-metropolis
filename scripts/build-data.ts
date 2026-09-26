@@ -40,9 +40,12 @@ function buildEvents(data: Dataset) {
       platform: m.platform,
       kind: m.origin === 'own' ? ('model-launch' as const) : ('model-available' as const),
       title:
-        m.origin === 'own'
-          ? `${m.name} released`
-          : `${m.name} available in ${names.get(m.platform)}`,
+        m.origin !== 'own'
+          ? `${m.name} available in ${names.get(m.platform)}`
+          : m.dateKind === 'first-seen'
+            ? `${m.name} first seen`
+            : `${m.name} released`,
+      datePrecision: m.datePrecision,
       source: m.source,
     }))
     .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.id.localeCompare(b.id)));

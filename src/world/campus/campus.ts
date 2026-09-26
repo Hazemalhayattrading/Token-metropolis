@@ -84,6 +84,8 @@ export interface Campus {
    * office floors to the tower's real shape.
    */
   insideBody(x: number, y: number, z: number, height: number): boolean;
+  /** Whether solid campus geometry (base buildings, tower, substation) stands at local (x, z). */
+  groundBlocked(x: number, z: number): boolean;
   /** Local-space anchors for the interiors (M4). */
   readonly anchors: { halls: Vector3; power: Vector3; lab: Vector3 };
   currentHeight: number;
@@ -425,6 +427,15 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
       tower.body.scale.y = prevScale;
       group.updateMatrixWorld(true);
       return inside;
+    },
+    groundBlocked(x, z) {
+      group.updateMatrixWorld(true);
+      probeOrigin.set(x, 80, z);
+      group.localToWorld(probeOrigin);
+      probe.set(probeOrigin, probeDir.set(0, -1, 0));
+      // Flat plaza discs and pools (under 0.12 high) are walkable; anything taller is not.
+      const hits = probe.intersectObjects([tower.base, tower.body, sub], true);
+      return hits.some((hit) => hit.point.y - group.position.y > 0.12);
     },
     setInterior(view) {
       if (view === interior) return;

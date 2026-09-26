@@ -270,6 +270,8 @@ export const EventSchema = z.object({
   platform: slug,
   kind: z.enum(['model-launch', 'model-available']),
   title: z.string().min(3),
+  /** Month-precision dates are shown as YYYY-MM and get no launch-day animation. */
+  datePrecision: z.enum(['day', 'month']).default('day'),
   source: SourceSchema,
 });
 export type TimelineEvent = z.infer<typeof EventSchema>;

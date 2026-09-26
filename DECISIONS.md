@@ -316,3 +316,25 @@ are now packed greedily on a fine grid and kept only where the desk and chair ar
 body at that floor (a per-mesh ray-parity test, since towers are unions of overlapping solids); each
 desk gets its own floor tile. Base parts (plazas, workshops, canopies) hide in the offices and hall
 views so they never cut through a diorama.
+
+### D-048 — History is read from the same curves, and says so
+
+The time machine does not replay a separate history: every past moment is evaluated with the same
+growth curves, ranges and tiers as today (tiers are time-aware: a figure is Reported only near a
+reported anchor). A History badge carries the note that figures before a platform's first published
+number are modeled and ranges are wider. In history the HUD shows the whole UTC day's total (scrubbing
+by day would otherwise read as midnight zeros); "since you arrived" always counts real time.
+
+### D-049 — Launch days, pulses and toasts
+
+A launch day lasts 72 hours from 00:00 UTC on the launch date. Playback that moves forward past a
+launch fires a short real-time pulse at the HQ and a toast; forward jumps longer than 7 days (seeks)
+fire nothing, and moving backwards fires nothing. Month-precision launches (day unknown) get no launch
+day. Beams are fake volumetric shafts (no real lights), and every part of the effect shares one
+bounding sphere so off-screen HQs are culled.
+
+### D-050 — Race mode uses one linear scale
+
+Bars share a linear scale where the leader fills the width — the honest picture of how concentrated
+tokens are — with thin whiskers for the plausible range and a tier chip on every row. Platform names
+open the HQ panel, where each figure has its formula and source.
