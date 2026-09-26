@@ -451,3 +451,37 @@ and the build adds the prefix for Safari.
 
 On phones the control row is a sideways-scrolling strip, which clipped the "What's new" and hidden
 details popovers. On phones they open as fixed sheets just under the strip, full width.
+
+### D-064 — The data pipeline: status pages hourly, model sightings from OpenRouter
+
+The brief asks for a daily run; status notices last hours, so the pipeline runs hourly (the repo is
+public, so Actions minutes are free) and stops early when nothing changed. It reads each HQ's
+Statuspage-compatible `summary.json` (statuspage.io and incident.io both publish one) and keeps
+only what the page reports as open: incidents that are investigating, identified or monitoring,
+and maintenance in progress with an impact. Every notice carries the time it was read; the site
+shows "Status as of HH:MM UTC" and hides a notice whose page has not been read for three hours. On
+a page shared with other services (githubstatus.com) only notices naming the HQ's component count;
+notices naming none are not guessed to be ours. Pages that publish only RSS are not read. A page
+that fails, answers with something that is not a status summary, or lists open entries none of
+which can be read keeps its previous notices (which then go stale on the site by themselves).
+"Monitoring" notices say a fix is in place.
+
+### D-065 — "First seen on OpenRouter" sightings
+
+OpenRouter's public model list is the key-free source for new models. Only authors whose models are
+unambiguously an HQ's own family are mapped (Gemma, gpt-oss and Seed-OSS are excluded). A model's
+variants (`:free`, `:thinking`, …) are one model, dated by its earliest listing, and only models
+first listed in the last 45 days become events. The data build drops a sighting once the curated
+list has the same model (same HQ, the same name word for word with whole version numbers — Opus 5
+is not Opus 5.1 — dates within 120 days). Sightings are timeline and What's new events of kind
+"first seen": never celebrated, always linked to the model's OpenRouter page. The owner hides a
+wrong one in `data/manual/hidden-sightings.yaml`; `data/auto/` is written by the pipeline only.
+
+### D-066 — Publishing rules for generated data
+
+`build-data` validates the pipeline's files too and refuses to publish (exiting non-zero, leaving
+`public/data` untouched) if any is invalid, including files that are not valid JSON. "Data
+updated" follows the figures, models and events only; status notices do not move it. The workflow
+commits to `main` only when a file changed, regenerates and retries if `main` moved during the run,
+and calls the Pages deploy itself (pushes made with the workflow token trigger no workflows); a
+manual run can force a deploy.

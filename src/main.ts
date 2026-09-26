@@ -455,7 +455,11 @@ async function boot(): Promise<void> {
       const refreshIncidents = () => {
         const live = tm.state().mode === 'live';
         const active = live
-          ? activeIncidents(data.incidents, Date.now(), { staleAfterMs: 3 * 86_400_000 })
+          ? activeIncidents(data.incidents, Date.now(), {
+              staleAfterMs: 3 * 86_400_000,
+              // The pipeline reads the pages hourly; a notice not read for 3 hours is not shown.
+              checkedWithinMs: 3 * 3_600_000,
+            })
           : new Map<string, (typeof data.incidents)[number]>();
         banner.update(active);
         world.setIncidents(active);

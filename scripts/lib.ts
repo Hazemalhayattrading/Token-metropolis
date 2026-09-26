@@ -21,9 +21,26 @@ export function stableJson(value: unknown): string {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
 
-/** The parsed JSON in `file`, or `fallback` when the file does not exist. */
-export function readJson(file: string, fallback: unknown): unknown {
-  return existsSync(file) ? (JSON.parse(readFileSync(file, 'utf8')) as unknown) : fallback;
+/**
+ * The parsed JSON in `file` (`fallback` when the file does not exist), or an error message when
+ * it is not valid JSON — e.g. a stray comma after a hand edit — so callers can handle it like any
+ * other invalid file instead of crashing.
+ */
+export function readJson(
+  file: string,
+  fallback: unknown,
+): { ok: true; value: unknown } | { ok: false; error: string } {
+  if (!existsSync(file)) return { ok: true, value: fallback };
+  try {
+    return { ok: true, value: JSON.parse(readFileSync(file, 'utf8')) as unknown };
+  } catch (e) {
+    return { ok: false, error: `not valid JSON (${e instanceof Error ? e.message : String(e)})` };
+  }
+}
+
+/** The parsed YAML in data/manual/`name`, or `fallback` when the file does not exist. */
+export function readYamlOr(name: string, fallback: unknown): unknown {
+  return existsSync(join(MANUAL, name)) ? readYaml(name) : fallback;
 }
 
 /** Write through a temporary file, so a crash never leaves a half-written file behind. */

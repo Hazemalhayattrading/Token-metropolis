@@ -157,6 +157,9 @@
   color: var(--text);
 }
 
+.incidents__status {
+  color: var(--tier-reported);
+}
 .incidents__meta {
   display: flex;
   flex-wrap: wrap;

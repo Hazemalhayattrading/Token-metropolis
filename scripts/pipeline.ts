@@ -15,6 +15,7 @@ import { mkdirSync, readFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { z } from 'zod';
 import {
+  byDateDesc,
   mergeIncidents,
   newModelSightings,
   normalizeStatusSummary,
@@ -67,18 +68,31 @@ function writeIfChanged(file: string, value: unknown, dryRun: boolean): boolean 
   return true;
 }
 
+/** Share of unreadable entries above which the model list counts as changed format (unusable). */
+const MAX_SKIPPED_SHARE = 0.2;
+
 export async function runUpdate(
-  data: { readonly platforms: readonly Platform[]; readonly models: readonly Model[] },
+  data: {
+    readonly platforms: readonly Platform[];
+    readonly models: readonly Model[];
+    /** Sighting ids the owner hid (data/manual/hidden-sightings.yaml). */
+    readonly hidden: ReadonlySet<string>;
+  },
   env: UpdateEnv,
 ): Promise<UpdateResult> {
+  const checked = new Date(env.nowMs).toISOString();
+
   // --- 1. status pages → incidents.json ------------------------------------------------------
-  const previousParsed = z.array(IncidentSchema).safeParse(readJson(env.incidentsFile, []));
-  if (!previousParsed.success)
+  const previousFile = readJson(env.incidentsFile, []);
+  const previousParsed = previousFile.ok
+    ? z.array(IncidentSchema).safeParse(previousFile.value)
+    : null;
+  if (!previousParsed?.success)
     env.note(
       'warn',
       'The published incidents.json did not validate; it is rebuilt from the feeds.',
     );
-  const previous: Incident[] = previousParsed.success ? previousParsed.data : [];
+  const previous: Incident[] = previousParsed?.success ? previousParsed.data : [];
   const fresh = new Map<string, Incident[]>();
   const failed = new Set<string>();
   await Promise.all(
@@ -90,15 +104,23 @@ export async function runUpdate(
         return;
       }
       try {
-        const r = normalizeStatusSummary(p.id, page.url, await env.fetchJson(page.json));
+        const r = normalizeStatusSummary(p.id, page.url, await env.fetchJson(page.json), {
+          checked,
+          components: page.components,
+        });
         fresh.set(p.id, r.incidents);
-        const skipped = r.skipped
-          ? `, ${plural(r.skipped, 'unreadable entry', 'unreadable entries')} skipped`
+        const other = r.otherComponents
+          ? `; ${plural(r.otherComponents, 'notice', 'notices')} about other services left out`
           : '';
         env.note(
           'info',
-          `${p.name}: ${plural(r.incidents.length, 'open notice', 'open notices')}${skipped}.`,
+          `${p.name}: ${plural(r.incidents.length, 'open notice', 'open notices')}${other}.`,
         );
+        if (r.skipped)
+          env.note(
+            'warn',
+            `${p.name}: ${plural(r.skipped, 'open entry', 'open entries')} on the status page could not be read and ${r.skipped === 1 ? 'was' : 'were'} skipped.`,
+          );
       } catch (e) {
         failed.add(p.id);
         env.note(
@@ -113,11 +135,12 @@ export async function runUpdate(
 
   // --- 2. OpenRouter → sightings.json ---------------------------------------------------------
   let sightingsChanged = false;
-  const known = z.array(SightingSchema).safeParse(readJson(env.sightingsFile, []));
-  if (!known.success) {
+  const knownFile = readJson(env.sightingsFile, []);
+  const known = knownFile.ok ? z.array(SightingSchema).safeParse(knownFile.value) : null;
+  if (!known?.success) {
     env.note(
       'error',
-      'data/auto/sightings.json does not validate; left unchanged (fix it or reset it to []).',
+      `data/auto/sightings.json ${knownFile.ok ? 'does not validate' : knownFile.error}; left unchanged. It is written by this pipeline only: restore it from git history (or reset it to []).`,
     );
   } else {
     try {
@@ -126,24 +149,31 @@ export async function runUpdate(
         windowDays: SIGHTING_WINDOW_DAYS,
         platforms: data.platforms,
         models: data.models,
-        known: known.data,
+        known: new Set([...known.data.map((k) => k.id), ...data.hidden]),
       });
-      const next: Sighting[] = [...known.data, ...r.events].sort((a, b) =>
-        a.date < b.date ? 1 : a.date > b.date ? -1 : a.id.localeCompare(b.id),
-      );
+      if (r.total > 0 && r.skipped / r.total > MAX_SKIPPED_SHARE)
+        throw new Error(`${r.skipped} of ${r.total} entries could not be read (format change?)`);
+      const next: Sighting[] = [...known.data, ...r.events].sort(byDateDesc);
       sightingsChanged = writeIfChanged(
         env.sightingsFile,
         z.array(SightingSchema).parse(next),
         env.dryRun,
       );
       const names = r.events.length ? ` (${r.events.map((e) => e.model).join(', ')})` : '';
-      const skipped = r.skipped
-        ? `, ${plural(r.skipped, 'unreadable entry', 'unreadable entries')} skipped`
-        : '';
       env.note(
         'info',
-        `OpenRouter: ${plural(r.events.length, 'new model sighting', 'new model sightings')}${names}${skipped}.`,
+        `OpenRouter: ${plural(r.events.length, 'new model sighting', 'new model sightings')}${names}.`,
       );
+      if (r.curated.length)
+        env.note(
+          'info',
+          `OpenRouter: already curated, not added: ${r.curated.map((c) => `${c.model} (= ${c.match})`).join(', ')}.`,
+        );
+      if (r.skipped)
+        env.note(
+          'warn',
+          `OpenRouter: ${plural(r.skipped, 'entry', 'entries')} could not be read and ${r.skipped === 1 ? 'was' : 'were'} skipped.`,
+        );
     } catch (e) {
       env.note(
         'warn',

@@ -12,7 +12,8 @@
 import { appendFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { validateDataset } from '../src/data/validate';
-import { AUTO, OUT, readYaml } from './lib';
+import { z } from 'zod';
+import { AUTO, OUT, readYaml, readYamlOr } from './lib';
 import { runUpdate, type Level } from './pipeline';
 
 const TIMEOUT_MS = 20_000;
@@ -59,14 +60,22 @@ async function main(): Promise<void> {
     console.error('✗ the curated data does not validate; nothing was fetched or written.');
     process.exit(1);
   }
-  const r = await runUpdate(result.data, {
-    fetchJson,
-    nowMs: Date.now(),
-    incidentsFile: join(OUT, 'incidents.json'),
-    sightingsFile: join(AUTO, 'sightings.json'),
-    dryRun,
-    note,
-  });
+  const hidden = z.array(z.string()).safeParse(readYamlOr('hidden-sightings.yaml', []) ?? []);
+  if (!hidden.success) {
+    console.error('✗ data/manual/hidden-sightings.yaml must be a list of sighting ids.');
+    process.exit(1);
+  }
+  const r = await runUpdate(
+    { ...result.data, hidden: new Set(hidden.data) },
+    {
+      fetchJson,
+      nowMs: Date.now(),
+      incidentsFile: join(OUT, 'incidents.json'),
+      sightingsFile: join(AUTO, 'sightings.json'),
+      dryRun,
+      note,
+    },
+  );
   const changed = r.incidentsChanged || r.sightingsChanged;
   note(
     'info',

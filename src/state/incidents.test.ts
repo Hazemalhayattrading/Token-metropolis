@@ -119,6 +119,23 @@ describe('isActiveAt', () => {
     expect(isActiveAt(open, T, { staleAfterMs: 7 * 86_400_000 })).toBe(true);
   });
 
+  it('shows a notice only while the pipeline read it recently, and never without that time', () => {
+    const within = { checkedWithinMs: 3 * 3_600_000 };
+    const fresh = inc({ id: 'f-1', platform: 'x', checked: new Date(T - 3_600_000).toISOString() });
+    const stale = inc({
+      id: 's-1',
+      platform: 'x',
+      checked: new Date(T - 4 * 3_600_000).toISOString(),
+    });
+    const unknown = inc({ id: 'u-1', platform: 'x' });
+    const garbled = inc({ id: 'g-1', platform: 'x', checked: 'yesterday-ish' });
+    expect(isActiveAt(fresh, T, within)).toBe(true);
+    expect(isActiveAt(stale, T, within)).toBe(false);
+    expect(isActiveAt(unknown, T, within)).toBe(false);
+    expect(isActiveAt(garbled, T, within)).toBe(false);
+    expect(isActiveAt(unknown, T)).toBe(true); // the rule applies only when asked for
+  });
+
   it('is never active at a non-finite time', () => {
     expect(isActiveAt(open, Number.NaN)).toBe(false);
     expect(isActiveAt(open, Number.POSITIVE_INFINITY)).toBe(false);

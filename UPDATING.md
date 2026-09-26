@@ -50,46 +50,54 @@ npm run build:data              # write public/data/*.json
 npx tsx scripts/report.ts       # print today's estimates per platform
 ```
 
-## The daily update
+## The automatic update
 
-`.github/workflows/update-data.yml` runs every day at 05:17 UTC (and on demand: **Actions → Update
-data → Run workflow**). It uses only public, key-free sources and needs no secrets:
+`.github/workflows/update-data.yml` runs every hour at :17 (and on demand: **Actions → Update data
+→ Run workflow**). It uses only public, key-free sources and needs no secrets:
 
-| Source                                                               | Becomes                                                                                          |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Each HQ's status page `summary.json` (`statusPage.json` in the YAML) | `public/data/incidents.json`: open incidents and maintenance under way, as the page reports them |
-| OpenRouter's public model list (`openrouter.ai/api/v1/models`)       | `data/auto/sightings.json`: "first seen on OpenRouter" events for the HQs' own model families    |
+| Source                                                               | Becomes                                                                                                                        |
+| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Each HQ's status page `summary.json` (`statusPage.json` in the YAML) | `public/data/incidents.json`: open incidents and maintenance under way, as the page reports them, with the time they were read |
+| OpenRouter's public model list (`openrouter.ai/api/v1/models`)       | `data/auto/sightings.json`: "first seen on OpenRouter" events for the HQs' own model families                                  |
 
-Then it runs the data build (which validates everything again), type-checks, tests and builds the
-site, and **commits to `main` only if a file changed**, which redeploys the site.
+If nothing changed, the run stops there. Otherwise it runs the data build (which validates
+everything again), type-checks, tests and builds the site, **commits to `main`** and redeploys.
 
 What it will never do:
 
 - **Publish broken or empty data.** A status page or the model list that cannot be reached, or
-  that returns something unexpected, keeps its previous data and is listed as a warning on the run
+  that returns something unexpected, keeps its previous data and shows as a warning on the run
   (open the run and read "Data update" in its summary). If anything to be published does not
   validate, the run fails and nothing is committed.
 - **Guess.** Notices come only from a page's JSON feed; pages that publish only RSS (e.g. xAI's)
-  are skipped. An unknown impact is recorded as "none", which the site does not show. The site
-  itself hides an open notice after three days, in case a page stops updating.
-- **Call a sighting a launch.** "First seen" events are listed in What's new and on the timeline,
-  but never celebrated as launches.
+  are skipped. On a page shared with other services (githubstatus.com), only notices naming the
+  HQ's component are kept (`statusPage.components`). An unknown impact is recorded as "none",
+  which the site does not show.
+- **Show stale notices.** Each notice carries the time it was read. The site shows it with "as of
+  HH:MM UTC" and hides it once its page has not been read for three hours.
+- **Call a sighting a launch.** "First seen" events appear in What's new and on the timeline, dated
+  when OpenRouter first listed the model (its earliest variant), but are never celebrated.
 
 Common tasks:
 
-- **Run it now:** Actions → Update data → Run workflow.
+- **Run it now:** Actions → Update data → Run workflow (on `main`). Tick "Deploy the site even if
+  the data did not change" to redeploy after a failed deploy.
 - **Locally:** `npm run update:data -- --dry-run` fetches and reports without writing;
   `npm run update:data` then `npm run build:data` does what the workflow does.
 - **Add or fix a status page:** edit that platform's `statusPage` in `data/manual/platforms.yaml`
   (`json` is the page's `/api/v2/summary.json`; statuspage.io and incident.io pages both publish
-  one).
+  one; add `components: ["Name"]` if the page covers other services too).
 - **A sighting is really a launch:** add the model to `data/manual/models.yaml` with its source.
-  The data build then drops the sighting (same HQ, matching name, within 120 days).
-- **A sighting is wrong:** delete its entry from `data/auto/sightings.json`, or add the model to
-  `models.yaml`. Which OpenRouter authors map to which HQ is set in `OPENROUTER_AUTHORS`
-  (`src/data/feeds.ts`).
-- **"Data updated" looks old:** it shows when the published data last _changed_. Days without news
-  make no commit, so the date only moves when there is something new.
+  The data build then drops the sighting (same HQ, same name, within 120 days).
+- **A sighting is wrong:** add its id (e.g. `seen-qwen-qwen3-foo`) to
+  `data/manual/hidden-sightings.yaml`. Do not edit `data/auto/` by hand: the pipeline owns it and
+  would stop (safely, publishing nothing) if it could not read it. Which OpenRouter authors map to
+  which HQ is set in `OPENROUTER_AUTHORS` (`src/data/feeds.ts`).
+- **"Data updated" looks old:** it shows when the figures, models or events last _changed_ (status
+  notices, which come and go by the hour, do not move it).
+- **A branch conflicts with `main` in `public/data/`:** the bot commits generated files to `main`.
+  Merge `main`, take either side of the conflict, then run `npm run build:data` and commit: the
+  files are regenerated from the sources.
 
 If the run fails with a permissions error on `git push`, the repository's settings must let
 workflows write (Settings → Actions → General → Workflow permissions → "Read and write"), and a

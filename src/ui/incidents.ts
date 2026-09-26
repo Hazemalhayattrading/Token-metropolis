@@ -51,6 +51,12 @@ function writeDismissed(ids: ReadonlySet<string>): void {
 }
 
 /** "2026-09-26, 10:05 UTC", or the feed's own text if it cannot be read. */
+/** "as of 12:17 UTC": when the pipeline last read the notice on the page (none if unknown). */
+function checkedLabel(i: Incident): string {
+  const ms = i.checked ? parseInstant(i.checked) : null;
+  return ms === null ? '' : COPY.incidents.asOf(utcParts(ms).hhmm);
+}
+
 function startedLabel(i: Incident): string {
   const ms = parseInstant(i.started);
   if (ms === null) return i.started;
@@ -131,6 +137,10 @@ export function mountIncidentBanner(
       'p',
       { class: 'incidents__meta' },
       h('span', {}, COPY.incidents.started(startedLabel(i))),
+      i.status === 'monitoring'
+        ? h('span', { class: 'incidents__status' }, COPY.incidents.monitoring)
+        : null,
+      checkedLabel(i) ? h('span', { class: 'incidents__asof' }, checkedLabel(i)) : null,
       isHttps(i.url)
         ? h(
             'a',
@@ -252,6 +262,7 @@ export function mountIncidentBanner(
         top.title,
         startedLabel(top),
       ),
+      top.status === 'monitoring' ? COPY.incidents.spokenMonitoring : '',
       shown.length > 1 ? COPY.incidents.spokenMore(shown.length - 1) : '',
     ]
       .filter(Boolean)

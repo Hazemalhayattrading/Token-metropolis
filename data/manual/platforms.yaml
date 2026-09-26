@@ -546,8 +546,9 @@
     url: "https://www.githubstatus.com"
     json: "https://www.githubstatus.com/api/v2/summary.json"
     provider: statuspage.io
+    components: ["Copilot"]
     verified: page
-    note: "Copilot is a component of GitHub's status page; confirmed in a third-party status monitor's configuration."
+    note: "Copilot is a component of GitHub's status page; confirmed in a third-party status monitor's configuration. Only notices naming the Copilot component are shown."
   feeds:
     - { url: "https://github.com/github/docs/commits/main/data/tables/copilot/model-release-status.yml.atom", type: atom }
   identity:

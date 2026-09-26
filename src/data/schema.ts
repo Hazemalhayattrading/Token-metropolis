@@ -149,6 +149,11 @@ export const PlatformSchema = z.object({
       json: httpsUrl.nullable(),
       rss: httpsUrl.nullable().default(null),
       provider: z.enum(['statuspage.io', 'incident.io', 'other', 'none']),
+      /**
+       * For a page shared with other services (e.g. githubstatus.com): only notices about these
+       * components (their names on the page) belong to this HQ; notices naming none are skipped.
+       */
+      components: z.array(z.string().min(1)).min(1).optional(),
       verified: VerificationSchema,
       note: z.string().optional(),
     })
@@ -287,6 +292,13 @@ export const IncidentSchema = z.object({
   started: z.string().min(10),
   resolved: z.string().min(10).nullable(),
   url: httpsUrl,
+  /** The page's own status for it: a "monitoring" incident has a fix in place. */
+  status: z.enum(['investigating', 'identified', 'monitoring', 'maintenance']).optional(),
+  /**
+   * When the pipeline last read this notice on the page (ISO time). The site shows a notice only
+   * while this is recent: a page that stops answering cannot leave it up.
+   */
+  checked: z.string().min(10).optional(),
 });
 export type Incident = z.infer<typeof IncidentSchema>;
 

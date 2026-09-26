@@ -165,6 +165,27 @@ discoveries + tracker + share card). Integration hooks already on the branch: `c
 - [ ] Final M6 screenshots (desktop + mobile) and second art pass over every M6 feature.
 - [ ] Full multi-agent review (4 dimensions + adversarial verify, D-051); fix findings; push.
 
+## Milestone 7 — data pipeline (done; review fixes applied)
+
+Definition of done: scheduled workflow (daily or better) + manual run; public key-free sources;
+normalized into `public/data`; validated with Zod; a failing source keeps its previous data and is
+logged; commits only on change → Pages redeploys; no secrets; `UPDATING.md` covers it; tests.
+
+- [x] `scripts/update-data.ts` (CLI) + `scripts/pipeline.ts` (core) + `src/data/feeds.ts`
+      (normalizers): status `summary.json` → `incidents.json` (with `checked` time, component
+      filter for shared pages); OpenRouter models → `data/auto/sightings.json` — D-064/65.
+- [x] `build-data` validates pipeline files, merges sightings (minus curated and hidden ones),
+      keeps notices out of "Data updated" — D-066.
+- [x] `update-data.yml` hourly + manual (force-deploy option), early exit, retry when `main` moved,
+      calls `deploy.yml` (now `workflow_call`).
+- [x] Site: notices show "Status as of HH:MM UTC", hide after 3 h without a read, say when a fix
+      is in place.
+- [x] Light review (correctness + data honesty, D-051): 21 findings, all addressed (variant dates,
+      Copilot component filter, whole-version name matching, freshness, hidden list, JSON errors,
+      push race, maintenance start/impact, synthetic test fixtures, deploy retry).
+- [ ] Not verifiable here: live fetches (the sandbox proxy answers 403 to every feed). First real
+      run happens on GitHub after merge to `main`; check its "Data update" summary.
+
 ## Blocked (needs the owner)
 
 - **Deploys:** GitHub Pages needs a push to `main` and Pages enabled in the repo settings.

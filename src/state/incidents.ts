@@ -45,6 +45,11 @@ export interface ActiveOptions {
    * A guard against a feed that stopped updating and left an old incident open.
    */
   readonly staleAfterMs?: number;
+  /**
+   * Show a notice only if the pipeline read it on the status page within this long before `tMs`
+   * (its `checked` time). A missing or unreadable `checked` time then claims nothing.
+   */
+  readonly checkedWithinMs?: number;
 }
 
 /**
@@ -54,6 +59,10 @@ export interface ActiveOptions {
  */
 export function isActiveAt(incident: Incident, tMs: number, opts: ActiveOptions = {}): boolean {
   if (incidentSeverity(incident.impact) <= 0 || !Number.isFinite(tMs)) return false;
+  if (opts.checkedWithinMs !== undefined) {
+    const checked = incident.checked ? parseInstant(incident.checked) : null;
+    if (checked === null || tMs - checked > opts.checkedWithinMs) return false;
+  }
   const start = parseInstant(incident.started);
   if (start === null || start > tMs) return false;
   if (incident.resolved === null) return tMs - start < (opts.staleAfterMs ?? Infinity);

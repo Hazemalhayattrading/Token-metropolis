@@ -358,6 +358,10 @@ export const COPY = {
     possessive: (name: string) => (/s$/i.test(name) ? '’' : '’s'),
     reports: ' official status page reports: ',
     started: (when: string) => `Started ${when}`,
+    /** When our pipeline last read the notice on the status page. */
+    asOf: (hhmm: string) => `Status as of ${hhmm} UTC`,
+    /** The page's own status "monitoring": the provider has deployed a fix and is watching. */
+    monitoring: 'Fix in place, monitoring',
     /** A UTC instant, written like the time machine's labels. */
     when: (date: string, hhmm: string) => `${date}, ${hhmm} UTC`,
     link: 'Status page',
@@ -366,10 +370,11 @@ export const COPY = {
     more: (n: number) => `+${n} more`,
     less: 'Show less',
     dismiss: (name: string) => `Dismiss the ${name} status notice`,
-    note: 'Copied from the platform’s own status page at our last data update — open it for the current status. Token estimates on this site are not adjusted for incidents.',
+    note: 'Copied from the platform’s own status page, which we read every hour — open it for the current status. Token estimates on this site are not adjusted for incidents.',
     /** What screen readers hear when a new notice appears. */
     spoken: (name: string, impact: string, title: string, when: string) =>
       `${name}${/s$/i.test(name) ? '’' : '’s'} official status page reports ${impact.toLowerCase()}: ${title}. Started ${when}.`,
+    spokenMonitoring: 'A fix is in place and the page is monitoring.',
     spokenMore: (n: number) => `${n} more status ${n === 1 ? 'notice' : 'notices'} listed.`,
   },
   // ---- M6: cinematic tour (src/state/tour.ts, src/ui/tour.ts) — owned by that module's builder
