@@ -1,5 +1,6 @@
 /**
- * Compile data/manual/*.yaml → public/data/*.json.
+ * Compile data/manual/*.yaml (curated) and data/auto/*.json (written by the daily pipeline,
+ * scripts/update-data.ts) → public/data/*.json.
  *
  * Refuses to publish anything invalid: if validation fails, public/data is
  * left untouched and the process exits non-zero. `meta.json.lastUpdated`
@@ -9,53 +10,65 @@
  * Usage: tsx scripts/build-data.ts [--check]   (--check validates without writing)
  */
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { parse } from 'yaml';
+import { mkdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { z } from 'zod';
+import { isCurated, SightingSchema, type Sighting } from '../src/data/feeds';
+import { IncidentSchema, type TimelineEvent } from '../src/data/schema';
 import { validateDataset, type Dataset } from '../src/data/validate';
 import { CONSTANT_INDEX } from '../src/model/constants';
+import { AUTO, OUT, readJson, readYaml, stableJson, writeAtomic } from './lib';
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const MANUAL = join(ROOT, 'data', 'manual');
-const OUT = join(ROOT, 'public', 'data');
 const checkOnly = process.argv.includes('--check');
 
-function readYaml(name: string): unknown {
-  const file = join(MANUAL, name);
-  if (!existsSync(file)) throw new Error(`missing ${file}`);
-  return parse(readFileSync(file, 'utf8'));
-}
+const byDateDesc = (a: TimelineEvent, b: TimelineEvent) =>
+  a.date < b.date ? 1 : a.date > b.date ? -1 : a.id.localeCompare(b.id);
 
-function stableJson(value: unknown): string {
-  return `${JSON.stringify(value, null, 2)}\n`;
-}
-
-function buildEvents(data: Dataset) {
+/**
+ * Timeline events: one per curated model, plus the pipeline's "first seen" sightings that the
+ * curated list does not (yet) have.
+ */
+function buildEvents(data: Dataset, sightings: readonly Sighting[]): TimelineEvent[] {
   const names = new Map(data.platforms.map((p) => [p.id, p.name]));
-  return data.models
-    .map((m) => ({
-      id: `launch-${m.id}`,
-      date: m.released,
-      platform: m.platform,
-      kind: m.origin === 'own' ? ('model-launch' as const) : ('model-available' as const),
-      title:
-        m.origin !== 'own'
-          ? `${m.name} available in ${names.get(m.platform)}`
-          : m.dateKind === 'first-seen'
-            ? `${m.name} first seen`
-            : `${m.name} released`,
-      datePrecision: m.datePrecision,
-      dateKind: m.dateKind,
-      source: m.source,
-    }))
-    .sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : a.id.localeCompare(b.id)));
+  const curated: TimelineEvent[] = data.models.map((m) => ({
+    id: `launch-${m.id}`,
+    date: m.released,
+    platform: m.platform,
+    kind: m.origin === 'own' ? ('model-launch' as const) : ('model-available' as const),
+    title:
+      m.origin !== 'own'
+        ? `${m.name} available in ${names.get(m.platform)}`
+        : m.dateKind === 'first-seen'
+          ? `${m.name} first seen`
+          : `${m.name} released`,
+    datePrecision: m.datePrecision,
+    dateKind: m.dateKind,
+    source: m.source,
+  }));
+  const seen: TimelineEvent[] = sightings
+    .filter((s) => names.has(s.platform))
+    .filter(
+      (s) =>
+        !isCurated(
+          s.platform,
+          s.model,
+          Date.parse(`${s.date}T00:00:00Z`) / 86_400_000,
+          data.models,
+        ),
+    )
+    .map(({ model: _model, ...event }) => event);
+  const ids = new Set(curated.map((e) => e.id));
+  return [...curated, ...seen.filter((e) => !ids.has(e.id))].sort(byDateDesc);
 }
 
-function writeAtomic(file: string, content: string): void {
-  const tmp = `${file}.tmp`;
-  writeFileSync(tmp, content);
-  renameSync(tmp, file);
+/** A pipeline-owned file, validated; exits (publishing nothing) if it is invalid. */
+function readAuto<T>(file: string, schema: z.ZodType<T>, label: string): T {
+  const parsed = schema.safeParse(readJson(file, []));
+  if (parsed.success) return parsed.data;
+  for (const issue of parsed.error.issues.slice(0, 10))
+    console.error(`error ${label}: ${issue.path.join('.') || '(root)'}: ${issue.message}`);
+  console.error(`\n✗ ${label} does not validate. public/data left unchanged.`);
+  process.exit(1);
 }
 
 function main(): void {
@@ -79,13 +92,14 @@ function main(): void {
     'models.json': [...data.models].sort(
       (a, b) => a.platform.localeCompare(b.platform) || a.released.localeCompare(b.released),
     ),
-    'events.json': buildEvents(data),
+    'events.json': buildEvents(
+      data,
+      readAuto(join(AUTO, 'sightings.json'), z.array(SightingSchema), 'data/auto/sightings.json'),
+    ),
   };
-  // incidents.json is owned by the daily pipeline; seed it if missing.
+  // incidents.json is owned by the daily pipeline (seeded empty if missing), validated here too.
   const incidentsFile = join(OUT, 'incidents.json');
-  const incidents = existsSync(incidentsFile)
-    ? (JSON.parse(readFileSync(incidentsFile, 'utf8')) as unknown)
-    : [];
+  const incidents = readAuto(incidentsFile, z.array(IncidentSchema), 'public/data/incidents.json');
 
   const hash = createHash('sha256');
   for (const name of Object.keys(files).sort()) hash.update(stableJson(files[name]));
@@ -93,9 +107,7 @@ function main(): void {
   const contentHash = hash.digest('hex').slice(0, 16);
 
   const metaFile = join(OUT, 'meta.json');
-  const previous = existsSync(metaFile)
-    ? (JSON.parse(readFileSync(metaFile, 'utf8')) as { contentHash?: string; lastUpdated?: string })
-    : {};
+  const previous = readJson(metaFile, {}) as { contentHash?: string; lastUpdated?: string };
   const unchanged =
     previous.contentHash === contentHash && typeof previous.lastUpdated === 'string';
   const pendingConstants = Object.entries(CONSTANT_INDEX)

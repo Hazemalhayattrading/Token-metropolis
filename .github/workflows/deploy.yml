@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Called by update-data.yml after it commits new data.
+  workflow_call:
 
 permissions:
   contents: read
@@ -20,6 +22,10 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          # A push deploys its own commit; a manual run or the data pipeline deploys main as it is now
+          # (for a called workflow, github.sha is the commit before the pipeline's data commit).
+          ref: ${{ github.event_name == 'push' && github.sha || 'main' }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22

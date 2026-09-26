@@ -1,0 +1,66 @@
+name: Update data
+
+# The daily pipeline (brief §4): status-page notices and new model sightings from public,
+# key-free feeds. Sources that fail keep their previous data; invalid data is never published.
+# It commits to main only when something changed, then deploys the site.
+
+on:
+  schedule:
+    - cron: '17 5 * * *' # daily at 05:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      changed: ${{ steps.commit.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Fetch public feeds (status pages, OpenRouter models)
+        run: npx tsx scripts/update-data.ts
+      - name: Validate and build the published data
+        run: npm run build:data
+      - name: Type-check, test and build the site with the new data
+        run: |
+          npm run typecheck
+          npm test
+          npm run build
+      - name: Commit if anything changed
+        id: commit
+        run: |
+          git add -A -- public/data data/auto
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No data change." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Update data $(date -u +%Y-%m-%d)"
+          git push origin HEAD:main
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+  # Pushes made with the workflow's token do not trigger other workflows, so deploy from here.
+  deploy:
+    needs: update
+    if: needs.update.outputs.changed == 'true'
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    uses: ./.github/workflows/deploy.yml
