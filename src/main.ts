@@ -34,7 +34,7 @@ import { mountIncidentBanner } from './ui/incidents';
 import { mountTourCaptions } from './ui/tour';
 import { createPanel } from './ui/panel';
 import { mountPrompt } from './ui/prompt';
-import { createTracker } from './state/discoveries';
+import { createTracker, discoveryById } from './state/discoveries';
 import { shareCardText, type CardView } from './state/sharecard';
 import { mountDiscoveries } from './ui/discoveries';
 import { mountShareButton, type ShareInput } from './ui/share';
@@ -267,10 +267,27 @@ async function boot(): Promise<void> {
         document.documentElement.classList.toggle('prompt-open', open);
         updateInsets();
       };
+      /** Where keyboard focus goes when the thing that had it disappears. */
+      const focusFallback = (): HTMLElement =>
+        panelEl.querySelector<HTMLElement>('#panel:not([hidden]) [aria-selected="true"]') ??
+        [...byId('controls').querySelectorAll<HTMLElement>('button')].find(
+          (b) => !b.hasAttribute('disabled') && b.offsetParent !== null,
+        ) ??
+        byId('scene');
       const prompt = mountPrompt(promptEl, city, {
         reducedMotion,
-        onSend: (id, _tokens, origin) => world.sendToken(id, origin),
+        onSend: (id, _tokens, origin) => {
+          // The token lands in an HQ that is on screen: at the present (every HQ has launched)
+          // and, when an interior is open, back in the overview unless it is this HQ's.
+          if (tm.state().mode === 'history') tm.goLive();
+          if (world.view !== 'overview' && panel.openId !== id) {
+            panel.showView('overview');
+            world.setView('overview');
+          }
+          return world.sendToken(id, origin);
+        },
         onClose: () => promptShown(false),
+        focusAfterClose: focusFallback,
       });
       const closePrompt = () => {
         if (!prompt.isOpen) return;
@@ -289,7 +306,13 @@ async function boot(): Promise<void> {
       // Hidden details: a per-visitor tracker (this browser only) and the "12/40 found" chip.
       const tracker = createTracker();
       const discSlot = h('div', { class: 'disc-slot' });
-      const discoveries = mountDiscoveries(discSlot, tracker, { platformName, reducedMotion });
+      const discoveries = mountDiscoveries(discSlot, tracker, {
+        platformName,
+        reducedMotion,
+        // Keyboard path: go to the detail (the island's, or an HQ interior's) and count it found.
+        onReveal: (id) => revealDiscovery(id),
+      });
+      let revealDiscovery: (id: string) => void = () => undefined;
       const world = createWorld(byId<HTMLCanvasElement>('scene'), city, tm, {
         reducedMotion,
         sound,
@@ -345,6 +368,35 @@ async function boot(): Promise<void> {
         if (mobile.matches) world.select(null);
         closePrompt();
       };
+      revealDiscovery = (id) => {
+        const d = discoveryById(id);
+        if (!d) return;
+        const found = () => {
+          if (tracker.mark(id)) discoveries.celebrate(id);
+        };
+        if (compare.open) setCompareOpen(false);
+        tm.goLive();
+        if (d.where === 'city') {
+          closePrompt();
+          if (!panelEl.hidden) world.select(null);
+          if (world.revealDiscovery(id)) found();
+          return;
+        }
+        // An interior detail: its own HQ's, or (one every HQ has) the open HQ's or the largest's.
+        const largest = [...city.platforms].sort(
+          (a, b) => dailyRate(b, tm.now()).central - dailyRate(a, tm.now()).central,
+        )[0]!.platform.id;
+        const own = d.platform && city.byId.has(d.platform) ? d.platform : null;
+        const hq = own ?? panel.openId ?? largest;
+        if (panel.openId !== hq) openHq(hq);
+        panel.showView(d.where);
+        world.setView(d.where);
+        found();
+      };
+      // Narrower than 960px the prompt and the HQ panel share one slot (see onSelect).
+      roomy.addEventListener('change', () => {
+        if (!roomy.matches && !panelEl.hidden) closePrompt();
+      });
       // Compare mode: split-screen campuses with a metrics card per column.
       const compareEl = byId('compare');
       // Towers are vertical, so compare always uses columns; on phones they fill the top half and
@@ -371,6 +423,10 @@ async function boot(): Promise<void> {
       const compare = mountCompare(compareEl, city, tm, {
         onChange: (ids) => world.setCompare(ids, layout(), area()),
         onClose: () => setCompareOpen(false),
+        onOpenHq: (id) => {
+          setCompareOpen(false);
+          openHq(id);
+        },
         history: () => tm.state().mode === 'history',
       });
       mobile.addEventListener('change', () => {
@@ -394,7 +450,8 @@ async function boot(): Promise<void> {
       legend.replaceChildren(
         h(
           'details',
-          { class: 'glass-legend__box', open: !mobile.matches },
+          // Open by default only where it fits beside everything else.
+          { class: 'glass-legend__box', open: window.matchMedia('(min-width: 1184px)').matches },
           h('summary', {}, COPY.glass.legendTitle),
           h(
             'ul',
@@ -420,6 +477,16 @@ async function boot(): Promise<void> {
       });
       controls.feedSlot.before(promptButton, glassButton, soundButton);
       controls.feedSlot.after(discSlot, shareSlot);
+      // Overlays placed above the control row (prompt, glass legend, race, toasts) and the incident
+      // banner placed under the HUD follow their real heights: the row wraps on narrower desktops.
+      const sizeVars = () => {
+        const rootStyle = document.documentElement.style;
+        rootStyle.setProperty('--controls-h', `${byId('controls').offsetHeight || 38}px`);
+        rootStyle.setProperty('--hud-h', `${byId('hud').offsetHeight || 280}px`);
+      };
+      const sizes = new ResizeObserver(sizeVars);
+      sizes.observe(byId('controls'));
+      sizes.observe(byId('hud'));
 
       // The share card frames what the visitor sees: with the HQ panel open, the part of the
       // frame beside (desktop) or above (phones) the panel, where the view is centred.
@@ -451,7 +518,14 @@ async function boot(): Promise<void> {
 
       // Incident mode: official status-page notices. incidents.json is a snapshot of *current*
       // status, so notices follow the live clock only (not the time machine).
-      const banner = mountIncidentBanner(byId('incidents'), { platformName, onSelect: openHq });
+      const banner = mountIncidentBanner(byId('incidents'), {
+        platformName,
+        onSelect: (id) => {
+          if (compare.open) setCompareOpen(false);
+          openHq(id);
+        },
+        fallbackFocus: focusFallback,
+      });
       const refreshIncidents = () => {
         const live = tm.state().mode === 'live';
         const active = live
@@ -462,7 +536,8 @@ async function boot(): Promise<void> {
             })
           : new Map<string, (typeof data.incidents)[number]>();
         banner.update(active);
-        world.setIncidents(active);
+        // The city's alarms follow the notices on screen (a dismissed notice goes quiet).
+        world.setIncidents(new Map(banner.shown.map((i) => [i.platform, i])));
       };
       refreshIncidents();
       setInterval(refreshIncidents, 1000);
@@ -475,6 +550,7 @@ async function boot(): Promise<void> {
       const stopTour = () => {
         if (!document.documentElement.classList.contains('tour-on')) return;
         tourRun++;
+        world.setGlass(glassButton.getAttribute('aria-pressed') === 'true');
         document.documentElement.classList.remove('tour-on');
         captions.hide();
         setTimeout(() => {
@@ -490,10 +566,19 @@ async function boot(): Promise<void> {
           race.open ||
           prompt.isOpen ||
           document.documentElement.classList.contains('share-open') ||
-          tm.state().playing;
+          // An open popover in the control row ("What's new", hidden details) is being read.
+          !!byId('controls').querySelector('[aria-expanded="true"]') ||
+          // A date chosen in the time machine is not thrown away for a tour.
+          tm.state().mode === 'history' ||
+          tm.state().playing ||
+          // The visitor is in the data view below the city (e.g. reading with a screen reader).
+          window.scrollY > 40 ||
+          byId('data-view').contains(document.activeElement);
         if (busy || document.hidden) return;
         const run = ++tourRun;
         tm.goLive();
+        // The glass's legend is hidden during the tour, so the glass steps aside too.
+        world.setGlass(false);
         document.documentElement.classList.add('tour-on');
         tourEl.hidden = false;
         while (run === tourRun) {

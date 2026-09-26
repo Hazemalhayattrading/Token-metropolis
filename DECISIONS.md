@@ -485,3 +485,37 @@ updated" follows the figures, models and events only; status notices do not move
 commits to `main` only when a file changed, regenerates and retries if `main` moved during the run,
 and calls the Pages deploy itself (pushes made with the workflow token trigger no workflows); a
 manual run can force a deploy.
+
+### D-067 — M6 review: what changed and why
+
+The full M6 review (four dimensions, adversarial verification) confirmed 34 findings; all were
+fixed. The decisions behind the fixes:
+
+- **Compare shares one framing.** Every column is framed for the tallest compared tower, so one
+  world unit is the same on screen in each column and heights compare (per-campus framing had
+  evened them out). A comparison keeps two to three platforms: remove buttons disable at two, the
+  list only selects and an Add button commits (arrow keys never add a column), and Escape closes
+  compare from anywhere. Each column states the HQ's scope, says what its latest published figure
+  is (often users or revenue, not tokens) and names the HQ as a button that opens its panel; the
+  bar links to the method and says GPUs, power and water use one H100-class figure.
+- **Overlays never cover each other.** The incident banner hides in compare, moves beside an
+  open HQ panel on wide screens and under the HUD on narrower desktops; popovers on phones sit
+  above it; the glass legend steps aside for it on phones; everything placed above the control
+  row follows the row's real height (it wraps on narrow desktops). The glass hides in compare
+  and during the tour, whose legend is hidden.
+- **The tour waits for the visitor.** It does not start while a popover is open, while a
+  time-machine date is shown, or while the visitor is in the data view; focus moves and
+  scrolling count as activity; screen readers hear that it started (and how to stop it) once,
+  not every caption.
+- **The prompt never lands a token out of sight.** Sending returns to the present and, if
+  another HQ's interior is open, to the overview. Its copy now gives the model's own assumption
+  for a typical request (about 2,000 tokens, 800–6,000, Modeled) and says the efficiency figure
+  is shared because most HQs publish nothing comparable. The tokenizer loads and counts in a
+  worker, so typing and the city never stall.
+- **Honest edges.** A glass range reaching below the scale's floor runs to the ground (no solid
+  core); small power values show significant figures instead of "0.00"; a share card for today
+  in the time machine says "so far"; the alarm tone is for outages only and follows dismissals.
+- **Hidden details for everyone.** Each unfound hint has a "Show me" button that takes the
+  visitor to the detail (the keyboard and screen-reader path) and counts it found. A reset in
+  one tab holds in the others. The props load as their own chunk, are built at idle and their
+  shaders are compiled before they appear; alarm and token-flight shaders are compiled ahead too.

@@ -20,6 +20,8 @@ import { h } from './dom';
 
 export interface IncidentBanner {
   update(active: ReadonlyMap<string, Incident>): void;
+  /** The notices on screen: active and not dismissed (what the city's alarms should follow). */
+  readonly shown: readonly Incident[];
   dispose(): void;
 }
 
@@ -72,7 +74,12 @@ const isHttps = (url: string) => /^https:\/\//i.test(url);
 
 export function mountIncidentBanner(
   root: HTMLElement,
-  opts: { platformName(id: string): string; onSelect(platformId: string): void },
+  opts: {
+    platformName(id: string): string;
+    onSelect(platformId: string): void;
+    /** Where keyboard focus goes when the last notice is dismissed. */
+    fallbackFocus?(): HTMLElement | null;
+  },
 ): IncidentBanner {
   const listId = `incidents-list-${++uid}`;
   const card = h('section', {
@@ -189,6 +196,8 @@ export function mountIncidentBanner(
       card.hidden = true;
       card.replaceChildren();
       expanded = false;
+      // The last notice was dismissed from the keyboard: never strand focus on <body>.
+      if (focusKey !== null) opts.fallbackFocus?.()?.focus({ preventScroll: true });
       return;
     }
     if (rest.length === 0) expanded = false;
@@ -324,6 +333,9 @@ export function mountIncidentBanner(
     update(next) {
       active = next;
       refresh();
+    },
+    get shown() {
+      return shown;
     },
     dispose() {
       window.clearTimeout(speakTimer);

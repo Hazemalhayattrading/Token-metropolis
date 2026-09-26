@@ -56,6 +56,18 @@ const WINDOW_LABEL = {
 } as const;
 
 /** "180 trillion tokens per day", "$65 billion a year", "900 million weekly users". */
+/**
+ * Megawatts for display: whole numbers from 10, one decimal from 1, two from 0.01, then two
+ * significant figures, so a small but real load never reads as "0.00".
+ */
+export function formatMW(n: number): string {
+  if (!Number.isFinite(n) || n <= 0) return '0';
+  if (n >= 10) return fullNumber(Math.round(n));
+  if (n >= 1) return n.toFixed(1);
+  if (n >= 0.01) return n.toFixed(2);
+  return String(Number(n.toPrecision(2)));
+}
+
 export function describeValue(m: {
   kind: string;
   value: number;

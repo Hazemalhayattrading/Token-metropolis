@@ -211,3 +211,33 @@ test('share: an image of the view with its numbers, from the city and from an HQ
   await page.keyboard.press('Escape');
   expect(problems).toEqual([]);
 });
+
+test('hidden details can be found from the keyboard: "Show me" goes there', async ({ page }) => {
+  test.setTimeout(120_000);
+  const problems = watchConsole(page);
+  await ready(page);
+  const chip = page.locator('.disc__chip');
+  const list = page.locator('.disc__panel');
+  // An island detail: the camera flies to it and it counts as found. (The props are built at idle
+  // shortly after start, so the first try may come before them.)
+  await expect(async () => {
+    await chip.scrollIntoViewIfNeeded();
+    if ((await chip.getAttribute('aria-expanded')) !== 'true') await chip.click();
+    await list.locator('[data-id="lighthouse"] .disc__show').click();
+    await expect(chip).toHaveAttribute('aria-label', /1 of 40 found/, { timeout: 3_000 });
+  }).toPass({ timeout: 60_000 });
+  await expect(chip).toBeFocused();
+  await expect(page.locator('.disc-sr[role="status"]').first()).toBeAttached();
+  // An interior detail: its HQ's panel opens on that view, and it counts too.
+  await chip.click();
+  await list.locator('[data-id="server-cat"] .disc__show').click();
+  await expect(chip).toHaveAttribute('aria-label', /2 of 40 found/);
+  const panel = page.locator('#panel');
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText('DeepSeek');
+  await expect(panel.getByRole('tab', { name: 'Server hall' })).toHaveAttribute(
+    'aria-selected',
+    'true',
+  );
+  expect(problems).toEqual([]);
+});

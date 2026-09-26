@@ -193,6 +193,17 @@ export function createTracker(opts: { storage?: Store | null; key?: string } = {
     }
   };
 
+  // Another tab changed the stored progress (a find, or a reset): follow it, so that a reset
+  // there is not undone by this tab's next find.
+  if (storage && typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+    window.addEventListener('storage', (e: StorageEvent) => {
+      if (e.key !== key && e.key !== null) return; // null: the whole storage was cleared
+      found.clear();
+      for (const id of read()) found.add(id);
+      notify();
+    });
+  }
+
   return {
     has: (id) => found.has(id),
     mark(id) {

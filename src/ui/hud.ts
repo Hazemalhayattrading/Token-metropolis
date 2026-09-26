@@ -19,6 +19,7 @@ import type { Clock } from '../state/clock';
 import { tierBadge } from './badge';
 import { byId, h } from './dom';
 import { fullNumber, humanNumber, timeAgo } from './format';
+import { METHODOLOGY_URL } from './links';
 
 export interface Hud {
   update(): void;
@@ -95,7 +96,7 @@ export function mountHud(
       h(
         'a',
         {
-          href: 'https://github.com/Hazemalhayattrading/Token-metropolis/blob/main/METHODOLOGY.md',
+          href: METHODOLOGY_URL,
           rel: 'noopener',
         },
         COPY.hud.methodLink,

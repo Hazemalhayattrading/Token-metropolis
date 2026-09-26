@@ -17,6 +17,8 @@ export default defineConfig({
       },
     },
   },
+  // The tokenizer worker imports the vocabulary lazily (its own chunk): that needs ES workers.
+  worker: { format: 'es' },
   server: { port: 5173 },
   preview: { port: 4173 },
 });

@@ -37,6 +37,16 @@ export function towerHeight(tokensPerDay: number, mode: ScaleMode, maxTokens: nu
   return HEIGHT_MIN + (HEIGHT_MAX - HEIGHT_MIN) * logLoad(tokensPerDay);
 }
 
+/**
+ * Whether `tokensPerDay` lies below the lowest height the scale can draw (its tower is drawn at
+ * that floor): below 10 billion tokens/day in log scale, below 0.35 units in true scale.
+ */
+export function belowFloor(tokensPerDay: number, mode: ScaleMode, maxTokens: number): boolean {
+  if (!(tokensPerDay > 0)) return true;
+  if (mode === 'true') return (HEIGHT_MAX * tokensPerDay) / Math.max(maxTokens, 1) < 0.35;
+  return Math.log10(tokensPerDay) < LOG_FLOOR;
+}
+
 /** Discrete facility counts that grow with load (server halls, cooling towers, trucks). */
 export function facilityCounts(tokensPerDay: number): {
   halls: number;

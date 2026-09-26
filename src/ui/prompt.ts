@@ -16,7 +16,7 @@
  * polite status line, only once typing has settled.
  */
 import { COPY } from '../copy';
-import { COMPUTE, isDisplayable } from '../model/constants';
+import { COMPUTE, isDisplayable, USAGE } from '../model/constants';
 import { tierOfBasis } from '../model/tier';
 import type { Constant, Estimate, Tier } from '../model/types';
 import type { City } from '../state/city';
@@ -32,6 +32,7 @@ import {
 import { exactBadge, tierBadge, uncheckedBadge } from './badge';
 import { h } from './dom';
 import { fullNumber } from './format';
+import { METHODOLOGY_URL } from './links';
 
 export interface PromptPanel {
   readonly isOpen: boolean;
@@ -59,6 +60,11 @@ export interface PromptOptions {
   ): unknown;
   /** The visitor closed the panel (close button or Escape). The panel has already hidden itself. */
   onClose(): void;
+  /**
+   * Where keyboard focus goes on close when the control that opened the panel is no longer shown
+   * (e.g. the control row hides while an HQ panel is open).
+   */
+  focusAfterClose?(): HTMLElement | null;
   reducedMotion: boolean;
 }
 
@@ -68,13 +74,13 @@ const DEBOUNCE_MS = 150;
 const ANNOUNCE_MS = 1200;
 /** After a landing, the panel stays aside this long so the flash and the lit rack can be seen. */
 const ASIDE_LINGER_MS = 900;
-const METHODOLOGY_URL =
-  'https://github.com/Hazemalhayattrading/Token-metropolis/blob/main/METHODOLOGY.md';
 /** OpenAI's tokenizer library, which defines the o200k_base encoding. */
 const TIKTOKEN_URL = 'https://github.com/openai/tiktoken';
 const GPT_TOKENIZER_URL = 'https://github.com/niieani/gpt-tokenizer';
 const TICK_EASE = 'cubic-bezier(0.22, 1, 0.36, 1)';
 
+/** The model's assumption for a typical chat request, input and output (Modeled). */
+const REQUEST = USAGE.tokensPerRequest_assistant;
 /** One loader for the page: the tokenizer chunk is fetched once, when the panel first opens. */
 const tokenizer = createTokenizerLoader();
 let uid = 0;
@@ -288,7 +294,16 @@ export function mountPrompt(root: HTMLElement, city: City, opts: PromptOptions):
     h('h3', { class: 'prompt__section', id: id('results') }, COPY.prompt.results),
     h('div', { class: 'prompt__grid' }, energy.el, water.el),
     resultsHint,
-    h('p', { class: 'prompt__note' }, COPY.prompt.scope),
+    h(
+      'p',
+      { class: 'prompt__note' },
+      COPY.prompt.scope(
+        fullNumber(REQUEST.value),
+        fullNumber(REQUEST.low),
+        fullNumber(REQUEST.high),
+        COPY.tiers[tierOfBasis(REQUEST.basis)],
+      ),
+    ),
   );
   // How the figures are calculated: after the HQ picker, so the results sit right under the count.
   const calc = h(
@@ -510,7 +525,7 @@ export function mountPrompt(root: HTMLElement, city: City, opts: PromptOptions):
         if (disposed) return;
         counter = c;
         loadState = 'ready';
-        countNow();
+        void countNow();
       },
       () => {
         // Offline, or the chunk is gone after a redeploy. No console noise: the panel says it.
@@ -526,26 +541,40 @@ export function mountPrompt(root: HTMLElement, city: City, opts: PromptOptions):
     return tokenizer.failures > 1 ? COPY.prompt.failedAgain : COPY.prompt.failed;
   }
 
-  function countNow(): void {
+  /** Requests in flight to the tokenizer (a newer one supersedes older answers). */
+  let countSeq = 0;
+
+  function countNow(): Promise<void> {
     window.clearTimeout(countTimer);
     countTimer = 0;
     const text = textarea.value;
-    if (text === '') {
-      count = 0;
-      countedFor = '';
-      countError = false;
-    } else if (counter) {
-      try {
-        count = counter(text);
+    const seq = ++countSeq;
+    if (text === '' || !counter) {
+      if (text === '') {
+        count = 0;
+        countedFor = '';
         countError = false;
-      } catch {
+      }
+      render();
+      return Promise.resolve();
+    }
+    return counter(text).then(
+      (n) => {
+        if (seq !== countSeq || disposed) return; // the text changed meanwhile
+        count = n;
+        countError = false;
+        countedFor = text;
+        render();
+        if (n > 0) scheduleAnnounce();
+      },
+      () => {
+        if (seq !== countSeq || disposed) return;
         count = null;
         countError = true;
-      }
-      countedFor = text;
-    }
-    render();
-    if (count !== null && count > 0) scheduleAnnounce();
+        countedFor = text;
+        render();
+      },
+    );
   }
 
   function onInput(): void {
@@ -553,7 +582,7 @@ export function mountPrompt(root: HTMLElement, city: City, opts: PromptOptions):
     const text = textarea.value;
     if (text === '' || (counter && (countedFor === '' || countedFor === null))) {
       // Emptied, or the first characters after empty: count at once (no stale "0" on screen).
-      countNow();
+      void countNow();
       return;
     }
     // Typing never retries a failed load (offline, that would be a request per keystroke): only
@@ -658,8 +687,8 @@ export function mountPrompt(root: HTMLElement, city: City, opts: PromptOptions):
   }
 
   // --- actions -----------------------------------------------------------------------------
-  function sendNow(): void {
-    if (countedFor !== textarea.value && counter) countNow(); // never send a stale count
+  async function sendNow(): Promise<void> {
+    if (countedFor !== textarea.value && counter) await countNow(); // never send a stale count
     const tokens = !countError && countedFor === textarea.value ? count : null;
     if (tokens === null || tokens <= 0) {
       textarea.focus();
@@ -698,8 +727,12 @@ export function mountPrompt(root: HTMLElement, city: City, opts: PromptOptions):
     isOpen = false;
     window.clearTimeout(announceTimer);
     // Never strand keyboard focus inside a panel that is about to disappear.
-    if (panel.contains(document.activeElement) && returnFocus?.isConnected) {
-      returnFocus.focus({ preventScroll: true });
+    if (panel.contains(document.activeElement)) {
+      const shown = (el: HTMLElement) =>
+        el.isConnected && (el.checkVisibility?.() ?? el.offsetParent !== null);
+      const target =
+        returnFocus && shown(returnFocus) ? returnFocus : (opts.focusAfterClose?.() ?? null);
+      target?.focus({ preventScroll: true });
     }
     returnFocus = null;
     panel.classList.remove('prompt--open');
@@ -722,7 +755,7 @@ export function mountPrompt(root: HTMLElement, city: City, opts: PromptOptions):
   const onTextKey = (e: KeyboardEvent) => {
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey) && !e.isComposing) {
       e.preventDefault();
-      sendNow();
+      void sendNow();
     }
   };
   const onRetry = () => {
@@ -733,7 +766,8 @@ export function mountPrompt(root: HTMLElement, city: City, opts: PromptOptions):
   textarea.addEventListener('input', onInput);
   textarea.addEventListener('keydown', onTextKey);
   select.addEventListener('change', syncHq);
-  send.addEventListener('click', sendNow);
+  const onSendClick = () => void sendNow();
+  send.addEventListener('click', onSendClick);
   close.addEventListener('click', userClose);
   retry.addEventListener('click', onRetry);
   body.addEventListener('scroll', updateEdges, { passive: true });
@@ -780,7 +814,7 @@ export function mountPrompt(root: HTMLElement, city: City, opts: PromptOptions):
       textarea.removeEventListener('input', onInput);
       textarea.removeEventListener('keydown', onTextKey);
       select.removeEventListener('change', syncHq);
-      send.removeEventListener('click', sendNow);
+      send.removeEventListener('click', onSendClick);
       close.removeEventListener('click', userClose);
       retry.removeEventListener('click', onRetry);
       body.removeEventListener('scroll', updateEdges);

@@ -168,7 +168,16 @@ export interface IdleTimer {
 }
 
 /** What counts as someone using the page. */
-const ACTIVITY = ['pointerdown', 'pointermove', 'keydown', 'wheel', 'touchstart'] as const;
+const ACTIVITY = [
+  'pointerdown',
+  'pointermove',
+  'keydown',
+  'wheel',
+  'touchstart',
+  // Reading with a screen reader or scrolling the page sends no key or pointer events.
+  'focusin',
+  'scroll',
+] as const;
 /**
  * Pointer moves shorter than this (CSS pixels, from the last counted position) are not activity:
  * browsers send moves when the content changes under a still cursor, e.g. when a caption appears.

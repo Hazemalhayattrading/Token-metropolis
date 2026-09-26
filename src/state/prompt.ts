@@ -108,19 +108,76 @@ export function formatQuantity(n: number, digits = 2): string {
 // The tokenizer (lazy, its own chunk)
 // ---------------------------------------------------------------------------
 
-/** Counts the tokens of a text with TOKENIZER_NAME. */
-export type TokenCounter = (text: string) => number;
+/** Counts the tokens of a text with TOKENIZER_NAME (asynchronously: the work runs in a worker). */
+export type TokenCounter = (text: string) => Promise<number>;
 
-/** The slice of the tokenizer module the counter uses. */
+/** The slice of the tokenizer module the counter uses (the worker's version answers later). */
 export interface TokenizerModule {
-  countTokens(text: string, options?: { disallowedSpecial?: Set<string> }): number;
+  countTokens(
+    text: string,
+    options?: { disallowedSpecial?: Set<string> },
+  ): number | Promise<number>;
 }
 
 /**
- * Import the tokenizer. The dynamic import makes it a chunk of its own (~2 MB of vocabulary),
- * fetched only when the prompt panel first needs it. Only this one encoding is imported.
+ * Import the tokenizer on this thread. The dynamic import makes it a chunk of its own (~2 MB of
+ * vocabulary), fetched only when the prompt panel first needs it. Only this one encoding is
+ * imported. Used where workers are unavailable (and by tests); pages use workerTokenizer().
  */
 export const importTokenizer = () => import('gpt-tokenizer/encoding/o200k_base');
+
+/**
+ * The tokenizer in a module worker (./tokenizer.worker.ts), so its load — a long task of parsing
+ * and table building — never blocks rendering or typing. Rejects with the worker's error message
+ * (which names the failed chunk, for the retry) if the load fails.
+ */
+export function workerTokenizer(): Promise<TokenizerModule> {
+  return new Promise((resolve, reject) => {
+    const worker = new Worker(new URL('./tokenizer.worker.ts', import.meta.url), {
+      type: 'module',
+    });
+    const waiting = new Map<number, { ok(n: number): void; fail(e: Error): void }>();
+    let next = 0;
+    worker.addEventListener('message', (e: MessageEvent) => {
+      const m = e.data as {
+        type: string;
+        id?: number;
+        count?: number;
+        error?: string;
+        message?: string;
+      };
+      if (m.type === 'ready') {
+        resolve({
+          countTokens: (text) =>
+            new Promise<number>((ok, fail) => {
+              const id = next++;
+              waiting.set(id, { ok, fail });
+              worker.postMessage({ id, text });
+            }),
+        });
+      } else if (m.type === 'error') {
+        worker.terminate();
+        reject(new Error(m.message ?? 'The tokenizer could not be loaded.'));
+      } else if (m.type === 'count' && m.id !== undefined) {
+        const w = waiting.get(m.id);
+        waiting.delete(m.id);
+        if (m.error !== undefined || typeof m.count !== 'number')
+          w?.fail(new Error(m.error ?? 'count failed'));
+        else w?.ok(m.count);
+      }
+    });
+    worker.addEventListener('error', (e) => {
+      worker.terminate();
+      reject(new Error(e.message || 'The tokenizer worker failed.'));
+    });
+  });
+}
+
+/** In pages, the worker; elsewhere (tests, very old browsers) this thread. */
+const defaultImporter = (): Promise<TokenizerModule> =>
+  typeof Worker === 'function' && typeof window !== 'undefined'
+    ? workerTokenizer()
+    : importTokenizer();
 
 export interface TokenizerLoader {
   /** Resolves with a counter once the tokenizer is loaded. A failed load is not cached: call again to retry. */
@@ -157,7 +214,7 @@ function isTokenizerModule(m: unknown): m is TokenizerModule {
 }
 
 export function createTokenizerLoader(
-  importer: () => Promise<TokenizerModule> = importTokenizer,
+  importer: () => Promise<TokenizerModule> = defaultImporter,
   /** Imports a module by URL (used to retry a failed chunk under a cache-busting URL). */
   importUrl: (url: string) => Promise<unknown> = (url) => import(/* @vite-ignore */ url),
   origin: string = globalThis.location?.origin ?? '',
@@ -189,7 +246,7 @@ export function createTokenizerLoader(
           // input) instead of throwing, which the library does by default for special tokens.
           const options = { disallowedSpecial: new Set<string>() };
           ready = true;
-          return (text: string) => (text === '' ? 0 : m.countTokens(text, options));
+          return async (text: string) => (text === '' ? 0 : await m.countTokens(text, options));
         },
         (e: unknown) => {
           pending = null;

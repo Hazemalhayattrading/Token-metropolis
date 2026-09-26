@@ -32,6 +32,11 @@ export interface DiscoveryUIOptions {
   platformName?(id: string): string | undefined;
   /** Defaults to the prefers-reduced-motion media query. */
   reducedMotion?: boolean;
+  /**
+   * "Show me" on a detail not found yet: take the visitor to it (and count it found). The path to
+   * the details for keyboard and screen-reader users, who cannot aim at the 3D scene.
+   */
+  onReveal?(id: string): void;
 }
 
 const EDGE = 12;
@@ -99,6 +104,7 @@ interface Row {
   readonly sr: HTMLElement;
   readonly text: HTMLElement;
   readonly meta: HTMLElement;
+  readonly show: HTMLButtonElement | null;
   found: boolean | null;
 }
 
@@ -160,13 +166,29 @@ export function mountDiscoveries(
       const sr = h('span', { class: 'disc-sr' });
       const text = h('span', { class: 'disc__text' });
       const meta = h('span', { class: 'disc__meta' });
+      const show = opts.onReveal
+        ? h(
+            'button',
+            {
+              class: 'disc__show',
+              type: 'button',
+              'aria-label': COPY.discoveries.revealLabel(copyOf(d.id)?.hint ?? d.id),
+            },
+            COPY.discoveries.reveal,
+          )
+        : null;
+      show?.addEventListener('click', () => {
+        closePanel(true);
+        opts.onReveal?.(d.id);
+      });
       const li = h(
         'li',
         { class: 'disc__item', 'data-id': d.id },
         mark,
         h('span', { class: 'disc__body' }, sr, text, meta),
+        show,
       );
-      rows.push({ d, li, mark, sr, text, meta, found: null });
+      rows.push({ d, li, mark, sr, text, meta, show, found: null });
       ul.append(li);
     }
     list.append(
@@ -272,6 +294,7 @@ export function mountDiscoveries(
       const meta = found ? whereLabel(r.d) : '';
       r.meta.textContent = meta;
       r.meta.hidden = meta === '';
+      if (r.show) r.show.hidden = found;
     }
     reset.disabled = count === 0;
     if (count === 0 && !confirm.hidden) hideConfirm(false);

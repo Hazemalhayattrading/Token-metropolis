@@ -172,17 +172,18 @@ describe('the tokenizer', () => {
     expect(loader.ready).toBe(false);
     const count = await loader.load();
     expect(loader.ready).toBe(true);
-    expect(count('')).toBe(0);
-    expect(count('Hello, world!')).toBe(4);
+    expect(await count('')).toBe(0);
+    expect(await count('Hello, world!')).toBe(4);
     // Pasted text containing "<|endoftext|>" is ordinary characters, not a special token.
-    expect(count('<|endoftext|> hi')).toBeGreaterThan(2);
+    expect(await count('<|endoftext|> hi')).toBeGreaterThan(2);
     // Unicode, emoji and a lone surrogate all count.
-    expect(count('Naïve café — 東京 🚀')).toBeGreaterThan(5);
-    expect(count(`a${'\uD83D'}b`)).toBeGreaterThan(0);
+    expect(await count('Naïve café — 東京 🚀')).toBeGreaterThan(5);
+    expect(await count(`a${'\uD83D'}b`)).toBeGreaterThan(0);
     // A full box counts in one go.
     const long = 'The quick brown fox jumps over the lazy dog. '.repeat(450).slice(0, 20_000);
-    expect(count(long)).toBeGreaterThan(3000);
-    expect(count(long)).toBeLessThan(20_000);
+    const n = await count(long);
+    expect(n).toBeGreaterThan(3000);
+    expect(n).toBeLessThan(20_000);
   });
 
   it('loads once and shares the counter', async () => {
@@ -195,7 +196,7 @@ describe('the tokenizer', () => {
     const [a, b] = await Promise.all([loader.load(), loader.load()]);
     expect(a).toBe(b);
     expect(calls).toBe(1);
-    expect(a('abc')).toBe(3);
+    expect(await a('abc')).toBe(3);
   });
 
   it('retries a failed chunk under a fresh URL when the browser named it', async () => {
@@ -214,7 +215,7 @@ describe('the tokenizer', () => {
     expect(loader.failures).toBe(1);
     const count = await loader.load();
     expect(urls).toEqual([`${chunk}?retry=1`]); // browsers remember a failed URL: ask anew
-    expect(count('x')).toBe(5);
+    expect(await count('x')).toBe(5);
   });
 
   it('names the failed chunk only for same-origin scripts', () => {
@@ -243,7 +244,7 @@ describe('the tokenizer', () => {
     expect(loader.ready).toBe(false);
     const count = await loader.load();
     expect(calls).toBe(2);
-    expect(count('anything')).toBe(7);
+    expect(await count('anything')).toBe(7);
     expect(loader.ready).toBe(true);
   });
 });

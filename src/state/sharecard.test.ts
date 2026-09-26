@@ -100,5 +100,7 @@ describe('shareCardText', () => {
     const t = now - 0.1; // earlier today, in the time machine
     const card = shareCardText(city, { t, liveNow: now, history: true, platformId: 'claude' });
     expect(card.stats[0]!.label).toBe(COPY.time.panelDaySoFar('2026-09-25'));
+    const whole = shareCardText(city, { t, liveNow: now, history: true, platformId: null });
+    expect(whole.stats[0]!.label).toBe(COPY.time.todayLabelHistorySoFar('2026-09-25'));
   });
 });

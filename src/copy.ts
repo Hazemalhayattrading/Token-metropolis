@@ -184,6 +184,8 @@ export const COPY = {
       'Past days are read from the same growth curves as today: figures before a platform’s first published number are modeled, and ranges are wider.',
     date: (iso: string) => iso,
     todayLabelHistory: (date: string) => `Tokens processed on ${date}`,
+    /** The date shown is today (in the time machine): the day is not over yet. */
+    todayLabelHistorySoFar: (date: string) => `Tokens processed on ${date} so far`,
     todayQualifierHistory: 'all 15 platforms · the whole UTC day · estimate',
     rateLabelHistory: 'At the time shown',
     todayQualifierSoFar: 'all 15 platforms · 00:00 UTC to now · estimate',
@@ -267,7 +269,7 @@ export const COPY = {
     tokenizerLibrary: 'gpt-tokenizer, the JavaScript port used here',
     hqLabel: 'Send it to',
     sameForEveryHq:
-      'The figures are the same for every HQ: we use one hardware-efficiency figure for all of them, because none publishes its own.',
+      'The figures are the same for every HQ: we use one H100-class efficiency figure for all of them. Most publish nothing comparable; the few published figures (DeepSeek, Google, OpenAI) set its range.',
     results: 'What this prompt takes',
     energy: 'Energy',
     water: 'On-site cooling water',
@@ -275,8 +277,9 @@ export const COPY = {
     waterUnit: 'mL',
     noValue: '—',
     resultsEmpty: 'Energy and water appear here once your text is counted.',
-    scope:
-      'Only the tokens you typed. A real request also carries instructions and chat history, and the reply adds its own tokens: a typical chat request is 2,000–3,000 tokens in all. Water is on-site cooling only, not the water used to make the electricity.',
+    /** What the figures cover; the typical request size is the model's own assumption. */
+    scope: (central: string, low: string, high: string, tier: string) =>
+      `Only the tokens you typed. A real request also carries instructions and chat history, and the reply adds its own tokens: we assume a typical chat request is about ${central} tokens in all (${low}–${high}, ${tier}). Water is on-site cooling only, not the water used to make the electricity.`,
     formula: 'How it is calculated',
     energyFormula: (formula: string) => `Energy (Wh) = ${formula}`,
     waterFormula: (formula: string) => `Water (mL) = ${formula}`,
@@ -326,7 +329,7 @@ export const COPY = {
         'Frost: how firm the evidence is. Clear for Reported, frosted for Estimated, foggy for Modeled.',
     },
     rangeNote:
-      'A plausible range is roughly a 90% interval from our model, not a hard limit. The glass uses the same height scale as the towers (log or true).',
+      'A plausible range is roughly a 90% interval from our model, not a hard limit. The glass uses the same height scale as the towers (log or true); a range that reaches below the scale’s lowest height runs down to the ground, with no solid core.',
   },
   // ---- M6: sound (src/audio/sound.ts) — owned by that module's builder
   sound: {
@@ -407,6 +410,8 @@ export const COPY = {
     closing: (perDay: string) => `The whole city: about ${perDay} tokens a day`,
     /** What screen readers hear for a caption that states a number (the tier follows it). */
     spoken: (caption: string, tier: string) => `${caption} (${tier})`,
+    /** Heard once, with the first caption; later captions are not announced. */
+    spokenStart: 'Cinematic tour started; press any key to stop it.',
   },
   // ---- M6: discoveries (src/state/discoveries.ts, src/ui/discoveries.ts) — owned by that module's builder
   discoveries: {
@@ -436,6 +441,9 @@ export const COPY = {
     resetYes: 'Yes, reset',
     resetNo: 'Cancel',
     resetDone: 'Progress reset.',
+    /** Keyboard path: take me to a detail not found yet (it then counts as found). */
+    reveal: 'Show me',
+    revealLabel: (hint: string) => `Show me this detail: ${hint}`,
     /** Group headings in the list. */
     where: {
       city: 'Around the island',
@@ -647,13 +655,19 @@ export const COPY = {
     remove: (name: string) => `Remove ${name} from the comparison`,
     close: 'Close compare',
     hint: 'Pick two or three platforms to see their campuses side by side.',
-    scaleNote: 'Towers keep the city’s current scale (log or true).',
+    /** The button that adds the platform chosen in the list. */
+    addButton: 'Add',
+    /** Each column's platform name opens its HQ panel (and leaves compare). */
+    openHq: (name: string) => `Open ${name}’s panel (leaves compare)`,
+    scaleNote:
+      'Towers keep the city’s current scale (log or true) and share one framing, so their heights compare. GPUs, power and water use one H100-class efficiency figure for every HQ.',
+    method: 'How we estimate',
     rows: {
       perDay: 'Daily rate',
       now: 'Right now',
       nowHistory: 'At the time shown',
       total: 'Since launch',
-      gpus: 'GPU equivalents',
+      gpus: 'GPU equivalents (H100-class)',
       power: 'Power',
       water: 'Cooling water',
       latest: 'Latest published figure',

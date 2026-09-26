@@ -382,11 +382,22 @@ describe('createIdleTimer', () => {
   it('ignores events that are not activity', () => {
     const { onIdle, timer, poke } = setup();
     vi.advanceTimersByTime(20_000);
-    poke('scroll');
-    poke('focusin');
+    poke('resize');
+    poke('mouseover');
     vi.advanceTimersByTime(10_000);
     expect(onIdle).toHaveBeenCalledTimes(1);
     timer.dispose();
+  });
+
+  it('counts focus moves and scrolling as activity (screen-reader reading, page scrolls)', () => {
+    for (const type of ['focusin', 'scroll']) {
+      const { onIdle, timer, poke } = setup();
+      vi.advanceTimersByTime(20_000);
+      poke(type);
+      vi.advanceTimersByTime(20_000);
+      expect(onIdle, type).not.toHaveBeenCalled();
+      timer.dispose();
+    }
   });
 
   it('calls onActive on the next activity after idle, then counts down again', () => {

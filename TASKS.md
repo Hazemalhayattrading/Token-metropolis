@@ -162,8 +162,12 @@ discoveries + tracker + share card). Integration hooks already on the branch: `c
       left the last HQ highlighted.
 - [x] E2E: glass, incidents, sound, tour, prompt (count, tiers, send + landing), hidden details
       (stored progress, list, reset), share (city + HQ).
-- [ ] Final M6 screenshots (desktop + mobile) and second art pass over every M6 feature.
-- [ ] Full multi-agent review (4 dimensions + adversarial verify, D-051); fix findings; push.
+- [x] Final M6 screenshots (desktop + mobile) and second art pass over every M6 feature.
+- [x] Full multi-agent review (4 dimensions + adversarial verify, D-051): 40 findings, 34 survived
+      verification, all fixed (D-067): compare framing/min-two/Add button/scope/figure, overlay
+      layering at 390/1024/1440, tour etiquette, prompt worker tokenizer and send guards, glass
+      floor, alarm rule, keyboard "Show me" path for hidden details, idle-built props, shader
+      pre-compilation, focus fallbacks.
 
 ## Milestone 7 — data pipeline (done; review fixes applied)
 
@@ -185,6 +189,22 @@ logged; commits only on change → Pages redeploys; no secrets; `UPDATING.md` co
       push race, maintenance start/impact, synthetic test fixtures, deploy retry).
 - [ ] Not verifiable here: live fetches (the sandbox proxy answers 403 to every feed). First real
       run happens on GitHub after merge to `main`; check its "Data update" summary.
+
+## Milestone 8 — polish & hardening (next)
+
+Definition of done (brief §7, §10): adaptive quality governor (frame-time driven: pixel ratio,
+bloom, effects); 60 fps desktop / 30 fps phone targets (measure what can be measured here);
+fallbacks (no WebGL, reduced motion = calm mode, offline/failed fetch, tab hidden, resize,
+long names); accessibility pass (keyboard + screen reader through the data view, AA contrast,
+visible focus); in-site methodology page mirroring METHODOLOGY.md, with every "How we estimate"
+link pointing to it; Lighthouse ≥ 90 on Performance (2D view), Accessibility, Best Practices, SEO;
+copy review; final art passes; README; full multi-agent review (D-051).
+
+Known items to fold in:
+
+- Mobile HUD hides `.counter__range` (plausible range under the big counter) — show it.
+- `src/ui/links.ts` METHODOLOGY_URL → the in-site page.
+- Final summary per platform: what is Reported vs Estimated vs Modeled; known limitations.
 
 ## Blocked (needs the owner)
 

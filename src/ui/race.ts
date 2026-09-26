@@ -17,6 +17,7 @@ import { barFraction, raceRows, raceScale, whiskerSpan, type RaceRow } from '../
 import { tierBadge } from './badge';
 import { h } from './dom';
 import { humanNumber } from './format';
+import { METHODOLOGY_URL } from './links';
 
 export interface Race {
   readonly open: boolean;
@@ -49,9 +50,6 @@ interface RowView {
 let uid = 0;
 
 const pct = (f: number) => `${(f * 100).toFixed(2)}%`;
-
-const METHODOLOGY_URL =
-  'https://github.com/Hazemalhayattrading/Token-metropolis/blob/main/METHODOLOGY.md';
 
 function makeRow(
   id: string,

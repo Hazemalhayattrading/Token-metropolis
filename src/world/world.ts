@@ -33,7 +33,7 @@ import type { Clock } from '../state/clock';
 import { daylight, localHour, occupancy } from '../state/localtime';
 import { humanNumber } from '../ui/format';
 import { createCampus, type Campus } from './campus/campus';
-import { createDiscoveryProps, type DiscoveryProps } from './discoveries';
+import type { DiscoveryProps } from './discoveries';
 import { CameraDirector, type Pose } from './director';
 import { createEnvironment, MOON_DIRECTION } from './environment';
 import type { InteriorView, Interiors } from './interiors';
@@ -46,7 +46,7 @@ import { createUncertaintyGlass, type UncertaintyGlass } from './uncertainty';
 import { createLabels, type LabelValue, type Labels } from './labels';
 import { ISLAND_RADIUS, layoutPlots } from './layout';
 import { createPost, type Post } from './post';
-import { facilityCounts, logLoad, towerHeight, type ScaleMode } from './scale';
+import { belowFloor, facilityCounts, logLoad, towerHeight, type ScaleMode } from './scale';
 import { createStreams, type Streams } from './streams';
 
 export interface World {
@@ -80,6 +80,11 @@ export interface World {
    * e.g. the Send button) into its server hall and light the racks. Resolves on landing.
    */
   sendToken(platformId: string, origin?: { readonly x: number; readonly y: number }): Promise<void>;
+  /**
+   * Fly the camera to one of the island's hidden details (the keyboard path to finding them).
+   * False when it is not an island detail or the props are not built yet.
+   */
+  revealDiscovery(id: string): boolean;
   readonly view: InteriorView;
   dispose(): void;
 }
@@ -202,26 +207,69 @@ export function createWorld(
   let scaleMode: ScaleMode = 'log';
   let view: InteriorView = 'overview';
   let interiors: Interiors | null = null;
+  let disposed = false;
   /**
    * The 40 hidden details (src/state/discoveries.ts): island props, plus props added to each
-   * interior as it is built. Created shortly after the first frames (~50 ms of work), so they
-   * never delay the first picture of the city.
+   * interior as it is built. Their module is its own chunk, fetched after the first frames; the
+   * props (~100 ms of geometry work on a desktop) are built in an idle slot and their shaders
+   * compiled before they join the scene, so the opening flight never stalls.
    */
   let discoveries: DiscoveryProps | null = null;
+  let propsScheduled = false;
   const propHours = new Map<string, number>();
   const propLoads = new Map<string, number>();
-  const createProps = () => {
-    discoveries = createDiscoveryProps({
-      campuses: [...slots.values()].map(({ campus: c }) => ({
-        id: c.id,
-        group: c.group,
-        footprint: c.footprint,
-      })),
-      islandRadius: ISLAND_RADIUS,
-      reducedMotion: opts.reducedMotion,
-    });
-    scene.add(discoveries.group);
+  const whenIdle = (cb: () => void): void => {
+    // Safari has no requestIdleCallback.
+    if (typeof globalThis.requestIdleCallback === 'function')
+      globalThis.requestIdleCallback(cb, { timeout: 3000 });
+    else globalThis.setTimeout(cb, 300);
   };
+  const scheduleProps = () => {
+    propsScheduled = true;
+    void import('./discoveries').then((mod) =>
+      whenIdle(() => {
+        if (disposed) return;
+        const props = mod.createDiscoveryProps({
+          campuses: [...slots.values()].map(({ campus: c }) => ({
+            id: c.id,
+            group: c.group,
+            footprint: c.footprint,
+          })),
+          islandRadius: ISLAND_RADIUS,
+          reducedMotion: opts.reducedMotion,
+        });
+        void precompile(props.group).then(() => {
+          if (disposed) return props.dispose();
+          discoveries = props;
+          scene.add(props.group);
+        });
+      }),
+    );
+  };
+
+  /**
+   * Compile an object's shaders before it first shows — in parallel with rendering where the GPU
+   * allows it — so its first appearance does not stall a frame. Hidden objects are made visible
+   * only for the (synchronous) collection of their programs.
+   */
+  function precompile(obj: Object3D): Promise<void> {
+    const was = obj.visible;
+    obj.visible = true;
+    let done: Promise<unknown>;
+    try {
+      done = renderer.extensions.has('KHR_parallel_shader_compile')
+        ? renderer.compileAsync(obj, camera, scene)
+        : Promise.resolve(renderer.compile(obj, camera, scene));
+    } catch {
+      done = Promise.resolve();
+    } finally {
+      obj.visible = was;
+    }
+    return done.then(
+      () => undefined,
+      () => undefined,
+    );
+  }
   let interiorsModule: Promise<typeof import('./interiors')> | null = null;
   let interiorsLib: typeof import('./interiors') | null = null;
   /** What the open interiors were built for (rebuilt when the date shown changes them). */
@@ -253,11 +301,15 @@ export function createWorld(
     return { position, target };
   }
 
-  /** @param compact tighter framing for narrow compare columns (their FOV already widens). */
-  function campusPose(id: string, aspect = camera.aspect, compact = false): Pose {
+  /**
+   * The usual viewpoint on one campus. `compact`: tighter framing for narrow compare columns
+   * (their FOV already widens). `height` overrides the tower height it frames (compare mode
+   * frames every column for the tallest compared tower, so heights compare across columns).
+   */
+  function campusPose(id: string, aspect = camera.aspect, compact = false, height?: number): Pose {
     const c = slots.get(id)!.campus;
     const base = c.group.position;
-    const h = Math.max(c.currentHeight, 6);
+    const h = Math.max(height ?? c.currentHeight, 6);
     const portrait = aspect < 1;
     const target = new Vector3(base.x, h * (portrait ? 0.38 : 0.45), base.z);
     const out = new Vector3(base.x, 0, base.z).normalize();
@@ -357,9 +409,12 @@ export function createWorld(
     if (!compare) return;
     const { clientWidth: w, clientHeight: h } = canvas;
     const n = compare.views.length;
+    // One framing for every column (the tallest compared tower), so one world unit is the same
+    // on screen in each column and the ground lines up: the towers' heights stay comparable.
+    const shared = Math.max(...compare.views.map((v) => slots.get(v.id)!.campus.currentHeight));
     compare.views.forEach((v, i) => {
       if (!opts.reducedMotion) v.angle += dt * 0.05;
-      const pose = campusPose(v.id, v.camera.aspect, true);
+      const pose = campusPose(v.id, v.camera.aspect, true, shared);
       const offset = pose.position.clone().sub(pose.target).applyAxisAngle(UP, v.angle);
       v.camera.position.copy(pose.target).add(offset);
       v.camera.lookAt(pose.target);
@@ -678,7 +733,11 @@ export function createWorld(
       rates.set(pm.platform.id, range.central);
       maxRate = Math.max(maxRate, range.central);
     }
-    if (!discoveries && elapsed > 0.5) createProps();
+    if (!propsScheduled && elapsed > 0.5) {
+      scheduleProps();
+      // Alarm beacons only show during incidents: compile them now, while nothing depends on it.
+      for (const s of slots.values()) void precompile(s.alarm.group);
+    }
     let activitySum = 0;
     let rateSum = 0;
     for (const pm of city.platforms) {
@@ -731,14 +790,17 @@ export function createWorld(
         height: slot.campus.currentHeight,
         reducedMotion: opts.reducedMotion,
       });
-      // Uncertainty glass: the plausible range on the towers' own height scale.
-      const glassShown = glassOn && view === 'overview' && !away && rate > 0;
+      // Uncertainty glass: the plausible range on the towers' own height scale. Not in compare
+      // columns, whose overlay has no room for its legend.
+      const glassShown = glassOn && view === 'overview' && !away && rate > 0 && !compare;
       slot.glass.group.visible = glassShown;
       slot.campus.setGlassMode(glassShown);
       if (glassShown) {
         const r = ranges.get(id)!;
         slot.glass.update({
-          low: towerHeight(r.low, scaleMode, maxRate),
+          // A range reaching below the scale's floor runs down to the ground (no solid core):
+          // drawing its low end at the floor would make the least certain towers look precise.
+          low: belowFloor(r.low, scaleMode, maxRate) ? 0 : towerHeight(r.low, scaleMode, maxRate),
           central: towerHeight(r.central, scaleMode, maxRate),
           high: towerHeight(r.high, scaleMode, maxRate),
           tier: tiers.get(id) ?? 'modeled',
@@ -899,11 +961,18 @@ export function createWorld(
     async sendToken(platformId, origin) {
       const slot = slots.get(platformId);
       if (!slot || compare) return;
-      // Frame the hall where the token lands first (interior views keep their camera).
+      // Only to a campus that is on screen: not one that has not launched at the date shown, nor
+      // another HQ while an interior is open (the caller returns to the overview first).
+      if (!(dailyRate(city.byId.get(platformId)!, clock.now()).central > 0)) return;
+      if (view !== 'overview' && selected !== platformId) return;
+      // Frame the hall where the token lands first (interior views keep their camera), compiling
+      // the flight's shaders during the approach so the liftoff does not stall.
+      const ready = precompile(tokenFlight.group);
       if (view === 'overview') {
         controls.autoRotate = false;
         await director.flyTo(sendPose(platformId), 1.2);
       }
+      await ready;
       const rect = canvas.getBoundingClientRect();
       const o = origin ?? { x: rect.left + rect.width / 2, y: rect.top + rect.height * 0.8 };
       const from = screenToWorld(camera, rect, o.x, o.y, 6);
@@ -913,9 +982,27 @@ export function createWorld(
       await tokenFlight.launch(from, to, { color: accent });
       slot.campus.pulseHall();
     },
+    revealDiscovery(id) {
+      const target = discoveries?.pickables.find((o) => o.userData.discoveryId === id);
+      if (!target || compare || view !== 'overview') return false;
+      const p = new Vector3();
+      target.getWorldPosition(p);
+      // From further out (over the sea for shore details), looking back at the detail.
+      const out = new Vector3(p.x, 0, p.z);
+      if (out.lengthSq() < 1) out.set(0, 0, 1);
+      out.normalize();
+      const position = p
+        .clone()
+        .addScaledVector(out, 14)
+        .add(new Vector3(0, 6, 0));
+      controls.autoRotate = false;
+      void director.flyTo({ position, target: p.clone() }, 1.6);
+      return true;
+    },
     setIncidents(active) {
       incidents = active;
-      opts.sound?.alarm(active.size > 0);
+      // The tone is for outages: not for maintenance (which the beacons also treat as calm).
+      opts.sound?.alarm([...active.values()].some((i) => incidentSeverity(i.impact) >= 2));
     },
     setGlass(on) {
       if (on && !glassOn) compileGlass = true;
@@ -953,6 +1040,7 @@ export function createWorld(
       controls.dispose();
       labels.dispose();
       disposeCompare();
+      disposed = true;
       closeInteriors();
       discoveries?.dispose();
       tokenFlight.dispose();

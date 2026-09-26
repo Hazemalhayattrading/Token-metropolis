@@ -81,7 +81,11 @@ export function shareCardText(city: City, v: CardView): CardText {
       subtitle,
       stats: [
         stat(
-          history ? COPY.time.todayLabelHistory(date) : COPY.hud.todayLabel,
+          history
+            ? soFar
+              ? COPY.time.todayLabelHistorySoFar(date)
+              : COPY.time.todayLabelHistory(date)
+            : COPY.hud.todayLabel,
           globalBetween(city.platforms, dayStart, end),
           iTier,
         ),

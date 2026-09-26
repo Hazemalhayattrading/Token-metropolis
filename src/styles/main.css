@@ -27,6 +27,9 @@
   --blur: 14px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --footer-h: 44px;
+  /* set from the real layout by main.ts (the control row wraps on narrower desktops) */
+  --controls-h: 38px;
+  --hud-h: 280px;
 
   color-scheme: dark;
 }
@@ -1018,7 +1021,8 @@ a {
   position: absolute;
   right: var(--gap);
   top: calc(var(--gap) + 232px);
-  bottom: calc(var(--footer-h) + var(--gap) + 72px);
+  /* above the control row, which can reach this far right */
+  bottom: calc(var(--footer-h) + var(--gap) + 86px + var(--controls-h));
   width: min(380px, calc(100vw - 2 * var(--gap)));
   z-index: 5;
 }
@@ -1028,7 +1032,7 @@ a {
 .toasts-root {
   position: absolute;
   left: var(--gap);
-  bottom: calc(var(--footer-h) + var(--gap) + 124px);
+  bottom: calc(var(--footer-h) + var(--gap) + 86px + var(--controls-h));
   width: min(320px, calc(100vw - 2 * var(--gap)));
   z-index: 6;
   pointer-events: none;
@@ -1242,6 +1246,25 @@ a {
   transform: translateX(-50%);
   z-index: 7;
 }
+/* beside an open HQ panel: in the space between the panel and the HUD */
+.panel-open .incidents-root {
+  left: calc(var(--gap) * 2 + 420px);
+  width: min(560px, calc(100vw - 3 * var(--gap) - 820px));
+  min-width: 300px;
+  transform: none;
+}
+/* narrower desktops: no room between the masthead and the HUD, so below the HUD */
+@media (min-width: 721px) and (max-width: 1183px) {
+  .incidents-root,
+  .panel-open .incidents-root {
+    top: calc(var(--gap) + var(--hud-h) + 12px);
+    left: auto;
+    right: var(--gap);
+    width: min(400px, calc(100vw - 2 * var(--gap)));
+    min-width: 0;
+    transform: none;
+  }
+}
 .incidents-root:empty {
   display: none;
 }
@@ -1261,7 +1284,7 @@ a {
 .prompt-root {
   position: absolute;
   top: calc(var(--gap) + env(safe-area-inset-top));
-  bottom: calc(var(--footer-h) + var(--gap) + 124px);
+  bottom: calc(var(--footer-h) + var(--gap) + 86px + var(--controls-h));
   left: 50%;
   width: min(480px, calc(100vw - 2 * var(--gap)));
   display: flex;
@@ -1335,7 +1358,7 @@ a {
   position: absolute;
   right: var(--gap);
   /* above the control row, which can reach this far right */
-  bottom: calc(var(--footer-h) + var(--gap) + 124px);
+  bottom: calc(var(--footer-h) + var(--gap) + 86px + var(--controls-h));
   width: min(300px, calc(100vw - 2 * var(--gap)));
   z-index: 4;
 }
@@ -1443,4 +1466,12 @@ a {
 .segmented__option,
 .control-button {
   white-space: nowrap;
+}
+
+/* Up to narrow desktops the incident banner and the glass legend share the right-hand strip:
+   while a notice shows (it can be dismissed), the legend steps aside. */
+@media (max-width: 1183px) {
+  html:has(.incidents:not([hidden])) .glass-legend {
+    display: none;
+  }
 }

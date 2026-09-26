@@ -1,8 +1,9 @@
 /**
  * Compare mode (brief §5.3 item 7): two or three platforms side by side. The
  * world renders one viewport per campus; this overlay puts a header and a
- * metrics card over each viewport column — every figure with its range, tier
- * and (for the latest published figure) its source.
+ * metrics card over each viewport column — every figure with its range and
+ * tier, the HQ's scope, and the latest published figure (what it is, when,
+ * who published it). Each HQ name opens that HQ's panel with every formula.
  */
 import { COPY } from '../copy';
 import { isDisplayable } from '../model/constants';
@@ -22,9 +23,12 @@ import type { City } from '../state/city';
 import type { Clock } from '../state/clock';
 import { tierBadge } from './badge';
 import { h } from './dom';
-import { humanNumber } from './format';
+import { describeValue, formatMW, humanNumber } from './format';
+import { METHODOLOGY_URL } from './links';
 
 export const COMPARE_MAX = 3;
+/** A comparison needs two platforms: fewer, and the columns lose their remove buttons. */
+export const COMPARE_MIN = 2;
 
 export interface Compare {
   readonly open: boolean;
@@ -38,6 +42,8 @@ export interface Compare {
 export interface CompareOptions {
   onChange(ids: readonly string[]): void;
   onClose(): void;
+  /** The visitor chose an HQ's name: leave compare and open its panel. */
+  onOpenHq(id: string): void;
   history: () => boolean;
 }
 
@@ -46,8 +52,6 @@ interface Cell {
   range: HTMLElement;
   badge: HTMLElement;
 }
-
-const mw = (n: number) => (n < 10 ? n.toFixed(n < 1 ? 2 : 1) : humanNumber(n));
 
 function setCell(
   c: Cell,
@@ -79,7 +83,9 @@ export function mountCompare(
   let lastUpdate = 0;
   let returnFocus: HTMLElement | null = null;
 
+  // Choosing in the list only selects; the Add button commits (arrow keys never add a column).
   const picker = h('select', { class: 'compare__picker', 'aria-label': COPY.compare.addLabel });
+  const add = h('button', { class: 'compare__add', type: 'button' }, COPY.compare.addButton);
   const close = h(
     'button',
     { class: 'compare__close', type: 'button', 'aria-label': COPY.compare.close },
@@ -91,7 +97,13 @@ export function mountCompare(
     { class: 'compare__bar' },
     h('h2', { class: 'compare__title' }, COPY.compare.title),
     picker,
+    add,
     h('p', { class: 'compare__note' }, COPY.compare.scaleNote),
+    h(
+      'a',
+      { class: 'compare__method', href: METHODOLOGY_URL, rel: 'noopener' },
+      COPY.compare.method,
+    ),
     close,
   );
   const panel = h('section', { class: 'compare', 'aria-label': COPY.compare.title }, bar, grid);
@@ -105,6 +117,11 @@ export function mountCompare(
         .map((pm) => h('option', { value: pm.platform.id }, pm.platform.name)),
     );
     picker.disabled = ids.length >= COMPARE_MAX;
+    syncAdd();
+  }
+
+  function syncAdd(): void {
+    add.disabled = picker.disabled || picker.value === '';
   }
 
   function metric(label: string, id: string, key: string): HTMLElement {
@@ -135,10 +152,27 @@ export function mountCompare(
         cells.set(id, {});
         const remove = h(
           'button',
-          { class: 'compare__remove', type: 'button', 'aria-label': COPY.compare.remove(p.name) },
+          {
+            class: 'compare__remove',
+            type: 'button',
+            'aria-label': COPY.compare.remove(p.name),
+            'data-remove': id,
+            disabled: ids.length <= COMPARE_MIN,
+          },
           '×',
         );
-        remove.addEventListener('click', () => setIds(ids.filter((x) => x !== id)));
+        remove.addEventListener('click', () => removeId(id));
+        const name = h(
+          'button',
+          {
+            class: 'compare__name-button',
+            type: 'button',
+            title: COPY.compare.openHq(p.name),
+            'data-open': id,
+          },
+          p.name,
+        );
+        name.addEventListener('click', () => opts.onOpenHq(id));
         const latest = h('p', { class: 'compare__latest' });
         latestEls.set(id, latest);
         return h(
@@ -148,12 +182,13 @@ export function mountCompare(
             'header',
             { class: 'compare__head' },
             h('span', { class: 'compare__swatch', 'aria-hidden': 'true' }),
-            h('h3', { class: 'compare__name' }, p.name),
+            h('h3', { class: 'compare__name' }, name),
             remove,
           ),
           h(
             'div',
             { class: 'compare__card' },
+            h('p', { class: 'compare__scope', title: p.scope }, p.scope),
             h(
               'dl',
               { class: 'compare__metrics' },
@@ -181,6 +216,29 @@ export function mountCompare(
     opts.onChange(ids);
   }
 
+  /** Remove a column (never below two) and keep keyboard focus in the overlay. */
+  function removeId(id: string): void {
+    if (ids.length <= COMPARE_MIN) return;
+    const at = ids.indexOf(id);
+    setIds(ids.filter((x) => x !== id));
+    const next = ids[Math.min(at, ids.length - 1)];
+    const target =
+      grid.querySelector<HTMLElement>(`[data-open="${next}"]`) ??
+      (picker.disabled ? close : picker);
+    target.focus({ preventScroll: true });
+  }
+
+  function addPicked(): void {
+    const id = picker.value;
+    if (!id || ids.length >= COMPARE_MAX) return;
+    setIds([...ids, id]);
+    // The list disables itself at three columns: never leave focus on a disabled control.
+    (picker.disabled
+      ? (grid.querySelector<HTMLElement>(`[data-open="${id}"]`) ?? close)
+      : picker
+    ).focus({ preventScroll: true });
+  }
+
   function update(): void {
     if (!isOpen) return;
     const nowMs = performance.now();
@@ -196,7 +254,9 @@ export function mountCompare(
       const day = dailyRate(pm, t);
       if (!(day.central > 0)) {
         for (const cell of Object.values(c)) setCell(cell, COPY.race.notLaunched, null, null);
-        latestEls.get(id)!.textContent = '—';
+        const el = latestEls.get(id)!;
+        el.textContent = '—';
+        el.dataset.key = 'not-launched'; // so the figure comes back once the HQ has launched
         continue;
       }
       const tier = rateTier(pm, t);
@@ -209,7 +269,7 @@ export function mountCompare(
       setCell(c.now!, `${humanNumber(tps.central)}/s`, tps, instantTier(pm, t));
       setCell(c.total!, humanNumber(cum.central), cum, cumulativeTier(pm, t));
       setCell(c.gpus!, humanNumber(g.range.central), g.range, g.tier);
-      setCell(c.power!, `${mw(p.range.central)} MW`, p.range, p.tier, mw);
+      setCell(c.power!, `${formatMW(p.range.central)} MW`, p.range, p.tier, formatMW);
       if (isDisplayable(w.refs))
         setCell(c.water!, `${humanNumber(w.range.central)} L/day`, w.range, w.tier);
       const a = latestAnchor(pm, t);
@@ -218,17 +278,21 @@ export function mountCompare(
       const key = a ? `${a.refs[0] ?? ''}@${a.t}` : 'none';
       if (el.dataset.key !== key) {
         el.dataset.key = key;
+        // What was published (often users or revenue, not tokens), its tier, when and by whom.
         el.replaceChildren(
           ...(m && a
             ? [
+                h('span', { class: 'compare__figure', title: m.scope }, describeValue(m)),
+                ' ',
+                tierBadge(m.sourceKind === 'primary' ? 'reported' : 'derived'),
+                h('br'),
                 `${daysToIso(a.t)} · `,
                 h(
                   'a',
                   { href: m.source.url, rel: 'noopener nofollow', target: '_blank' },
                   m.source.publisher,
                 ),
-                ' ',
-                tierBadge(m.sourceKind === 'primary' ? 'reported' : 'derived'),
+                m.verified === 'snippet' ? ` · ${COPY.panel.snippet}` : '',
               ]
             : ['—']),
         );
@@ -236,17 +300,15 @@ export function mountCompare(
     }
   }
 
-  picker.addEventListener('change', () => {
-    if (picker.value) setIds([...ids, picker.value]);
-    picker.value = '';
-  });
+  picker.addEventListener('change', syncAdd);
+  add.addEventListener('click', addPicked);
   close.addEventListener('click', () => opts.onClose());
-  panel.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      e.stopPropagation();
-      opts.onClose();
-    }
-  });
+  // Escape closes compare wherever focus is (the overlay is the whole screen while open).
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key !== 'Escape' || !isOpen || e.defaultPrevented) return;
+    e.stopPropagation();
+    opts.onClose();
+  };
 
   return {
     get open() {
@@ -260,17 +322,20 @@ export function mountCompare(
       returnFocus = active instanceof HTMLElement ? active : null;
       isOpen = true;
       root.hidden = false;
+      document.addEventListener('keydown', onKey);
       setIds(initial);
       requestAnimationFrame(() => picker.focus({ preventScroll: true }));
     },
     hide() {
       isOpen = false;
       root.hidden = true;
+      document.removeEventListener('keydown', onKey);
       if (returnFocus?.isConnected) returnFocus.focus({ preventScroll: true });
       returnFocus = null;
     },
     update,
     dispose() {
+      document.removeEventListener('keydown', onKey);
       root.replaceChildren();
     },
   };

@@ -35,8 +35,9 @@ import { LAB_MAX, labLineup, releasedBy } from '../world/interiors/lineup';
 import { DESK_BANDS, deskTier, logLoad, tokensAtLoad } from '../world/scale';
 import { tierBadge, uncheckedBadge } from './badge';
 import { byId, h } from './dom';
-import { describeValue, fullNumber, humanNumber } from './format';
+import { describeValue, formatMW, fullNumber, humanNumber } from './format';
 import { createGauge, decadeScale, type Gauge } from './gauge';
+import { METHODOLOGY_URL } from './links';
 
 export interface PanelCallbacks {
   onClose(): void;
@@ -59,8 +60,6 @@ export interface Panel {
 }
 
 const VIEWS: readonly InteriorView[] = ['overview', 'offices', 'hall', 'power', 'lab'];
-const METHODOLOGY_URL =
-  'https://github.com/Hazemalhayattrading/Token-metropolis/blob/main/METHODOLOGY.md';
 
 interface Row {
   label: HTMLElement;
@@ -117,7 +116,7 @@ function setRow(
   setBadge(r.badge, tier);
 }
 
-const mwText = (n: number) => (n < 10 ? n.toFixed(n < 1 ? 2 : 1) : fullNumber(Math.round(n)));
+const mwText = formatMW;
 
 function link(url: string, text: string): HTMLAnchorElement {
   return h('a', { href: url, rel: 'noopener nofollow', target: '_blank' }, text);

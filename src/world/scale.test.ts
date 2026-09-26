@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { layoutPlots, ISLAND_RADIUS } from './layout';
 import {
+  belowFloor,
   DESK_BANDS,
   deskTier,
   facilityCounts,
@@ -89,5 +90,15 @@ describe('desk bands', () => {
     expect(deskTier(DESK_BANDS[0])).toBe(1);
     expect(deskTier(DESK_BANDS[1])).toBe(2);
     expect(deskTier(1)).toBe(2);
+  });
+});
+
+describe('belowFloor', () => {
+  it('knows when a value is drawn at the scale floor rather than its own height', () => {
+    expect(belowFloor(5e9, 'log', 1e15)).toBe(true); // under 10 billion/day
+    expect(belowFloor(2e10, 'log', 1e15)).toBe(false);
+    expect(belowFloor(1e12, 'true', 3e14)).toBe(true); // 44 × 1e12 / 3e14 = 0.15 < 0.35
+    expect(belowFloor(1e14, 'true', 3e14)).toBe(false);
+    expect(belowFloor(0, 'log', 1e15)).toBe(true);
   });
 });

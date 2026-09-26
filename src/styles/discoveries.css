@@ -91,7 +91,7 @@
 
 /* while the list is open, the control row paints above the toasts and sheets */
 .controls:has(.disc__panel:not([hidden])) {
-  z-index: 7;
+  z-index: 12;
 }
 
 /* --- list ------------------------------------------------------------------- */
@@ -248,7 +248,7 @@
 }
 .disc__item {
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr);
+  grid-template-columns: 20px minmax(0, 1fr) auto;
   align-items: start;
   gap: 8px;
   padding: 4px 0;
@@ -383,7 +383,7 @@
   position: fixed;
   left: 50%;
   /* above the control row and the time machine, level with the launch toasts (main.css) */
-  bottom: calc(var(--footer-h) + var(--gap) + 124px);
+  bottom: calc(var(--footer-h) + var(--gap) + 86px + var(--controls-h));
   z-index: 45;
   width: max-content;
   max-width: calc(100vw - 2 * var(--gap));
@@ -469,4 +469,28 @@
   .disc-toast__card {
     transition: none;
   }
+}
+
+/* keyboard path: "Show me" on a detail not found yet */
+.disc__show {
+  align-self: center;
+  padding: 3px 9px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: 500 11px/1.2 var(--font-ui);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.disc__show:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+.disc__show:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.disc__show[hidden] {
+  display: none;
 }

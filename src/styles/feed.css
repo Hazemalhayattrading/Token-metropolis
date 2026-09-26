@@ -58,7 +58,7 @@
 }
 /* while the popover is open, the control row paints above the toasts and the race sheet */
 .controls:has(.feed__panel:not([hidden])) {
-  z-index: 7;
+  z-index: 12;
 }
 
 /* --- popover --------------------------------------------------------------- */
