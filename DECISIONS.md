@@ -246,3 +246,40 @@ and widening ranges.
 The assistant defaults (45% of weekly users active on a day × 8 messages each = 3.6 messages per weekly
 user per day) match OpenAI's published 18B messages/week from ~700M weekly users (3.7/day). Embedded
 assistants (Meta AI) use 3 requests per active day instead of 8.
+
+### D-040 — Interiors are dioramas inside the campus, not separate scenes
+
+Each interior is built in the campus's local space at a fixed anchor (offices inside the tower, racks
+inside the hall block, the lab in front of the tower, power beside the cooling towers). The camera
+flies there with the same director as every other flight, so there is no scene switch or page load,
+and the city stays visible around the interior. The tower turns to 16% glass for the offices view; the
+hall roofs are hidden for the server hall. Interiors load as a separate chunk on first use and are
+built only for the selected campus.
+
+### D-041 — What interior visuals mean, stated in the panel
+
+Desks, people and racks are a visual scale of load (log daily rate), not staff or machine counts, and
+each tab says so. Desk-hardware bands follow the daily rate at 1.78T and 56.2T tokens/day (log-load
+0.45 / 0.75). Liquid-cooling pipes are drawn for accelerator classes usually deployed with liquid
+cooling at scale (Blackwell rack systems, TPU pods, Trainium, and "mixed" fleets at the largest
+platforms) — a cosmetic assumption, labelled as such.
+
+### D-042 — Power and water gauges share one log scale
+
+Gauges span whole decades covering every HQ's plausible range, so the needle position compares across
+HQs (a linear scale would pin every platform but the largest at zero). The shaded band is the range,
+the needle the central value; the numbers and tier badge are in text beside the drawing.
+
+### D-043 — Model facts carry the "Reported" badge; checking level is separate
+
+Release dates and context windows come from announcements, so they are badged Reported. Whether we
+read the page, only a search summary, or have not yet checked is shown as a separate note, as for
+metrics. Models listed only for context (offered from other companies) are marked as offered.
+
+### D-044 — Multi-agent orchestration ("Ultracode")
+
+The owner asked mid-session for Ultracode mode. From M4 onward each substantive step is followed by a
+multi-agent workflow (parallel reviewers across correctness, data honesty, accessibility and
+performance, with adversarial verification of every finding) before pushing, and independent modules
+in later milestones may be built in parallel with strict file ownership. This supersedes the
+CLAUDE.md default of avoiding subagents, at the owner's request.

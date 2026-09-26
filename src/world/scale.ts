@@ -17,6 +17,19 @@ export function logLoad(tokensPerDay: number): number {
   return Math.min(1, Math.max(0, x));
 }
 
+/** Tokens/day at a given normalized load (inverse of `logLoad`). */
+export function tokensAtLoad(load: number): number {
+  return 10 ** (LOG_FLOOR + load * (LOG_CEIL - LOG_FLOOR));
+}
+
+/** Desk-hardware band thresholds on the log load (offices interior). */
+export const DESK_BANDS = [0.45, 0.75] as const;
+
+/** 0 = boxy monitors, 1 = flat screens, 2 = holographic panels. */
+export function deskTier(load: number): 0 | 1 | 2 {
+  return load < DESK_BANDS[0] ? 0 : load < DESK_BANDS[1] ? 1 : 2;
+}
+
 /** Tower height in world units. `maxTokens` is the largest platform's value (for true scale). */
 export function towerHeight(tokensPerDay: number, mode: ScaleMode, maxTokens: number): number {
   if (tokensPerDay <= 0) return 0;

@@ -68,13 +68,38 @@ Quick orientation: `npm install && npm run check` (type-check, lint, format, tes
 - "Homes powered" stays hidden until the EIA constant is verified.
 - "How we estimate" links to METHODOLOGY.md on GitHub until the in-site page (M8).
 
-## Next — Milestone 4: Zoom interiors
+## Milestone 4 — Zoom interiors ✅ (pending the multi-agent review below)
 
-- [ ] Office floors (instanced employees; desk hardware tiers by load; typing speed with traffic).
-- [ ] Server hall (racks, LEDs synced to tokens/s, liquid-cooling shader, accelerator class by platform).
-- [ ] Power & cooling (substation, cooling towers, live MW and water gauges).
-- [ ] Model lab (trophy wall of the model lineup; newest glows; click → release date, context, source).
-- [ ] Lazy-loaded interior scenes with seamless camera transitions from the campus view.
+- [x] Panel tabs (Overview · Offices · Server hall · Power & cooling · Model lab), ARIA tablist with
+      arrow/Home/End keys; each tab flies the camera to a diorama anchored in the campus.
+- [x] Interiors are a separate lazy chunk (`src/world/interiors/`), built for the selected campus only
+      and disposed when it is deselected.
+- [x] Offices: floors cut to the tower body (tower turns to glass); instanced desks and people; people
+      follow load × local office hours; desk hardware bands (boxy → flat → holographic) from the daily
+      rate; screens flicker with traffic. Copy: "Desks and people are a visual scale of load, not a
+      staff count."
+- [x] Server hall: rack rows grow with load, LEDs blink with the live traffic curve, LED colours and
+      liquid-cooling pipes (flowing shader) follow the platform's likely accelerator class
+      (`src/world/hardware.ts`); panel shows the class, note and sources.
+- [x] Power & cooling: substation (moved beside the cooling towers) with a pulsing feeder, lit cooling
+      tower lips and steam; live MW and water gauges on one shared log scale with tier + range; the
+      formula; PUE/WUE/kW-per-GPU/throughput constants with tier, range, note, sources, checking level.
+- [x] Model lab: display case of up to 12 most recent models (own = faceted gem in accent colour,
+      offered = pale stone, flagship taller, newest glows); click a crystal or the accessible list →
+      release date, context window, inputs, maker, source link, checking level.
+- [x] Every pane is filled on open so no number ever sits without its badge.
+- [x] E2E `tests/e2e/interiors.spec.ts` (desktop + mobile) + screenshots `m4-*`; two art passes.
+
+### Polish carried to M8
+
+- Steam is faint at night; neighbouring light streams cross some interior views.
+- Offices at night show few people (honest: local office hours) — consider a "working hours" hint.
+
+## Next — Milestone 5: Time machine, race mode, launch events
+
+- [ ] Time machine scrubber (Nov 2022 → today), play at cinematic speed; world driven by a virtual clock.
+- [ ] Launch events from `events.json`: 72 h launch-day animation at the HQ; "What's new" feed.
+- [ ] Race mode: animated bar-chart race of daily tokens synced with the time machine.
 
 ## Blocked (needs the owner)
 

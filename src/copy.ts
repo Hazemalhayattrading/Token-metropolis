@@ -71,6 +71,87 @@ export const COPY = {
       `The latest figure is ${days} days old, so today's value is extrapolated and its range widens with time.`,
     localTime: (time: string) => `${time} local time`,
   },
+  views: {
+    label: 'Inside this HQ',
+    overview: 'Overview',
+    offices: 'Offices',
+    hall: 'Server hall',
+    power: 'Power & cooling',
+    lab: 'Model lab',
+  },
+  offices: {
+    intro:
+      'A cutaway of three office floors. More desks fill as the daily rate grows and as the working day starts at the HQ.',
+    honesty: 'Desks and people are a visual scale of load, not a staff count.',
+    traffic: 'Traffic right now',
+    trafficUnit: '× the daily average',
+    hardwareLabel: 'Desk hardware',
+    hardware: [
+      'Boxy monitors — the lighter load band',
+      'Flat screens — a heavy load band',
+      'Holographic panels — the heaviest load band',
+    ],
+    bands: (a: string, b: string) =>
+      `Load bands follow the daily rate: below ${a} tokens/day, ${a}–${b}, and above ${b}.`,
+    typing:
+      'Screens flicker faster when traffic peaks. Lights follow a typical office day in local time.',
+  },
+  hall: {
+    intro:
+      'Rows of racks grow with the daily rate; their LEDs blink faster when traffic is above the daily average.',
+    honesty: 'Racks are a visual scale of load, not a count of real machines.',
+    accelerator: 'Likely accelerator class',
+    liquid: 'Coolant pipes are drawn because this accelerator class is usually liquid-cooled.',
+    air: 'No coolant pipes: this accelerator class is often air-cooled.',
+    sources: 'Sources',
+    classes: {
+      'nvidia-ampere': 'NVIDIA Ampere-class GPUs',
+      'nvidia-hopper': 'NVIDIA Hopper-class GPUs',
+      'nvidia-blackwell': 'NVIDIA Blackwell-class GPUs',
+      'google-tpu': 'Google TPUs',
+      'aws-trainium': 'AWS Trainium',
+      'huawei-ascend': 'Huawei Ascend',
+      'amd-instinct': 'AMD Instinct GPUs',
+      mixed: 'A mix of accelerators (not disclosed in detail)',
+    },
+  },
+  power: {
+    intro:
+      'The substation feeds the halls; cooling towers carry the heat away. Both gauges are live and share one log scale across all 15 HQs.',
+    powerGauge: 'Power now',
+    waterGauge: 'Cooling water',
+    inputs: 'Inputs',
+    formula: 'Formula',
+    checkedSnippet: 'checked against a search summary of the sources',
+    checkedPage: 'checked on the source pages',
+    labels: {
+      throughput: 'Tokens per second per GPU',
+      kw: 'Power per GPU',
+      pue: 'PUE (facility overhead)',
+      wue: 'WUE (on-site water)',
+    },
+  },
+  lab: {
+    intro: (name: string) =>
+      `The ${name} lineup: oldest on the left, and the newest glows. Faceted gems are the company's own models; pale stones are other companies' models offered here. Flagships stand taller.`,
+    capped: (shown: number, total: number) =>
+      `The display case holds the ${shown} most recent of ${total} models; all are listed here.`,
+    list: 'Models, newest first',
+    choose: 'Select a model to see its details.',
+    released: 'Released',
+    context: 'Context window',
+    contextUnit: 'tokens',
+    notPublished: 'not published',
+    modalities: 'Inputs',
+    origin: 'Made by',
+    own: (parent: string) => parent,
+    offered: 'Another company (offered on this platform)',
+    flagship: 'flagship',
+    offeredTag: 'offered',
+    source: 'Source',
+    pending: 'not yet checked against the source',
+    empty: 'No models are listed for this platform yet.',
+  },
   controls: {
     scale: 'Building height',
     log: 'Log scale',

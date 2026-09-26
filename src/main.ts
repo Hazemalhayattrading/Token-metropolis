@@ -78,7 +78,27 @@ async function boot(): Promise<void> {
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (hasWebGL()) {
       const { createWorld } = await import('./world/world');
-      const panel = createPanel(city, liveClock, () => world.select(null));
+      const panelEl = byId('panel');
+      const mobile = window.matchMedia('(max-width: 720px)');
+      // Recentre the scene in the screen area the panel leaves free.
+      const updateInsets = () => {
+        if (panelEl.hidden) {
+          world.setInsets({ left: 0, bottom: 0 });
+          return;
+        }
+        const stage = byId('scene').getBoundingClientRect();
+        const r = panelEl.getBoundingClientRect();
+        world.setInsets(
+          mobile.matches
+            ? { left: 0, bottom: Math.max(0, stage.bottom - r.top) }
+            : { left: Math.max(0, r.right - stage.left), bottom: 0 },
+        );
+      };
+      const panel = createPanel(city, liveClock, {
+        onClose: () => world.select(null),
+        onView: (view) => world.setView(view),
+        onModel: (id) => world.selectModel(id),
+      });
       const world = createWorld(byId<HTMLCanvasElement>('scene'), city, liveClock, {
         reducedMotion,
         labels: byId('labels'),
@@ -90,19 +110,13 @@ async function boot(): Promise<void> {
           if (id) panel.show(id);
           else panel.hide();
           document.documentElement.classList.toggle('panel-open', id !== null);
-          const el = byId('panel');
-          const stage = byId('scene').getBoundingClientRect();
-          const r = el.getBoundingClientRect();
-          const mobile = window.matchMedia('(max-width: 720px)').matches;
-          world.setInsets(
-            id === null
-              ? { left: 0, bottom: 0 }
-              : mobile
-                ? { left: 0, bottom: stage.bottom - r.top }
-                : { left: r.right - stage.left, bottom: 0 },
-          );
+          updateInsets();
+        },
+        onModel: (id) => {
+          if (panel.view === 'lab') panel.selectModel(id);
         },
       });
+      new ResizeObserver(updateInsets).observe(panelEl);
       mountControls((mode) => world.setScale(mode));
       world.start();
     } else {

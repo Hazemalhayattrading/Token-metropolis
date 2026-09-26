@@ -22,13 +22,15 @@ test('an HQ opens with sourced, tiered numbers and closes back to the city', asy
   const panel = page.locator('#panel');
   await expect(panel).toBeVisible();
   await expect(panel.locator('.panel__title')).toHaveText('Doubao');
-  // every metric carries a tier badge
-  const metrics = panel.locator('.metric');
-  const n = await metrics.count();
+  // every metric carries a tier badge — on the visible tab and on the hidden ones
+  const overview = panel.getByRole('tabpanel', { name: 'Overview' });
+  const n = await overview.locator('.metric').count();
   expect(n).toBeGreaterThanOrEqual(7);
-  await expect(panel.locator('.metric .tier')).toHaveCount(n);
+  await expect(overview.locator('.metric .tier')).toHaveCount(n);
+  const all = await panel.locator('.metric').count();
+  await expect(panel.locator('.metric .tier')).toHaveCount(all);
   // the latest published figure links to its source
-  await expect(panel.locator('.source a')).toHaveAttribute('href', /^https:\/\//);
+  await expect(overview.locator('.source a')).toHaveAttribute('href', /^https:\/\//);
   await page.waitForTimeout(2200); // camera flight
   await page.screenshot({ path: `screenshots/m3-${info.project.name}-panel.png` });
 

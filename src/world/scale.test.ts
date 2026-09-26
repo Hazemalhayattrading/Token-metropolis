@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 import { layoutPlots, ISLAND_RADIUS } from './layout';
-import { facilityCounts, HEIGHT_MAX, HEIGHT_MIN, logLoad, towerHeight } from './scale';
+import {
+  DESK_BANDS,
+  deskTier,
+  facilityCounts,
+  HEIGHT_MAX,
+  HEIGHT_MIN,
+  logLoad,
+  tokensAtLoad,
+  towerHeight,
+} from './scale';
 
 const IDS = [
   'chatgpt',
@@ -70,5 +79,15 @@ describe('scale', () => {
     expect(big.halls).toBeGreaterThan(small.halls);
     expect(big.cooling).toBeGreaterThan(small.cooling);
     expect(big.trucks).toBeGreaterThan(small.trucks);
+  });
+});
+
+describe('desk bands', () => {
+  it('inverts logLoad and bands monotonically', () => {
+    expect(logLoad(tokensAtLoad(0.3))).toBeCloseTo(0.3, 10);
+    expect(deskTier(0)).toBe(0);
+    expect(deskTier(DESK_BANDS[0])).toBe(1);
+    expect(deskTier(DESK_BANDS[1])).toBe(2);
+    expect(deskTier(1)).toBe(2);
   });
 });

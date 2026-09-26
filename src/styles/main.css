@@ -655,6 +655,221 @@ a {
   font-size: 12px;
 }
 
+/* --- panel tabs (zoom interiors) ------------------------------------------ */
+.tabs {
+  display: flex;
+  gap: 0;
+  justify-content: space-between;
+  margin: 14px -18px 0;
+  padding: 0 18px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--line);
+  scroll-padding-inline: 18px;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+.tabs__tab {
+  flex: none;
+  appearance: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  padding: 9px 7px 10px;
+  background: transparent;
+  color: var(--muted);
+  font: 500 12.5px/1 var(--font-ui);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+}
+
+.tabs__tab:hover {
+  color: var(--text);
+}
+.tabs__tab[aria-selected='true'] {
+  color: var(--text);
+  border-bottom-color: var(--accent);
+}
+.tabs__tab:focus-visible,
+.pane:focus-visible,
+.lab-list__item:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+.pane {
+  padding-top: 4px;
+}
+.pane[hidden] {
+  display: none;
+}
+.panel__lead {
+  margin: 12px 0 8px;
+  color: var(--text);
+  font-size: 14px;
+}
+.panel__honesty {
+  margin: 0 0 12px;
+  padding: 8px 11px;
+  border-left: 3px solid var(--tier-modeled);
+  border-radius: 0 8px 8px 0;
+  background: rgb(255 255 255 / 0.04);
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* gauges */
+.panel__grid--gauges {
+  grid-template-columns: 1fr 1fr;
+}
+.gauge__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 6px 0 2px;
+  overflow: visible;
+}
+.gauge__track {
+  fill: none;
+  stroke: rgb(255 255 255 / 0.1);
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+.gauge__band {
+  fill: none;
+  stroke: var(--accent);
+  stroke-opacity: 0.45;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+.gauge__tick {
+  stroke: rgb(255 255 255 / 0.28);
+  stroke-width: 1;
+}
+.gauge__tick-label {
+  fill: var(--muted);
+  font: 400 11px var(--font-ui);
+}
+.gauge__needle {
+  stroke: var(--text);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+.gauge__hub {
+  fill: var(--text);
+}
+.gauge__body {
+  justify-content: center;
+}
+.gauge .metric__range {
+  text-align: center;
+}
+
+/* model-input constants */
+.constants {
+  display: grid;
+  gap: 8px;
+}
+.constant {
+  padding: 10px 11px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.02);
+}
+.constant p {
+  margin: 4px 0 0;
+}
+.constant__value {
+  font-variant-numeric: tabular-nums;
+}
+.constant__note,
+.constant__sources,
+.constant__checked {
+  color: var(--faint);
+  font-size: 12px;
+}
+.constant__sources a,
+.panel__note a {
+  overflow-wrap: anywhere;
+}
+
+/* model lab */
+.lab-detail {
+  margin: 10px 0 4px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgb(255 255 255 / 0.03);
+}
+.lab-detail__name {
+  margin: 0 0 8px;
+  font: 400 20px/1.15 var(--font-display);
+}
+.lab-detail__facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 5px 12px;
+  margin: 0;
+  font-size: 13px;
+}
+.lab-detail__facts dt {
+  color: var(--muted);
+}
+.lab-detail__facts dd {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.lab-detail .tier {
+  font-size: 10px;
+  line-height: 16px;
+  padding: 0 6px;
+}
+.lab-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+.lab-list__item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text);
+  font: 400 13px/1.3 var(--font-ui);
+  text-align: left;
+  cursor: pointer;
+}
+.lab-list__item:hover {
+  border-color: var(--line-strong);
+}
+.lab-list__item[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: rgb(255 255 255 / 0.05);
+}
+.lab-list__meta {
+  flex: none;
+  color: var(--faint);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* inside an interior, the city labels step back */
+.labels.labels--interior {
+  display: none;
+}
+
 /* ==========================================================================
    Controls
    ========================================================================== */
@@ -708,6 +923,13 @@ a {
     bottom: var(--footer-h);
     width: auto;
     max-height: 60svh;
+  }
+  .tabs__tab {
+    padding-inline: 5px;
+    font-size: 12px;
+  }
+  .hq-panel:not([data-view='overview']) {
+    max-height: 52svh;
     border-radius: 18px 18px 0 0;
     transform: translateY(24px);
   }

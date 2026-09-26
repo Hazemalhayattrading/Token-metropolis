@@ -144,6 +144,22 @@ function roadTexture(plots: readonly Plot[]): CanvasTexture {
   return tex;
 }
 
+/** A soft round dot, so point lights never render as squares up close. */
+function dotTexture(): CanvasTexture {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d')!;
+  const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0, 'rgba(255,255,255,1)');
+  grad.addColorStop(0.35, 'rgba(255,255,255,0.85)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 64, 64);
+  const tex = new CanvasTexture(c);
+  tex.colorSpace = SRGBColorSpace;
+  return tex;
+}
+
 function streetLights(plots: readonly Plot[]): Points {
   const pts: number[] = [];
   const addRing = (r: number, n: number) => {
@@ -174,7 +190,8 @@ function streetLights(plots: readonly Plot[]): Points {
   geo.setAttribute('position', new Float32BufferAttribute(pts, 3));
   const mat = new PointsMaterial({
     color: '#ffc78a',
-    size: 0.42,
+    map: dotTexture(),
+    size: 0.6,
     sizeAttenuation: true,
     transparent: true,
     opacity: 0.9,
@@ -222,7 +239,10 @@ export function createEnvironment(plots: readonly Plot[]): Environment {
         if (o instanceof Mesh || o instanceof Points) {
           o.geometry.dispose();
           const mats = Array.isArray(o.material) ? o.material : [o.material];
-          mats.forEach((m) => m.dispose());
+          mats.forEach((m) => {
+            if (m instanceof PointsMaterial) m.map?.dispose();
+            m.dispose();
+          });
         }
       });
     },

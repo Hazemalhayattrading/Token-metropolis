@@ -5,6 +5,7 @@
  */
 import {
   AdditiveBlending,
+  Box3,
   BoxGeometry,
   BufferGeometry,
   CircleGeometry,
@@ -19,11 +20,13 @@ import {
   Object3D,
   Points,
   ShaderMaterial,
+  TorusGeometry,
   Vector2,
   Vector3,
   type Material,
 } from 'three';
 import type { Platform } from '../../data/schema';
+import type { InteriorView } from '../interiors';
 import type { Plot } from '../layout';
 import {
   accentMaterial,
@@ -67,9 +70,18 @@ export interface Campus {
   /** World-space point just above the crown (for labels and camera framing). */
   readonly top: Vector3;
   readonly footprint: number;
+  /** Half-extents (x, z) of the tower body at ground level, for the office cutaway. */
+  readonly bodyHalf: { x: number; z: number };
+  /** Local-space anchors for the interiors (M4). */
+  readonly anchors: { halls: Vector3; power: Vector3; lab: Vector3 };
   currentHeight: number;
   update(s: CampusState): void;
   setHighlight(on: boolean): void;
+  /**
+   * Make room for an interior: offices turn the tower to glass, the server
+   * hall lifts the hall roofs away, the lab parks the trucks.
+   */
+  setInterior(view: InteriorView): void;
   dispose(): void;
 }
 
@@ -112,7 +124,7 @@ function steamMaterial(): ShaderMaterial {
       varying float vLife;
       void main() {
         float d = length(gl_PointCoord - 0.5);
-        float a = smoothstep(0.5, 0.0, d) * (1.0 - vLife) * vLife * 0.55;
+        float a = smoothstep(0.5, 0.0, d) * (1.0 - vLife) * vLife * 0.8;
         gl_FragColor = vec4(uColor, a);
       }
     `,
@@ -143,6 +155,12 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
     accentColor: palette.accent,
   });
 
+  const bodyBox = new Box3().setFromObject(tower.body);
+  const bodyHalf = {
+    x: Math.max(Math.abs(bodyBox.min.x), Math.abs(bodyBox.max.x)),
+    z: Math.max(Math.abs(bodyBox.min.z), Math.abs(bodyBox.max.z)),
+  };
+
   const group = new Group();
   group.position.set(plot.x, 0, plot.z);
   group.rotation.y = plot.facing;
@@ -170,9 +188,18 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
     lathe.push(new Vector2(1.5 - 0.55 * Math.sin(Math.PI * y * 0.85), y * 4.2));
   }
   const coolGeo = new LatheGeometry(lathe, 24);
-  const coolMat = plainMaterial('#3a4150', 0.9);
+  const coolMat = new MeshStandardMaterial({
+    color: '#5b6474',
+    emissive: '#1b2130',
+    roughness: 0.9,
+  });
   materials.push(coolMat);
   const cooling = new InstancedMesh(coolGeo, coolMat, MAX_COOLING);
+  // A lit lip on each tower so they read at night.
+  const lipGeo = new TorusGeometry(1.1, 0.07, 6, 32);
+  lipGeo.rotateX(Math.PI / 2);
+  lipGeo.translate(0, 4.2, 0);
+  const lips = new InstancedMesh(lipGeo, accentSoft, MAX_COOLING);
   const coolPos: Vector3[] = [];
   for (let i = 0; i < MAX_COOLING; i++) {
     const p = new Vector3(tower.footprint + 5.5 + (i % 2) * 3.4, 0, -2 - Math.floor(i / 2) * 3.6);
@@ -180,9 +207,10 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
     dummy.position.copy(p);
     dummy.updateMatrix();
     cooling.setMatrixAt(i, dummy.matrix);
+    lips.setMatrixAt(i, dummy.matrix);
   }
-  cooling.count = 0;
-  group.add(cooling);
+  cooling.count = lips.count = 0;
+  group.add(cooling, lips);
 
   const steamMat = steamMaterial();
   materials.push(steamMat);
@@ -207,14 +235,18 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
   steam.frustumCulled = false;
   group.add(steam);
 
-  // --- substation + feeder line ---------------------------------------------
+  // --- substation + feeder line (beside the cooling towers) ------------------
   const sub = new Group();
   const subMat = plainMaterial('#2a303c', 0.6, 0.5);
   materials.push(subMat);
+  const subZ = 3.4;
+  const capGeo = new BoxGeometry(0.5, 0.08, 0.5);
   for (let i = 0; i < 3; i++) {
     const tr = new Mesh(new BoxGeometry(1.1, 1.3, 1.1), subMat);
-    tr.position.set(-tower.footprint - 5.5, 0.65, -1.5 + i * 1.6);
-    sub.add(tr);
+    tr.position.set(tower.footprint + 4.6 + i * 1.6, 0.65, subZ);
+    const cap = new Mesh(capGeo, accentSoft);
+    cap.position.set(tr.position.x, 1.34, subZ);
+    sub.add(tr, cap);
   }
   const feederMat = new MeshBasicMaterial({
     color: palette.accent,
@@ -222,9 +254,10 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
     opacity: 0.8,
   });
   materials.push(feederMat);
-  const feederLen = tower.footprint + 4.2;
-  const feeder = new Mesh(new BoxGeometry(feederLen, 0.08, 0.08), feederMat);
-  feeder.position.set(-(tower.footprint + 4.2) / 2 - 0.8, 1.4, 0);
+  const feederFrom = tower.footprint * 0.55;
+  const feederTo = tower.footprint + 4;
+  const feeder = new Mesh(new BoxGeometry(feederTo - feederFrom, 0.08, 0.08), feederMat);
+  feeder.position.set((feederFrom + feederTo) / 2, 1.4, subZ);
   sub.add(feeder);
   group.add(sub);
 
@@ -266,6 +299,8 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
   const top = new Vector3();
 
   let currentHeight = 0;
+  let interior: InteriorView = 'overview';
+  const towerMaterials = [facade, facadeAlt, accent, accentSoft, dark, glass];
   let highlight = 0;
   let highlightTarget = 0;
 
@@ -275,6 +310,12 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
     hit,
     top,
     footprint: tower.footprint,
+    bodyHalf,
+    anchors: {
+      halls: new Vector3(0, 0, -tower.footprint - 8),
+      power: new Vector3(tower.footprint + 6.5, 0, -0.8),
+      lab: new Vector3(0, 0, tower.footprint + 7),
+    },
     get currentHeight() {
       return currentHeight;
     },
@@ -310,13 +351,13 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
       steamMat.uniforms.uTime!.value = s.time;
       steamMat.uniforms.uRate!.value = 0.6 + s.activity * 0.6;
 
-      halls.count = Math.min(MAX_HALLS, s.halls);
-      cooling.count = Math.min(MAX_COOLING, s.cooling);
+      halls.count = interior === 'hall' ? 0 : Math.min(MAX_HALLS, s.halls);
+      cooling.count = lips.count = Math.min(MAX_COOLING, s.cooling);
       steamGeo.setDrawRange(0, Math.min(MAX_COOLING, s.cooling) * puffsPer);
       sub.visible = s.halls > 0;
 
       // Trucks: evenly spaced around a loop, speed follows traffic.
-      const n = Math.min(MAX_TRUCKS, s.trucks);
+      const n = interior === 'lab' ? 0 : Math.min(MAX_TRUCKS, s.trucks);
       trucks.count = n;
       for (let i = 0; i < n; i++) {
         const a = (i / Math.max(n, 1)) * Math.PI * 2 + s.time * 0.05 * (0.6 + s.activity * 0.5);
@@ -328,13 +369,29 @@ export function createCampus(platform: Platform, plot: Plot): Campus {
       trucks.instanceMatrix.needsUpdate = true;
 
       highlight += (highlightTarget - highlight) * k;
-      accent.emissiveIntensity = 1.6 + highlight * 1.6;
+      // Inside an interior the campus trims dim so they don't glare next to the camera.
+      accent.emissiveIntensity = interior === 'overview' ? 1.6 + highlight * 1.6 : 0.45;
+      // The feeder line pulses with traffic.
+      feederMat.opacity = 0.55 + 0.35 * (0.5 + 0.5 * Math.sin(s.time * (1.5 + s.activity * 3)));
 
       const pickH = Math.max(h + 4, 6);
       hit.scale.set(tower.footprint * 2 + 6, pickH, tower.footprint * 2 + 6);
       hit.position.set(0, pickH / 2, 0);
       top.set(0, h + 5, 0);
       group.localToWorld(top);
+    },
+    setInterior(view) {
+      if (view === interior) return;
+      const wasGhost = interior === 'offices';
+      interior = view;
+      const ghost = view === 'offices';
+      if (ghost === wasGhost) return;
+      for (const m of towerMaterials) {
+        m.transparent = ghost;
+        m.opacity = ghost ? 0.16 : 1;
+        m.depthWrite = !ghost;
+        m.needsUpdate = true;
+      }
     },
     setHighlight(on) {
       highlightTarget = on ? 1 : 0;

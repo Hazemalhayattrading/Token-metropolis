@@ -18,6 +18,7 @@ import {
   Vector3,
   WebGLRenderer,
   type Mesh,
+  type Object3D,
 } from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { dailyRate, rateTier, trafficNow } from '../model/estimate';
@@ -28,6 +29,7 @@ import { humanNumber } from '../ui/format';
 import { createCampus, type Campus } from './campus/campus';
 import { CameraDirector, type Pose } from './director';
 import { createEnvironment, MOON_DIRECTION } from './environment';
+import type { InteriorView, Interiors } from './interiors';
 import { createLabels, type LabelValue, type Labels } from './labels';
 import { layoutPlots } from './layout';
 import { createPost } from './post';
@@ -41,6 +43,11 @@ export interface World {
   setScale(mode: ScaleMode): void;
   /** Screen space covered by UI (side panel / bottom sheet), so the scene recentres in the free area. */
   setInsets(insets: { left: number; bottom: number }): void;
+  /** Fly into one of the selected campus's interiors (loaded on first use). */
+  setView(view: InteriorView): void;
+  /** Highlight a model in the lab (from the panel list). */
+  selectModel(id: string | null): void;
+  readonly view: InteriorView;
   dispose(): void;
 }
 
@@ -49,6 +56,8 @@ export interface WorldOptions {
   labels: HTMLElement;
   onFrame?: () => void;
   onSelect?: (id: string | null) => void;
+  /** A model crystal was clicked in the lab. */
+  onModel?: (id: string) => void;
 }
 
 interface Slot {
@@ -83,7 +92,7 @@ export function createWorld(
   controls.enableDamping = true;
   controls.dampingFactor = 0.07;
   controls.maxPolarAngle = Math.PI * 0.47;
-  controls.minDistance = 14;
+  controls.minDistance = 5;
   controls.maxDistance = 320;
   controls.autoRotate = !opts.reducedMotion;
   controls.autoRotateSpeed = 0.18;
@@ -119,6 +128,10 @@ export function createWorld(
   let selected: string | null = null;
   let hovered: string | null = null;
   let scaleMode: ScaleMode = 'log';
+  let view: InteriorView = 'overview';
+  let interiors: Interiors | null = null;
+  let interiorsModule: Promise<typeof import('./interiors')> | null = null;
+  let selectedModel: string | null = null;
 
   const labels: Labels = createLabels(
     opts.labels,
@@ -158,6 +171,54 @@ export function createWorld(
       .add(side)
       .setY(h * 0.5 + distance * 0.4);
     return { position, target };
+  }
+
+  /** Interior framings, in the campus's local space (+z faces the city centre). */
+  function viewPose(id: string, v: InteriorView): Pose {
+    if (v === 'overview') return campusPose(id);
+    const c = slots.get(id)!.campus;
+    let target: Vector3;
+    let dir: Vector3;
+    let distance: number;
+    switch (v) {
+      case 'offices':
+        target = new Vector3(0, 3.8, 0);
+        dir = new Vector3(0.55, 0.55, 1);
+        distance = 11 + Math.max(c.bodyHalf.x, c.bodyHalf.z) * 2.2;
+        break;
+      case 'hall':
+        target = c.anchors.halls.clone().setY(0.8);
+        dir = new Vector3(0.55, 1.35, -0.75);
+        distance = 21;
+        break;
+      case 'power':
+        target = c.anchors.power.clone().setY(1.8);
+        dir = new Vector3(0.9, 1.15, 0.45);
+        distance = 23;
+        break;
+      case 'lab':
+        target = c.anchors.lab.clone().setY(1.5);
+        dir = new Vector3(0.12, 0.38, 1);
+        distance = 9 + (interiors?.labHalfWidth() ?? 6) * 1.8;
+        break;
+    }
+    // Portrait screens see ~27° across, so step back to keep the scene in frame.
+    if (camera.aspect < 1) distance *= 1.7;
+    c.group.updateMatrixWorld();
+    const worldTarget = c.group.localToWorld(target);
+    const worldDir = dir.normalize().applyQuaternion(c.group.quaternion);
+    return {
+      target: worldTarget,
+      position: worldTarget.clone().addScaledVector(worldDir, distance),
+    };
+  }
+
+  function closeInteriors(): void {
+    interiors?.dispose();
+    interiors = null;
+    view = 'overview';
+    selectedModel = null;
+    opts.labels.classList.remove('labels--interior');
   }
 
   let insets = { left: 0, bottom: 0 };
@@ -202,27 +263,45 @@ export function createWorld(
   const hitMeshes: Mesh[] = [...slots.values()].map((s) => s.campus.hit);
   let down: { x: number; y: number } | null = null;
 
-  function pick(ev: PointerEvent): string | null {
+  interface Picked {
+    platform: string | null;
+    model: string | null;
+  }
+
+  function pick(ev: PointerEvent): Picked {
     const r = canvas.getBoundingClientRect();
     pointer.set(
       ((ev.clientX - r.left) / r.width) * 2 - 1,
       -((ev.clientY - r.top) / r.height) * 2 + 1,
     );
     raycaster.setFromCamera(pointer, camera);
+    const crystals = interiors?.pickables() ?? [];
+    if (crystals.length > 0) {
+      const m = raycaster.intersectObjects(crystals as Object3D[], false)[0];
+      if (m) return { platform: null, model: m.object.userData.modelId as string };
+    }
     const hit = raycaster.intersectObjects(hitMeshes, false)[0];
-    return (hit?.object.userData.platformId as string | undefined) ?? null;
+    return {
+      platform: (hit?.object.userData.platformId as string | undefined) ?? null,
+      model: null,
+    };
   }
 
   const onMove = (ev: PointerEvent) => {
     if (ev.pointerType !== 'mouse') return;
-    const id = pick(ev);
+    const picked = pick(ev);
+    const id = picked.platform;
+    if (picked.model) {
+      canvas.style.cursor = 'pointer';
+      return;
+    }
     if (id !== hovered) {
       if (hovered) slots.get(hovered)?.campus.setHighlight(hovered === selected);
       hovered = id;
       if (id) slots.get(id)?.campus.setHighlight(true);
       labels.setHovered(id);
-      canvas.style.cursor = id ? 'pointer' : '';
     }
+    canvas.style.cursor = id && id !== selected ? 'pointer' : '';
   };
   const onDown = (ev: PointerEvent) => (down = { x: ev.clientX, y: ev.clientY });
   const onUp = (ev: PointerEvent) => {
@@ -230,8 +309,11 @@ export function createWorld(
     const moved = Math.hypot(ev.clientX - down.x, ev.clientY - down.y);
     down = null;
     if (moved > 6) return; // a drag, not a tap
-    const id = pick(ev);
-    if (id) world.select(id);
+    const picked = pick(ev);
+    if (picked.model) {
+      world.selectModel(picked.model);
+      opts.onModel?.(picked.model);
+    } else if (picked.platform) world.select(picked.platform);
   };
   canvas.addEventListener('pointermove', onMove);
   canvas.addEventListener('pointerdown', onDown);
@@ -286,8 +368,12 @@ export function createWorld(
         time: elapsed,
         dt,
       });
+      const inside = id === selected && view !== 'overview';
+      if (inside) {
+        interiors?.update({ load, occupancy: occupancy(slot.hour), activity, time: elapsed });
+      }
       slot.streams.update(elapsed, rate > 0 ? (0.25 + 0.75 * load) * Math.min(1.4, activity) : 0);
-      slot.streams.group.visible = rate > 0;
+      slot.streams.group.visible = rate > 0 && !inside;
       labelPositions.set(id, slot.campus.top);
       labelValues.set(id, {
         text: rate > 0 ? `${humanNumber(rate, 'short')} tokens/day` : '',
@@ -321,9 +407,13 @@ export function createWorld(
       running = false;
       renderer.setAnimationLoop(null);
     },
+    get view() {
+      return view;
+    },
     select(id) {
       if (id === selected) return;
       if (selected) slots.get(selected)?.campus.setHighlight(false);
+      closeInteriors();
       selected = id;
       labels.setSelected(id);
       if (id) {
@@ -343,6 +433,41 @@ export function createWorld(
       insets = next;
       applyViewOffset();
     },
+    setView(next) {
+      const id = selected;
+      if (!id || next === view) return;
+      view = next;
+      opts.labels.classList.toggle('labels--interior', next !== 'overview');
+      if (next === 'overview') {
+        interiors?.show('overview');
+        void director.flyTo(viewPose(id, 'overview'), 1.4);
+        return;
+      }
+      interiorsModule ??= import('./interiors');
+      interiorsModule
+        .then((mod) => {
+          if (selected !== id || view !== next) return; // superseded while loading
+          const pm = city.byId.get(id)!;
+          interiors ??= mod.createInteriors(
+            pm.platform,
+            slots.get(id)!.campus,
+            city.dataset.models.filter((m) => m.platform === id),
+          );
+          interiors.show(next);
+          interiors.selectModel(selectedModel);
+          void director.flyTo(viewPose(id, next), 1.4);
+        })
+        .catch(() => {
+          // Chunk failed to load (offline): stay on the campus overview.
+          interiorsModule = null;
+          view = 'overview';
+          opts.labels.classList.remove('labels--interior');
+        });
+    },
+    selectModel(id) {
+      selectedModel = id;
+      interiors?.selectModel(id);
+    },
     dispose() {
       world.stop();
       document.removeEventListener('visibilitychange', onVisibility);
@@ -353,6 +478,7 @@ export function createWorld(
       observer.disconnect();
       controls.dispose();
       labels.dispose();
+      closeInteriors();
       slots.forEach((s) => {
         s.campus.dispose();
         s.streams.dispose();
