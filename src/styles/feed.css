@@ -1,0 +1,369 @@
+/* ==========================================================================
+   "What's new" feed and launch toasts (src/ui/feed.ts).
+   The feed root sits in the bottom-left control row; its popover opens
+   upwards from the toggle (downwards when there is no room above, e.g. when
+   the control row sits at the top on phones). The toast root is a stack on
+   the left (desktop) or top centre (phones).
+   ========================================================================== */
+
+.feed {
+  position: relative;
+  display: inline-flex;
+}
+
+/* --- toggle: sized like the segmented controls beside it ------------------ */
+.feed__toggle {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--panel);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  color: var(--muted);
+  font: 500 13px/1 var(--font-ui);
+  white-space: nowrap;
+  cursor: pointer;
+  transition:
+    color 0.2s var(--ease),
+    border-color 0.2s var(--ease);
+}
+.feed__toggle:hover,
+.feed__toggle[aria-expanded='true'] {
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+.feed__toggle:active {
+  transform: translateY(1px);
+}
+.feed__toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.feed__dot {
+  display: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+.feed__toggle--new .feed__dot {
+  display: inline-block;
+}
+
+/* --- popover --------------------------------------------------------------- */
+.feed__panel {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% + 8px);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  width: min(360px, calc(100vw - 2 * var(--gap)));
+  max-height: 50vh;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  box-shadow: 0 20px 60px rgb(0 0 0 / 0.45);
+  color: var(--text);
+  text-align: left;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 0.2s var(--ease),
+    transform 0.3s var(--ease);
+}
+.feed__panel[data-placement='bottom'] {
+  top: calc(100% + 8px);
+  bottom: auto;
+  transform: translateY(-6px);
+}
+.feed__panel--open,
+.feed__panel--open[data-placement='bottom'] {
+  opacity: 1;
+  transform: none;
+}
+.feed__panel[hidden] {
+  display: none;
+}
+.feed__panel:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.feed__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 10px 9px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.feed__title {
+  margin: 0;
+  font: 400 18px/1.15 var(--font-display);
+}
+.feed__close {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--text);
+  font: 400 20px/1 var(--font-ui);
+  cursor: pointer;
+  transition: border-color 0.2s var(--ease);
+}
+.feed__close:hover {
+  border-color: var(--accent);
+}
+.feed__close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.feed__list {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.feed__list[hidden] {
+  display: none;
+}
+/* more launches below: fade the bottom edge */
+.feed__list--more {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 28px), transparent);
+}
+.feed__item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas:
+    'meta source'
+    'what what';
+  align-items: center;
+  gap: 5px 12px;
+  padding: 10px 16px 11px;
+  border-top: 1px solid var(--line);
+}
+.feed__item:first-child {
+  border-top: 0;
+}
+/* pinned: still inside the 72-hour launch day */
+.feed__item--new {
+  background: rgb(255 197 102 / 0.06);
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+.feed__meta {
+  grid-area: meta;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.feed__date {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.feed__new {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 7px;
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  background: rgb(255 197 102 / 0.1);
+  color: var(--accent);
+  font: 600 10.5px/16px var(--font-ui);
+  letter-spacing: 0.03em;
+}
+.feed__new[hidden] {
+  display: none;
+}
+.feed__source {
+  grid-area: source;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 24px;
+  font-size: 12px;
+}
+.feed__source:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.feed__ext {
+  font-size: 11px;
+}
+.feed__what {
+  grid-area: what;
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.feed__platform {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 24px;
+  margin-right: 2px;
+  padding: 2px 8px 2px 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.04);
+  color: var(--text);
+  font: 500 13px/1.3 var(--font-ui);
+  vertical-align: baseline;
+  cursor: pointer;
+  transition:
+    border-color 0.2s var(--ease),
+    background 0.2s var(--ease);
+}
+.feed__platform:hover {
+  border-color: var(--feed-accent, var(--accent));
+  background: rgb(255 255 255 / 0.08);
+}
+.feed__platform:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.feed__swatch {
+  flex: none;
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--feed-accent, var(--accent));
+  box-shadow: 0 0 6px var(--feed-accent, var(--accent));
+}
+.feed__event {
+  color: var(--text);
+}
+.feed__empty {
+  margin: 0;
+  padding: 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.feed__empty[hidden] {
+  display: none;
+}
+
+/* --- launch toasts ----------------------------------------------------------- */
+.toasts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none; /* never block the city underneath */
+}
+.toast {
+  padding: 10px 13px 11px;
+  background: var(--panel-strong);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  backdrop-filter: blur(var(--blur));
+  -webkit-backdrop-filter: blur(var(--blur));
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.4);
+  color: var(--text);
+  transition:
+    opacity 0.3s var(--ease),
+    transform 0.4s var(--ease);
+}
+.toast--enter {
+  opacity: 0;
+  transform: translateX(-16px);
+}
+.toast--leave {
+  opacity: 0;
+  transform: translateX(-8px);
+}
+.toast__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 0 0 4px;
+}
+.toast__label {
+  color: var(--muted);
+  font: 500 11px/1.2 var(--font-ui);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.toast__date {
+  color: var(--muted);
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+}
+.toast__platform {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin: 0;
+  font: 500 14px/1.3 var(--font-ui);
+  overflow-wrap: anywhere;
+}
+.toast__dot {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--toast-accent, var(--accent));
+  box-shadow: 0 0 8px var(--toast-accent, var(--accent));
+}
+.toast__title {
+  margin: 2px 0 0 15px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.feed-sr,
+.toasts-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- motion ---------------------------------------------------------------- */
+.toasts--static .toast {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .feed__panel,
+  .feed__toggle,
+  .toast {
+    transition: none;
+  }
+}
+
+/* --- phones: toasts drop in from the top ----------------------------------- */
+@media (max-width: 720px) {
+  .toast--enter {
+    transform: translateY(-10px);
+  }
+  .toast--leave {
+    transform: translateY(-6px);
+  }
+}
