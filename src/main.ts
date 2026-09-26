@@ -515,7 +515,8 @@ async function boot(): Promise<void> {
       controls.feedSlot.after(shareSlot);
       mountShareButton(shareSlot, {
         capture: async () => ({
-          frame: document.createElement('canvas'),
+          // A 0×0 canvas: no frame, so the card paints its night sky.
+          frame: Object.assign(document.createElement('canvas'), { width: 0, height: 0 }),
           ...shareText(null),
           url: siteUrl(),
         }),
