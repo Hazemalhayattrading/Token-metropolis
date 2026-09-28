@@ -1,5 +1,20 @@
 [
   {
+    "id": "seen-anthropic-claude-sonnet-5-5",
+    "date": "2026-09-28",
+    "platform": "claude",
+    "kind": "model-launch",
+    "title": "Claude Sonnet 5.5 first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Claude Sonnet 5.5 — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/anthropic/claude-sonnet-5.5"
+    },
+    "model": "Claude Sonnet 5.5"
+  },
+  {
     "id": "seen-qwen-qwen3-8-max-prime",
     "date": "2026-09-23",
     "platform": "qwen",
