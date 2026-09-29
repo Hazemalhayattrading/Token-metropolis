@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "chatgpt-01m3q4rk1sm4emk445ggpg7c0n",
+    "platform": "chatgpt",
+    "impact": "minor",
+    "title": "Elevated errors across ChatGPT, Codex, and the API including the Agents API",
+    "started": "2026-09-29T17:52:52Z",
+    "resolved": null,
+    "url": "https://status.openai.com",
+    "status": "investigating",
+    "checked": "2026-09-29T18:39:48.355Z"
+  }
+]

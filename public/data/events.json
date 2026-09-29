@@ -1,5 +1,33 @@
 [
   {
+    "id": "seen-openai-gpt-6-1-sol",
+    "date": "2026-09-29",
+    "platform": "chatgpt",
+    "kind": "model-launch",
+    "title": "GPT-6.1 Sol first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "GPT-6.1 Sol — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/openai/gpt-6.1-sol"
+    }
+  },
+  {
+    "id": "seen-openai-gpt-6-1-sol-pro",
+    "date": "2026-09-29",
+    "platform": "chatgpt",
+    "kind": "model-launch",
+    "title": "GPT-6.1 Sol Pro first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "GPT-6.1 Sol Pro — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/openai/gpt-6.1-sol-pro"
+    }
+  },
+  {
     "id": "seen-anthropic-claude-sonnet-5-5",
     "date": "2026-09-28",
     "platform": "claude",
