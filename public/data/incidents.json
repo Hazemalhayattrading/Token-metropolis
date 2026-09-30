@@ -1,13 +1,24 @@
 [
   {
-    "id": "chatgpt-01m3q4rk1sm4emk445ggpg7c0n",
+    "id": "chatgpt-01m3r1t4fcr1337fbbyy9k2rpb",
     "platform": "chatgpt",
     "impact": "minor",
-    "title": "Elevated errors across ChatGPT, Codex, and the API including the Agents API",
-    "started": "2026-09-29T17:52:52Z",
+    "title": "Elevated errors in ChatGPT Space Pages",
+    "started": "2026-09-30T02:20:32Z",
     "resolved": null,
     "url": "https://status.openai.com",
     "status": "monitoring",
-    "checked": "2026-09-29T22:59:15.398Z"
+    "checked": "2026-09-30T08:37:50.779Z"
+  },
+  {
+    "id": "chatgpt-01m3rdny37capqgrkpbvmnrt4k",
+    "platform": "chatgpt",
+    "impact": "minor",
+    "title": "Elevated error rates for ChatGPT Pro and Plus users",
+    "started": "2026-09-30T05:47:57Z",
+    "resolved": null,
+    "url": "https://status.openai.com",
+    "status": "monitoring",
+    "checked": "2026-09-30T08:37:50.779Z"
   }
 ]
