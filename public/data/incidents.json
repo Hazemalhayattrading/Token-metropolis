@@ -8,17 +8,6 @@
     "resolved": null,
     "url": "https://status.openai.com",
     "status": "monitoring",
-    "checked": "2026-09-30T08:37:50.779Z"
-  },
-  {
-    "id": "chatgpt-01m3rdny37capqgrkpbvmnrt4k",
-    "platform": "chatgpt",
-    "impact": "minor",
-    "title": "Elevated error rates for ChatGPT Pro and Plus users",
-    "started": "2026-09-30T05:47:57Z",
-    "resolved": null,
-    "url": "https://status.openai.com",
-    "status": "monitoring",
-    "checked": "2026-09-30T08:37:50.779Z"
+    "checked": "2026-09-30T15:56:57.989Z"
   }
 ]
