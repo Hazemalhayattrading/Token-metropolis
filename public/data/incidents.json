@@ -8,6 +8,17 @@
     "resolved": null,
     "url": "https://status.openai.com",
     "status": "monitoring",
-    "checked": "2026-10-01T14:31:52.573Z"
+    "checked": "2026-10-01T20:21:46.112Z"
+  },
+  {
+    "id": "claude-k0h22tsvnydg",
+    "platform": "claude",
+    "impact": "minor",
+    "title": "Delayed credits on the Claude Platform",
+    "started": "2026-10-01T16:20:40.767Z",
+    "resolved": null,
+    "url": "https://stspg.io/jg26d0skzh27",
+    "status": "monitoring",
+    "checked": "2026-10-01T20:21:46.112Z"
   }
 ]
