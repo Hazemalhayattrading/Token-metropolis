@@ -7,7 +7,18 @@
     "started": "2026-10-05T07:03:53Z",
     "resolved": null,
     "url": "https://status.openai.com",
-    "status": "investigating",
-    "checked": "2026-10-05T09:09:09.590Z"
+    "status": "monitoring",
+    "checked": "2026-10-05T18:31:31.390Z"
+  },
+  {
+    "id": "chatgpt-01m46g248gghv9rsaje82bzy1x",
+    "platform": "chatgpt",
+    "impact": "minor",
+    "title": "Elevated errors in ChatGPT conversations",
+    "started": "2026-10-05T16:58:56Z",
+    "resolved": null,
+    "url": "https://status.openai.com",
+    "status": "monitoring",
+    "checked": "2026-10-05T18:31:31.390Z"
   }
 ]
