@@ -1,13 +1,13 @@
 [
   {
-    "id": "chatgpt-01m3r1t4fcr1337fbbyy9k2rpb",
+    "id": "chatgpt-01m45e0jffjz6eq3bwypw74r2z",
     "platform": "chatgpt",
     "impact": "minor",
-    "title": "Elevated errors in ChatGPT Space Pages",
-    "started": "2026-09-30T02:20:32Z",
+    "title": "Elevated Work Mode errors",
+    "started": "2026-10-05T07:03:53Z",
     "resolved": null,
     "url": "https://status.openai.com",
-    "status": "monitoring",
-    "checked": "2026-10-01T20:21:46.112Z"
+    "status": "investigating",
+    "checked": "2026-10-05T09:09:09.590Z"
   }
 ]
