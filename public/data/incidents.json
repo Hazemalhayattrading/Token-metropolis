@@ -9,5 +9,16 @@
     "url": "https://status.openai.com",
     "status": "monitoring",
     "checked": "2026-10-06T07:36:33.187Z"
+  },
+  {
+    "id": "cursor-w865g74p3k6g",
+    "platform": "cursor",
+    "impact": "minor",
+    "title": "Elevated errors affecting Anthropic models",
+    "started": "2026-10-06T12:40:51.881Z",
+    "resolved": null,
+    "url": "https://stspg.io/qkz3yd9rsm13",
+    "status": "investigating",
+    "checked": "2026-10-06T15:14:46.688Z"
   }
 ]
