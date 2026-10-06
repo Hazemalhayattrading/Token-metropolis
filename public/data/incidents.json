@@ -11,14 +11,14 @@
     "checked": "2026-10-06T07:36:33.187Z"
   },
   {
-    "id": "cursor-w865g74p3k6g",
+    "id": "cursor-bccntkmymws0",
     "platform": "cursor",
-    "impact": "minor",
-    "title": "Elevated errors affecting Anthropic models",
-    "started": "2026-10-06T12:40:51.881Z",
+    "impact": "major",
+    "title": "Investigating service degradation — Cloud Agents and Grok Bot",
+    "started": "2026-10-06T19:27:23.287Z",
     "resolved": null,
-    "url": "https://stspg.io/qkz3yd9rsm13",
+    "url": "https://stspg.io/s72y0jp0bgtt",
     "status": "investigating",
-    "checked": "2026-10-06T15:14:46.688Z"
+    "checked": "2026-10-06T20:22:30.573Z"
   }
 ]

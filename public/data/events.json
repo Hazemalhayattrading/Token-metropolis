@@ -1,5 +1,19 @@
 [
   {
+    "id": "seen-google-gemini-nano-banana-2-1",
+    "date": "2026-10-06",
+    "platform": "gemini",
+    "kind": "model-launch",
+    "title": "Nano Banana 2.1 first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Nano Banana 2.1 — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/google/gemini-nano-banana-2.1"
+    }
+  },
+  {
     "id": "seen-openai-gpt-6-1-sol",
     "date": "2026-09-29",
     "platform": "chatgpt",
