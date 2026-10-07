@@ -1,5 +1,19 @@
 [
   {
+    "id": "seen-anthropic-claude-haiku-5-5",
+    "date": "2026-10-07",
+    "platform": "claude",
+    "kind": "model-launch",
+    "title": "Claude Haiku 5.5 first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Claude Haiku 5.5 — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/anthropic/claude-haiku-5.5"
+    }
+  },
+  {
     "id": "seen-google-gemini-nano-banana-2-1",
     "date": "2026-10-06",
     "platform": "gemini",
