@@ -1,13 +1,13 @@
 [
   {
-    "id": "chatgpt-01m45e0jffjz6eq3bwypw74r2z",
+    "id": "chatgpt-01m4adhmmbk7k92njfj0dxryjm",
     "platform": "chatgpt",
-    "impact": "minor",
-    "title": "Elevated Work Mode errors",
-    "started": "2026-10-05T07:03:53Z",
+    "impact": "major",
+    "title": "Unable to create new ChatGPT Work threads in latest version of desktop app",
+    "started": "2026-10-07T05:31:56Z",
     "resolved": null,
     "url": "https://status.openai.com",
-    "status": "monitoring",
-    "checked": "2026-10-06T07:36:33.187Z"
+    "status": "identified",
+    "checked": "2026-10-07T07:17:16.827Z"
   }
 ]
