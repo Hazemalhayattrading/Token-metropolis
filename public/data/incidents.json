@@ -1,14 +1,14 @@
 [
   {
-    "id": "chatgpt-01m4adhmmbk7k92njfj0dxryjm",
+    "id": "chatgpt-01m4gv1m2a3k38t73jcvcd9g0r",
     "platform": "chatgpt",
-    "impact": "major",
-    "title": "Unable to create new ChatGPT Work threads in latest version of desktop app",
-    "started": "2026-10-07T05:31:56Z",
+    "impact": "minor",
+    "title": "Delayed Costs data in the Compliance API",
+    "started": "2026-10-09T17:23:18Z",
     "resolved": null,
     "url": "https://status.openai.com",
     "status": "identified",
-    "checked": "2026-10-07T07:17:16.827Z"
+    "checked": "2026-10-09T21:00:40.746Z"
   },
   {
     "id": "claude-978mjkgw6mh7",
@@ -19,6 +19,6 @@
     "resolved": null,
     "url": "https://stspg.io/sjkw7njwf0mt",
     "status": "monitoring",
-    "checked": "2026-10-09T16:16:22.037Z"
+    "checked": "2026-10-09T21:00:40.746Z"
   }
 ]
