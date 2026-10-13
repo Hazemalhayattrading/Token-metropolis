@@ -1,13 +1,13 @@
 [
   {
-    "id": "chatgpt-01m4gv1m2a3k38t73jcvcd9g0r",
+    "id": "chatgpt-01m4t4zcm54d3zptqxrswfg0xs",
     "platform": "chatgpt",
     "impact": "minor",
-    "title": "Delayed Costs data in the Compliance API",
-    "started": "2026-10-09T17:23:18Z",
+    "title": "Degraded performance in GPT-6.1 Sol Codex and Work mode",
+    "started": "2026-10-13T08:10:00Z",
     "resolved": null,
     "url": "https://status.openai.com",
     "status": "monitoring",
-    "checked": "2026-10-12T07:24:54.389Z"
+    "checked": "2026-10-13T16:02:59.887Z"
   }
 ]
