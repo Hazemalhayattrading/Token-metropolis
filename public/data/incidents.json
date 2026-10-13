@@ -9,16 +9,5 @@
     "url": "https://status.openai.com",
     "status": "monitoring",
     "checked": "2026-10-12T07:24:54.389Z"
-  },
-  {
-    "id": "cursor-8nlyd6t95xjm",
-    "platform": "cursor",
-    "impact": "critical",
-    "title": "Investigating service degradation — Grok Bot, IDE, and Cloud Agents",
-    "started": "2026-10-13T00:22:00.000Z",
-    "resolved": null,
-    "url": "https://stspg.io/wb9c5pzxfnz6",
-    "status": "investigating",
-    "checked": "2026-10-13T00:45:03.805Z"
   }
 ]
