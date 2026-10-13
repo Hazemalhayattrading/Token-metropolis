@@ -1,5 +1,20 @@
 [
   {
+    "id": "seen-google-gemini-4-argon",
+    "date": "2026-10-13",
+    "platform": "gemini",
+    "kind": "model-launch",
+    "title": "Gemini 4 Argon first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Gemini 4 Argon — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/google/gemini-4-argon"
+    },
+    "model": "Gemini 4 Argon"
+  },
+  {
     "id": "seen-anthropic-claude-haiku-5-5",
     "date": "2026-10-07",
     "platform": "claude",
