@@ -1,13 +1,24 @@
 [
   {
-    "id": "chatgpt-01m4t4zcm54d3zptqxrswfg0xs",
+    "id": "chatgpt-01m4xnqx7c6rcbngx9h711wfsg",
     "platform": "chatgpt",
     "impact": "minor",
-    "title": "Degraded performance in GPT-6.1 Sol Codex and Work mode",
-    "started": "2026-10-13T08:10:00Z",
+    "title": "Delayed Costs data in the Compliance API",
+    "started": "2026-10-14T17:00:44Z",
     "resolved": null,
     "url": "https://status.openai.com",
-    "status": "monitoring",
-    "checked": "2026-10-13T16:02:59.887Z"
+    "status": "identified",
+    "checked": "2026-10-14T17:15:15.541Z"
+  },
+  {
+    "id": "cursor-6y0yq43mvwg2",
+    "platform": "cursor",
+    "impact": "minor",
+    "title": "Investigating service degradation — Grok Bot",
+    "started": "2026-10-14T15:46:23.651Z",
+    "resolved": null,
+    "url": "https://stspg.io/tp05ff30h17j",
+    "status": "investigating",
+    "checked": "2026-10-14T17:15:15.541Z"
   }
 ]
