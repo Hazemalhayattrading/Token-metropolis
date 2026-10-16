@@ -7,7 +7,18 @@
     "started": "2026-10-14T17:00:44Z",
     "resolved": null,
     "url": "https://status.openai.com",
-    "status": "identified",
-    "checked": "2026-10-15T22:22:53.318Z"
+    "status": "monitoring",
+    "checked": "2026-10-16T01:24:44.286Z"
+  },
+  {
+    "id": "cursor-h76w09vs1vqq",
+    "platform": "cursor",
+    "impact": "minor",
+    "title": "Elevated errors affecting Grok models",
+    "started": "2026-10-15T22:25:11.662Z",
+    "resolved": null,
+    "url": "https://stspg.io/nbsrtgp6pr7p",
+    "status": "monitoring",
+    "checked": "2026-10-16T01:24:44.286Z"
   }
 ]
