@@ -1,5 +1,20 @@
 [
   {
+    "id": "seen-deepseek-deepseek-v4-1-flash-1017",
+    "date": "2026-10-17",
+    "platform": "deepseek",
+    "kind": "model-launch",
+    "title": "DeepSeek V4.1 Flash 1017 first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "DeepSeek V4.1 Flash 1017 — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/deepseek/deepseek-v4.1-flash-1017"
+    },
+    "model": "DeepSeek V4.1 Flash 1017"
+  },
+  {
     "id": "seen-google-gemini-4-argon",
     "date": "2026-10-13",
     "platform": "gemini",
