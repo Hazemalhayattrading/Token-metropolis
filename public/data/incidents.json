@@ -1,13 +1,13 @@
 [
   {
-    "id": "chatgpt-01m4xnqx7c6rcbngx9h711wfsg",
+    "id": "chatgpt-01m5fd63hhdrpqpm5ymqwj5htn",
     "platform": "chatgpt",
     "impact": "minor",
-    "title": "Delayed Costs data in the Compliance API",
-    "started": "2026-10-14T17:00:44Z",
+    "title": "Elevated FedRAMP API error rates for Astra and Sol",
+    "started": "2026-10-21T14:17:32Z",
     "resolved": null,
     "url": "https://status.openai.com",
-    "status": "monitoring",
-    "checked": "2026-10-16T07:14:22.172Z"
+    "status": "identified",
+    "checked": "2026-10-21T15:20:12.815Z"
   }
 ]
