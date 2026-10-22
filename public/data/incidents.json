@@ -9,16 +9,5 @@
     "url": "https://status.openai.com",
     "status": "monitoring",
     "checked": "2026-10-22T04:54:30.458Z"
-  },
-  {
-    "id": "claude-wj6r4t6mxq1r",
-    "platform": "claude",
-    "impact": "minor",
-    "title": "Elevated errors affecting Connectors",
-    "started": "2026-10-22T03:50:12.621Z",
-    "resolved": null,
-    "url": "https://stspg.io/4dcr8c005yxc",
-    "status": "investigating",
-    "checked": "2026-10-22T04:54:30.458Z"
   }
 ]
