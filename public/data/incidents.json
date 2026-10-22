@@ -1,13 +1,24 @@
 [
   {
-    "id": "chatgpt-01m5fd63hhdrpqpm5ymqwj5htn",
+    "id": "chatgpt-01m5gpe9c4e19he461p8jamyxd",
     "platform": "chatgpt",
     "impact": "minor",
-    "title": "Elevated FedRAMP API error rates for Astra and Sol",
-    "started": "2026-10-21T14:17:32Z",
+    "title": "ChatGPT conversion failures in India, Japan and Korea. And Response API errors",
+    "started": "2026-10-22T02:18:32Z",
     "resolved": null,
     "url": "https://status.openai.com",
-    "status": "identified",
-    "checked": "2026-10-21T15:20:12.815Z"
+    "status": "monitoring",
+    "checked": "2026-10-22T04:54:30.458Z"
+  },
+  {
+    "id": "claude-wj6r4t6mxq1r",
+    "platform": "claude",
+    "impact": "minor",
+    "title": "Elevated errors affecting Connectors",
+    "started": "2026-10-22T03:50:12.621Z",
+    "resolved": null,
+    "url": "https://stspg.io/4dcr8c005yxc",
+    "status": "investigating",
+    "checked": "2026-10-22T04:54:30.458Z"
   }
 ]
