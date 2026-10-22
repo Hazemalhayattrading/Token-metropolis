@@ -1,13 +1,24 @@
 [
   {
-    "id": "chatgpt-01m5gpe9c4e19he461p8jamyxd",
+    "id": "chatgpt-01m5jf8dr3egqjntxpz24akx2g",
     "platform": "chatgpt",
     "impact": "minor",
-    "title": "ChatGPT conversion failures in India, Japan and Korea. And Response API errors",
-    "started": "2026-10-22T02:18:32Z",
+    "title": "Degraded Performance of Dots on Enterprise",
+    "started": "2026-10-22T18:51:28Z",
     "resolved": null,
     "url": "https://status.openai.com",
-    "status": "monitoring",
-    "checked": "2026-10-22T04:54:30.458Z"
+    "status": "identified",
+    "checked": "2026-10-22T20:10:29.180Z"
+  },
+  {
+    "id": "chatgpt-01m5jhvjvc8waxb4wryfmkg6hp",
+    "platform": "chatgpt",
+    "impact": "minor",
+    "title": "New Ad Accounts failing to provision admins",
+    "started": "2026-10-22T19:36:53Z",
+    "resolved": null,
+    "url": "https://status.openai.com",
+    "status": "identified",
+    "checked": "2026-10-22T20:10:29.180Z"
   }
 ]
