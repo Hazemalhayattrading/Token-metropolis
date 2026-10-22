@@ -1,16 +1,5 @@
 [
   {
-    "id": "chatgpt-01m5jf8dr3egqjntxpz24akx2g",
-    "platform": "chatgpt",
-    "impact": "minor",
-    "title": "Degraded Performance of Dots on Enterprise",
-    "started": "2026-10-22T18:51:28Z",
-    "resolved": null,
-    "url": "https://status.openai.com",
-    "status": "identified",
-    "checked": "2026-10-22T20:10:29.180Z"
-  },
-  {
     "id": "chatgpt-01m5jhvjvc8waxb4wryfmkg6hp",
     "platform": "chatgpt",
     "impact": "minor",
@@ -19,6 +8,6 @@
     "resolved": null,
     "url": "https://status.openai.com",
     "status": "identified",
-    "checked": "2026-10-22T20:10:29.180Z"
+    "checked": "2026-10-22T23:25:53.774Z"
   }
 ]
