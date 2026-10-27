@@ -9,5 +9,16 @@
     "url": "https://status.openai.com",
     "status": "monitoring",
     "checked": "2026-10-23T23:11:16.897Z"
+  },
+  {
+    "id": "cursor-ps-67a789782eda77b3",
+    "platform": "cursor",
+    "impact": "minor",
+    "title": "Degraded agent personalization and codebase sync",
+    "started": "2026-10-26T22:02:31.000Z",
+    "resolved": null,
+    "url": "https://status.x.ai/history?incident=automations%2Fps_67a789782eda77b3",
+    "status": "investigating",
+    "checked": "2026-10-27T00:28:53.535Z"
   }
 ]
