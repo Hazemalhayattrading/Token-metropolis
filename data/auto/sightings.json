@@ -15,6 +15,21 @@
     "model": "GPT-6.1 Terra"
   },
   {
+    "id": "seen-openai-gpt-6-1-terra-pro",
+    "date": "2026-10-26",
+    "platform": "chatgpt",
+    "kind": "model-launch",
+    "title": "GPT-6.1 Terra Pro first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "GPT-6.1 Terra Pro — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/openai/gpt-6.1-terra-pro"
+    },
+    "model": "GPT-6.1 Terra Pro"
+  },
+  {
     "id": "seen-moonshotai-kimi-k3-1-pro",
     "date": "2026-10-23",
     "platform": "kimi",
