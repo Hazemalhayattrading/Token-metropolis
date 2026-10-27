@@ -1,13 +1,1 @@
-[
-  {
-    "id": "chatgpt-01m5nff94xcj6cgtd4s78a9beb",
-    "platform": "chatgpt",
-    "impact": "minor",
-    "title": "Degraded experience with ChatGPT app connections using CIMD",
-    "started": "2026-10-23T22:52:56Z",
-    "resolved": null,
-    "url": "https://status.openai.com",
-    "status": "monitoring",
-    "checked": "2026-10-23T23:11:16.897Z"
-  }
-]
+[]
