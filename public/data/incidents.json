@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "claude-phg1y2yh07n2",
+    "platform": "claude",
+    "impact": "minor",
+    "title": "Elevated errors affecting the Google Calendar connector",
+    "started": "2026-10-28T16:19:09.935Z",
+    "resolved": null,
+    "url": "https://stspg.io/75qq31h8672d",
+    "status": "investigating",
+    "checked": "2026-10-28T16:40:22.221Z"
+  }
+]
