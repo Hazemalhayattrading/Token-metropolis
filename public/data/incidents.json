@@ -1,13 +1,13 @@
 [
   {
-    "id": "claude-phg1y2yh07n2",
-    "platform": "claude",
-    "impact": "minor",
-    "title": "Elevated errors affecting the Google Calendar connector",
-    "started": "2026-10-28T16:19:09.935Z",
+    "id": "cursor-ps-d25569b21cabd283",
+    "platform": "cursor",
+    "impact": "major",
+    "title": "Multiple services degraded",
+    "started": "2026-10-28T21:15:10.000Z",
     "resolved": null,
-    "url": "https://stspg.io/75qq31h8672d",
+    "url": "https://status.x.ai/history?incident=automations%2Fps_d25569b21cabd283",
     "status": "investigating",
-    "checked": "2026-10-28T16:40:22.221Z"
+    "checked": "2026-10-28T21:41:18.241Z"
   }
 ]
