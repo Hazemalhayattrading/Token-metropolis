@@ -1,13 +1,1 @@
-[
-  {
-    "id": "cursor-ps-d25569b21cabd283",
-    "platform": "cursor",
-    "impact": "major",
-    "title": "Multiple services degraded",
-    "started": "2026-10-28T21:15:10.000Z",
-    "resolved": null,
-    "url": "https://status.x.ai/history?incident=automations%2Fps_d25569b21cabd283",
-    "status": "investigating",
-    "checked": "2026-10-28T21:41:18.241Z"
-  }
-]
+[]
