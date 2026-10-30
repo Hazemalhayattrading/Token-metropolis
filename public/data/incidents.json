@@ -1,13 +1,1 @@
-[
-  {
-    "id": "cursor-ps-ad31c985bfc193b9",
-    "platform": "cursor",
-    "impact": "minor",
-    "title": "Investigating Service Degradation with VS Code Extensions",
-    "started": "2026-10-29T21:38:10.000Z",
-    "resolved": null,
-    "url": "https://status.x.ai/history?incident=cursor-desktop%2Fps_ad31c985bfc193b9",
-    "status": "investigating",
-    "checked": "2026-10-30T07:11:48.529Z"
-  }
-]
+[]
