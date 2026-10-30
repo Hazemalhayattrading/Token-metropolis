@@ -1,1 +1,35 @@
-[]
+[
+  {
+    "id": "cursor-ps-35b661ea1cde5cbc",
+    "platform": "cursor",
+    "impact": "minor",
+    "title": "Cloud Agent Degradation",
+    "started": "2026-10-29T23:29:27.000Z",
+    "resolved": null,
+    "url": "https://status.x.ai/history?incident=automations%2Fps_35b661ea1cde5cbc",
+    "status": "investigating",
+    "checked": "2026-10-30T01:04:32.177Z"
+  },
+  {
+    "id": "cursor-ps-ad31c985bfc193b9",
+    "platform": "cursor",
+    "impact": "minor",
+    "title": "Investigating Service Degradation with VS Code Extensions",
+    "started": "2026-10-29T21:38:10.000Z",
+    "resolved": null,
+    "url": "https://status.x.ai/history?incident=cursor-desktop%2Fps_ad31c985bfc193b9",
+    "status": "investigating",
+    "checked": "2026-10-30T01:04:32.177Z"
+  },
+  {
+    "id": "cursor-ps-e5eb22a9954466c4",
+    "platform": "cursor",
+    "impact": "minor",
+    "title": "Auto Review Degradation",
+    "started": "2026-10-29T23:44:42.000Z",
+    "resolved": null,
+    "url": "https://status.x.ai/history?incident=grok-bot%2Fps_e5eb22a9954466c4",
+    "status": "investigating",
+    "checked": "2026-10-30T01:04:32.177Z"
+  }
+]
