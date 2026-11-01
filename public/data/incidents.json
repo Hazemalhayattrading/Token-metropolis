@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "cursor-ps-838fe2a3a154acfa",
+    "platform": "cursor",
+    "impact": "minor",
+    "title": "Service Degradation - Billing and Usage Dashboard",
+    "started": "2026-11-01T05:38:43.000Z",
+    "resolved": null,
+    "url": "https://status.x.ai/history?incident=cursor-com%2Fps_838fe2a3a154acfa",
+    "status": "investigating",
+    "checked": "2026-11-01T07:38:15.885Z"
+  }
+]
