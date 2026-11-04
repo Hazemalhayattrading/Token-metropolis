@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "chatgpt-01m6mbcx427a7113a3t4fj1n6y",
+    "platform": "chatgpt",
+    "impact": "minor",
+    "title": "Elevated error rates across paid ChatGPT plans",
+    "started": "2026-11-04T22:38:12Z",
+    "resolved": null,
+    "url": "https://status.openai.com",
+    "status": "monitoring",
+    "checked": "2026-11-04T23:43:50.499Z"
+  }
+]
