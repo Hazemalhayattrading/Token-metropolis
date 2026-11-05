@@ -1,5 +1,35 @@
 [
   {
+    "id": "seen-google-gemini-omni-1-2-flash",
+    "date": "2026-11-05",
+    "platform": "gemini",
+    "kind": "model-launch",
+    "title": "Gemini Omni 1.2 Flash first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Gemini Omni 1.2 Flash — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/google/gemini-omni-1.2-flash"
+    },
+    "model": "Gemini Omni 1.2 Flash"
+  },
+  {
+    "id": "seen-google-gemini-omni-1-1-flash",
+    "date": "2026-11-04",
+    "platform": "gemini",
+    "kind": "model-launch",
+    "title": "Gemini Omni 1.1 Flash first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Gemini Omni 1.1 Flash — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/google/gemini-omni-1.1-flash"
+    },
+    "model": "Gemini Omni 1.1 Flash"
+  },
+  {
     "id": "seen-openai-gpt-6-1-terra",
     "date": "2026-10-26",
     "platform": "chatgpt",

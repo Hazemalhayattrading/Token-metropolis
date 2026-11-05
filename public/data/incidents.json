@@ -3,22 +3,11 @@
     "id": "chatgpt-01m6p50gpp1v98ef8mj9sh393r",
     "platform": "chatgpt",
     "impact": "minor",
-    "title": "ChatGPT Issues",
+    "title": "ChatGPT Work and Dots Errors",
     "started": "2026-11-05T15:25:03Z",
     "resolved": null,
     "url": "https://status.openai.com",
-    "status": "investigating",
-    "checked": "2026-11-05T15:31:39.341Z"
-  },
-  {
-    "id": "cursor-ps-78783e1b35b98b43",
-    "platform": "cursor",
-    "impact": "minor",
-    "title": "composer-2.5 degraded",
-    "started": "2026-11-05T15:06:52.000Z",
-    "resolved": null,
-    "url": "https://status.x.ai/history?incident=automations%2Fps_78783e1b35b98b43",
-    "status": "investigating",
-    "checked": "2026-11-05T15:31:39.341Z"
+    "status": "monitoring",
+    "checked": "2026-11-05T22:02:30.800Z"
   }
 ]
