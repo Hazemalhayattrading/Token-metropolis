@@ -1,13 +1,24 @@
 [
   {
-    "id": "chatgpt-01m6mbcx427a7113a3t4fj1n6y",
+    "id": "chatgpt-01m6p50gpp1v98ef8mj9sh393r",
     "platform": "chatgpt",
     "impact": "minor",
-    "title": "Elevated error rates across paid ChatGPT plans",
-    "started": "2026-11-04T22:38:12Z",
+    "title": "ChatGPT Issues",
+    "started": "2026-11-05T15:25:03Z",
     "resolved": null,
     "url": "https://status.openai.com",
-    "status": "monitoring",
-    "checked": "2026-11-04T23:43:50.499Z"
+    "status": "investigating",
+    "checked": "2026-11-05T15:31:39.341Z"
+  },
+  {
+    "id": "cursor-ps-78783e1b35b98b43",
+    "platform": "cursor",
+    "impact": "minor",
+    "title": "composer-2.5 degraded",
+    "started": "2026-11-05T15:06:52.000Z",
+    "resolved": null,
+    "url": "https://status.x.ai/history?incident=automations%2Fps_78783e1b35b98b43",
+    "status": "investigating",
+    "checked": "2026-11-05T15:31:39.341Z"
   }
 ]
