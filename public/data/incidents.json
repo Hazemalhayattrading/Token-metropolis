@@ -1,13 +1,1 @@
-[
-  {
-    "id": "chatgpt-01m6p50gpp1v98ef8mj9sh393r",
-    "platform": "chatgpt",
-    "impact": "minor",
-    "title": "ChatGPT Work and Dots Errors",
-    "started": "2026-11-05T15:25:03Z",
-    "resolved": null,
-    "url": "https://status.openai.com",
-    "status": "monitoring",
-    "checked": "2026-11-06T02:30:32.750Z"
-  }
-]
+[]
