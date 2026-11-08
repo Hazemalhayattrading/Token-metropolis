@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "chatgpt-01m6xvdckrt3psb0yp8j30gtd5",
+    "platform": "chatgpt",
+    "impact": "minor",
+    "title": "Image generation experiencing elevated error rates",
+    "started": "2026-11-08T15:11:15Z",
+    "resolved": null,
+    "url": "https://status.openai.com",
+    "status": "identified",
+    "checked": "2026-11-08T15:17:09.574Z"
+  }
+]
