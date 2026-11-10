@@ -1,5 +1,20 @@
 [
   {
+    "id": "seen-anthropic-claude-fable-5-2",
+    "date": "2026-11-09",
+    "platform": "claude",
+    "kind": "model-launch",
+    "title": "Claude Fable 5.2 first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Claude Fable 5.2 — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/anthropic/claude-fable-5.2"
+    },
+    "model": "Claude Fable 5.2"
+  },
+  {
     "id": "seen-google-gemini-omni-1-2-flash",
     "date": "2026-11-05",
     "platform": "gemini",
