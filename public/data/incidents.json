@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "id": "chatgpt-01m76cw2d7fm7k7f8nj4w0g08n",
+    "platform": "chatgpt",
+    "impact": "critical",
+    "title": "Unable to start new Workspace Agent runs",
+    "started": "2026-11-11T22:50:17Z",
+    "resolved": null,
+    "url": "https://status.openai.com",
+    "status": "investigating",
+    "checked": "2026-11-12T03:04:40.418Z"
+  }
+]
