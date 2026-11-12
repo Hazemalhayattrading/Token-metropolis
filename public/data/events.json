@@ -1,5 +1,19 @@
 [
   {
+    "id": "seen-google-gemini-4-hydrogen",
+    "date": "2026-11-12",
+    "platform": "gemini",
+    "kind": "model-launch",
+    "title": "Gemini 4 Hydrogen first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Gemini 4 Hydrogen — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/google/gemini-4-hydrogen"
+    }
+  },
+  {
     "id": "seen-google-gemini-4-carbon",
     "date": "2026-11-10",
     "platform": "gemini",
