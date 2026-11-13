@@ -8,7 +8,7 @@
     "resolved": null,
     "url": "https://status.openai.com",
     "status": "monitoring",
-    "checked": "2026-11-13T16:29:20.081Z"
+    "checked": "2026-11-13T22:40:54.771Z"
   },
   {
     "id": "chatgpt-01m7atrs6bmz61e4jdhjgm79y0",
@@ -18,18 +18,7 @@
     "started": "2026-11-13T16:10:07Z",
     "resolved": null,
     "url": "https://status.openai.com",
-    "status": "identified",
-    "checked": "2026-11-13T16:29:20.081Z"
-  },
-  {
-    "id": "claude-sqn3fg1l96dl",
-    "platform": "claude",
-    "impact": "major",
-    "title": "Elevated errors affecting the Microsoft 365 connector",
-    "started": "2026-11-12T17:52:44.926Z",
-    "resolved": null,
-    "url": "https://stspg.io/m0rbx38nmy1c",
     "status": "monitoring",
-    "checked": "2026-11-13T16:29:20.081Z"
+    "checked": "2026-11-13T22:40:54.771Z"
   }
 ]
