@@ -8,7 +8,7 @@
     "resolved": null,
     "url": "https://status.openai.com",
     "status": "investigating",
-    "checked": "2026-11-12T19:59:00.044Z"
+    "checked": "2026-11-13T01:08:40.484Z"
   },
   {
     "id": "claude-sqn3fg1l96dl",
@@ -19,6 +19,6 @@
     "resolved": null,
     "url": "https://stspg.io/m0rbx38nmy1c",
     "status": "identified",
-    "checked": "2026-11-12T19:59:00.044Z"
+    "checked": "2026-11-13T01:08:40.484Z"
   }
 ]
