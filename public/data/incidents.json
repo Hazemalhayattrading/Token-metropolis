@@ -1,16 +1,5 @@
 [
   {
-    "id": "chatgpt-01m78gat3ak9p9w8z230khfve8",
-    "platform": "chatgpt",
-    "impact": "minor",
-    "title": "Elevated errors affecting the Microsoft 365 connector",
-    "started": "2026-11-12T18:29:14Z",
-    "resolved": null,
-    "url": "https://status.openai.com",
-    "status": "monitoring",
-    "checked": "2026-11-13T22:40:54.771Z"
-  },
-  {
     "id": "chatgpt-01m7atrs6bmz61e4jdhjgm79y0",
     "platform": "chatgpt",
     "impact": "minor",
@@ -19,6 +8,17 @@
     "resolved": null,
     "url": "https://status.openai.com",
     "status": "monitoring",
-    "checked": "2026-11-13T22:40:54.771Z"
+    "checked": "2026-11-14T03:21:16.801Z"
+  },
+  {
+    "id": "claude-qrpz8k79qm7x",
+    "platform": "claude",
+    "impact": "major",
+    "title": "Elevated purchasing errors on claude.ai",
+    "started": "2026-11-14T02:54:33.303Z",
+    "resolved": null,
+    "url": "https://stspg.io/qqf00d9r7pm4",
+    "status": "monitoring",
+    "checked": "2026-11-14T03:21:16.801Z"
   }
 ]
