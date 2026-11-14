@@ -8,17 +8,17 @@
     "resolved": null,
     "url": "https://status.openai.com",
     "status": "monitoring",
-    "checked": "2026-11-14T03:21:16.801Z"
+    "checked": "2026-11-14T11:32:51.405Z"
   },
   {
-    "id": "claude-qrpz8k79qm7x",
+    "id": "claude-ct4c2pwf2xpj",
     "platform": "claude",
     "impact": "major",
-    "title": "Elevated purchasing errors on claude.ai",
-    "started": "2026-11-14T02:54:33.303Z",
+    "title": "Some users unable to sign up with Apple on the Claude iOS app",
+    "started": "2026-11-14T07:11:36.111Z",
     "resolved": null,
-    "url": "https://stspg.io/qqf00d9r7pm4",
-    "status": "monitoring",
-    "checked": "2026-11-14T03:21:16.801Z"
+    "url": "https://stspg.io/4858wf40dx89",
+    "status": "investigating",
+    "checked": "2026-11-14T11:32:51.405Z"
   }
 ]
