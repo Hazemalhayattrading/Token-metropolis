@@ -1,5 +1,19 @@
 [
   {
+    "id": "seen-qwen-qwen4-max",
+    "date": "2026-11-16",
+    "platform": "qwen",
+    "kind": "model-launch",
+    "title": "Qwen4 Max first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Qwen4 Max — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/qwen/qwen4-max"
+    }
+  },
+  {
     "id": "seen-google-gemini-4-hydrogen",
     "date": "2026-11-12",
     "platform": "gemini",
