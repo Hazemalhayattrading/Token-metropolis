@@ -15,6 +15,21 @@
     "model": "Qwen4 Max"
   },
   {
+    "id": "seen-tencent-hy4-flash",
+    "date": "2026-11-16",
+    "platform": "yuanbao",
+    "kind": "model-launch",
+    "title": "Hy4 flash first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Hy4 flash — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/tencent/hy4-flash"
+    },
+    "model": "Hy4 flash"
+  },
+  {
     "id": "seen-google-gemini-4-hydrogen",
     "date": "2026-11-12",
     "platform": "gemini",

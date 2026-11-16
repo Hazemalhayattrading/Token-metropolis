@@ -11,14 +11,14 @@
     "checked": "2026-11-15T22:52:58.858Z"
   },
   {
-    "id": "claude-ct4c2pwf2xpj",
+    "id": "claude-b5cq662qf2wm",
     "platform": "claude",
     "impact": "major",
-    "title": "Some users unable to sign up with Apple on the Claude iOS app",
-    "started": "2026-11-14T07:11:36.111Z",
+    "title": "Claude unable to join meetings",
+    "started": "2026-11-16T15:10:15.160Z",
     "resolved": null,
-    "url": "https://stspg.io/4858wf40dx89",
+    "url": "https://stspg.io/01qq3kzyyqzl",
     "status": "investigating",
-    "checked": "2026-11-16T11:30:17.543Z"
+    "checked": "2026-11-16T22:10:36.285Z"
   }
 ]
