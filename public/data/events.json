@@ -1,5 +1,61 @@
 [
   {
+    "id": "seen-openai-gpt-6-2-astra",
+    "date": "2026-11-17",
+    "platform": "chatgpt",
+    "kind": "model-launch",
+    "title": "GPT-6.2 Astra first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "GPT-6.2 Astra — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/openai/gpt-6.2-astra"
+    }
+  },
+  {
+    "id": "seen-openai-gpt-6-2-astra-pro",
+    "date": "2026-11-17",
+    "platform": "chatgpt",
+    "kind": "model-launch",
+    "title": "GPT-6.2 Astra Pro first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "GPT-6.2 Astra Pro — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/openai/gpt-6.2-astra-pro"
+    }
+  },
+  {
+    "id": "seen-openai-gpt-6-2-sol",
+    "date": "2026-11-17",
+    "platform": "chatgpt",
+    "kind": "model-launch",
+    "title": "GPT-6.2 Sol first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "GPT-6.2 Sol — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/openai/gpt-6.2-sol"
+    }
+  },
+  {
+    "id": "seen-openai-gpt-6-2-sol-pro",
+    "date": "2026-11-17",
+    "platform": "chatgpt",
+    "kind": "model-launch",
+    "title": "GPT-6.2 Sol Pro first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "GPT-6.2 Sol Pro — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/openai/gpt-6.2-sol-pro"
+    }
+  },
+  {
     "id": "seen-qwen-qwen4-max",
     "date": "2026-11-16",
     "platform": "qwen",

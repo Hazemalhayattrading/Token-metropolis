@@ -1,14 +1,14 @@
 [
   {
-    "id": "chatgpt-01m7atrs6bmz61e4jdhjgm79y0",
+    "id": "chatgpt-01m7n9vnr6x5sec90m1ycdb36d",
     "platform": "chatgpt",
     "impact": "minor",
-    "title": "Delayed Costs Data in the Compliance API",
-    "started": "2026-11-13T16:10:07Z",
+    "title": "Costs API data is delayed",
+    "started": "2026-11-17T17:46:15Z",
     "resolved": null,
     "url": "https://status.openai.com",
     "status": "monitoring",
-    "checked": "2026-11-15T22:52:58.858Z"
+    "checked": "2026-11-17T22:55:48.040Z"
   },
   {
     "id": "claude-b5cq662qf2wm",
@@ -19,6 +19,6 @@
     "resolved": null,
     "url": "https://stspg.io/01qq3kzyyqzl",
     "status": "identified",
-    "checked": "2026-11-17T14:29:58.753Z"
+    "checked": "2026-11-17T22:55:48.040Z"
   }
 ]
