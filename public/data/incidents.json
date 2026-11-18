@@ -8,7 +8,18 @@
     "resolved": null,
     "url": "https://status.openai.com",
     "status": "monitoring",
-    "checked": "2026-11-18T04:27:40.527Z"
+    "checked": "2026-11-18T14:05:42.219Z"
+  },
+  {
+    "id": "chatgpt-01m7q99xrgp8t4dwjn8dszxa1x",
+    "platform": "chatgpt",
+    "impact": "minor",
+    "title": "Elevated conversation errors for Free and Go users",
+    "started": "2026-11-18T12:15:02Z",
+    "resolved": null,
+    "url": "https://status.openai.com",
+    "status": "identified",
+    "checked": "2026-11-18T14:05:42.219Z"
   },
   {
     "id": "claude-b5cq662qf2wm",
@@ -19,6 +30,6 @@
     "resolved": null,
     "url": "https://stspg.io/01qq3kzyyqzl",
     "status": "identified",
-    "checked": "2026-11-18T04:27:40.527Z"
+    "checked": "2026-11-18T14:05:42.219Z"
   }
 ]
