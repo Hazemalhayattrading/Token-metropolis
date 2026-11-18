@@ -1,5 +1,20 @@
 [
   {
+    "id": "seen-google-gemini-4-neon",
+    "date": "2026-11-18",
+    "platform": "gemini",
+    "kind": "model-launch",
+    "title": "Gemini 4 Neon first seen on OpenRouter",
+    "datePrecision": "day",
+    "dateKind": "first-seen",
+    "source": {
+      "title": "Gemini 4 Neon — OpenRouter model page",
+      "publisher": "OpenRouter",
+      "url": "https://openrouter.ai/google/gemini-4-neon"
+    },
+    "model": "Gemini 4 Neon"
+  },
+  {
     "id": "seen-openai-gpt-6-2-astra",
     "date": "2026-11-17",
     "platform": "chatgpt",
