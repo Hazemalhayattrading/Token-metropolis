@@ -20,16 +20,5 @@
     "url": "https://status.openai.com",
     "status": "identified",
     "checked": "2026-11-18T14:05:42.219Z"
-  },
-  {
-    "id": "claude-b5cq662qf2wm",
-    "platform": "claude",
-    "impact": "minor",
-    "title": "Claude unable to join meetings",
-    "started": "2026-11-16T15:10:15.160Z",
-    "resolved": null,
-    "url": "https://stspg.io/01qq3kzyyqzl",
-    "status": "identified",
-    "checked": "2026-11-18T22:00:25.744Z"
   }
 ]
