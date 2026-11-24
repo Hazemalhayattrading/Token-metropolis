@@ -24,12 +24,12 @@
   {
     "id": "claude-3vbyqgnswwxq",
     "platform": "claude",
-    "impact": "minor",
+    "impact": "major",
     "title": "Claude for Microsoft 365 add-in missing for some users",
     "started": "2026-11-24T00:10:40.012Z",
     "resolved": null,
     "url": "https://stspg.io/ffdq2qfv8frk",
     "status": "investigating",
-    "checked": "2026-11-24T10:59:56.982Z"
+    "checked": "2026-11-24T21:16:48.009Z"
   }
 ]
