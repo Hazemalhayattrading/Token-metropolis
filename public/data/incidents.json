@@ -1,25 +1,14 @@
 [
   {
-    "id": "chatgpt-01m7n9vnr6x5sec90m1ycdb36d",
+    "id": "chatgpt-01m898hvzgxfv2xc4775cg9gf8",
     "platform": "chatgpt",
     "impact": "minor",
-    "title": "Costs API data is delayed",
-    "started": "2026-11-17T17:46:15Z",
+    "title": "ChatGPT, ChatGPT Work, and Codex Cloud are experiencing elevated conversation errors",
+    "started": "2026-11-25T11:48:13Z",
     "resolved": null,
     "url": "https://status.openai.com",
     "status": "monitoring",
-    "checked": "2026-11-18T14:05:42.219Z"
-  },
-  {
-    "id": "chatgpt-01m7q99xrgp8t4dwjn8dszxa1x",
-    "platform": "chatgpt",
-    "impact": "minor",
-    "title": "Elevated conversation errors for Free and Go users",
-    "started": "2026-11-18T12:15:02Z",
-    "resolved": null,
-    "url": "https://status.openai.com",
-    "status": "identified",
-    "checked": "2026-11-18T14:05:42.219Z"
+    "checked": "2026-11-25T15:40:59.912Z"
   },
   {
     "id": "claude-3vbyqgnswwxq",
@@ -30,6 +19,6 @@
     "resolved": null,
     "url": "https://stspg.io/ffdq2qfv8frk",
     "status": "investigating",
-    "checked": "2026-11-25T04:20:12.169Z"
+    "checked": "2026-11-25T15:40:59.912Z"
   }
 ]
